@@ -835,6 +835,7 @@ InitPostgres(const char *in_dbname, Oid dboid, const char *username,
 		Assert(MyProcPort != NULL);
 		PerformAuthentication(MyProcPort);
 		InitializeSessionUserId(username, useroid);
+		InitializeSystemUser(MyProcPort);
 		am_superuser = superuser();
 	}
 
