@@ -360,10 +360,14 @@ CheckMyDatabase(const char *name, bool am_superuser, bool override_allow_connect
 		if (!am_superuser &&
 			pg_database_aclcheck(MyDatabaseId, GetUserId(),
 								 ACL_CONNECT) != ACLCHECK_OK)
+		{
+			if (FailedConnection_hook)
+				(*FailedConnection_hook) (FCET_BDP, MyProcPort);
 			ereport(FATAL,
 					(errcode(ERRCODE_INSUFFICIENT_PRIVILEGE),
 					 errmsg("permission denied for database \"%s\"", name),
 					 errdetail("User does not have CONNECT privilege.")));
+		}
 
 		/*
 		 * Check connection limit for this database.
@@ -918,9 +922,13 @@ InitPostgres(const char *in_dbname, Oid dboid, const char *username,
 
 		tuple = GetDatabaseTuple(in_dbname);
 		if (!HeapTupleIsValid(tuple))
+		{
+			if (FailedConnection_hook)
+				(*FailedConnection_hook) (FCET_BDN, MyProcPort);
 			ereport(FATAL,
 					(errcode(ERRCODE_UNDEFINED_DATABASE),
 					 errmsg("database \"%s\" does not exist", in_dbname)));
+		}
 		dbform = (Form_pg_database) GETSTRUCT(tuple);
 		MyDatabaseId = dbform->oid;
 		MyDatabaseTableSpace = dbform->dattablespace;
@@ -935,9 +943,13 @@ InitPostgres(const char *in_dbname, Oid dboid, const char *username,
 
 		tuple = GetDatabaseTupleByOid(dboid);
 		if (!HeapTupleIsValid(tuple))
+		{
+			if (FailedConnection_hook)
+				(*FailedConnection_hook) (FCET_BDO, MyProcPort);
 			ereport(FATAL,
 					(errcode(ERRCODE_UNDEFINED_DATABASE),
 					 errmsg("database %u does not exist", dboid)));
+		}
 		dbform = (Form_pg_database) GETSTRUCT(tuple);
 		MyDatabaseId = dbform->oid;
 		MyDatabaseTableSpace = dbform->dattablespace;
