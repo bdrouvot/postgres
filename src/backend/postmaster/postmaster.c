@@ -4465,7 +4465,7 @@ BackendInitialize(Port *port)
 	 */
 	if (status != STATUS_OK) {
 		if (FailedConnection_hook)
-			(*FailedConnection_hook) (FCET_BSP, port);
+			(*FailedConnection_hook) (FCET_BAD_STARTUP_PACKET, port);
 		proc_exit(0);
 	}
 
@@ -5328,7 +5328,7 @@ static void
 StartupPacketTimeoutHandler(void)
 {
 	if (FailedConnection_hook)
-		(*FailedConnection_hook) (FCET_SPT, MyProcPort);
+		(*FailedConnection_hook) (FCET_STARTUP_PACKET_TIMEOUT, MyProcPort);
 	ereport(COMMERROR,
 			(errcode(ERRCODE_PROTOCOL_VIOLATION),
 			 errmsg("timeout while processing startup packet")));

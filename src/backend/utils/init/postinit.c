@@ -362,7 +362,7 @@ CheckMyDatabase(const char *name, bool am_superuser, bool override_allow_connect
 								 ACL_CONNECT) != ACLCHECK_OK)
 		{
 			if (FailedConnection_hook)
-				(*FailedConnection_hook) (FCET_BDP, MyProcPort);
+				(*FailedConnection_hook) (FCET_BAD_DATABASE_PERMISSION, MyProcPort);
 			ereport(FATAL,
 					(errcode(ERRCODE_INSUFFICIENT_PRIVILEGE),
 					 errmsg("permission denied for database \"%s\"", name),
@@ -924,7 +924,7 @@ InitPostgres(const char *in_dbname, Oid dboid, const char *username,
 		if (!HeapTupleIsValid(tuple))
 		{
 			if (FailedConnection_hook)
-				(*FailedConnection_hook) (FCET_BDN, MyProcPort);
+				(*FailedConnection_hook) (FCET_BAD_DATABASE_NAME, MyProcPort);
 			ereport(FATAL,
 					(errcode(ERRCODE_UNDEFINED_DATABASE),
 					 errmsg("database \"%s\" does not exist", in_dbname)));
@@ -945,7 +945,7 @@ InitPostgres(const char *in_dbname, Oid dboid, const char *username,
 		if (!HeapTupleIsValid(tuple))
 		{
 			if (FailedConnection_hook)
-				(*FailedConnection_hook) (FCET_BDO, MyProcPort);
+				(*FailedConnection_hook) (FCET_BAD_DATABASE_OID, MyProcPort);
 			ereport(FATAL,
 					(errcode(ERRCODE_UNDEFINED_DATABASE),
 					 errmsg("database %u does not exist", dboid)));

@@ -784,11 +784,11 @@ extern PGDLLIMPORT fmgr_hook_type fmgr_hook;
  */
 typedef enum FailedConnectionEventType
 {
-	FCET_SPT, 	/* startup packet timeout */
-	FCET_BSP, 	/* bad startup packet */
-	FCET_BDN, 	/* bad database name */
-	FCET_BDO, 	/* bad database Oid */
-	FCET_BDP 	/* bad database permission */
+	FCET_STARTUP_PACKET_TIMEOUT,
+	FCET_BAD_STARTUP_PACKET,
+	FCET_BAD_DATABASE_NAME,
+	FCET_BAD_DATABASE_OID,
+	FCET_BAD_DATABASE_PERMISSION
 } FailedConnectionEventType;
 
 /* kluge to avoid including libpq/libpq-be.h here */
