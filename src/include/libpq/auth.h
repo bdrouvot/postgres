@@ -33,7 +33,6 @@ extern PGDLLIMPORT ClientAuthentication_hook_type ClientAuthentication_hook;
  */
 typedef enum FailedConnectionEventType
 {
-	FCET_STARTUP_PACKET_TIMEOUT,
 	FCET_BAD_STARTUP_PACKET,
 	FCET_BAD_DATABASE_NAME,
 	FCET_BAD_DATABASE_OID,

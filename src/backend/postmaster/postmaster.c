@@ -5328,8 +5328,6 @@ dummy_handler(SIGNAL_ARGS)
 static void
 StartupPacketTimeoutHandler(void)
 {
-	if (FailedConnection_hook)
-		(*FailedConnection_hook) (FCET_STARTUP_PACKET_TIMEOUT, MyProcPort);
 	_exit(1);
 }
 
