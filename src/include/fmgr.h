@@ -778,22 +778,4 @@ extern PGDLLIMPORT fmgr_hook_type fmgr_hook;
 #define FmgrHookIsNeeded(fn_oid)							\
 	(!needs_fmgr_hook ? false : (*needs_fmgr_hook)(fn_oid))
 
-
-/*
- * The failed connection events to be used in the FailedConnection_hook.
- */
-typedef enum FailedConnectionEventType
-{
-	FCET_STARTUP_PACKET_TIMEOUT,
-	FCET_BAD_STARTUP_PACKET,
-	FCET_BAD_DATABASE_NAME,
-	FCET_BAD_DATABASE_OID,
-	FCET_BAD_DATABASE_PERMISSION
-} FailedConnectionEventType;
-
-/* kluge to avoid including libpq/libpq-be.h here */
-struct Port;
-typedef void (*FailedConnection_hook_type) (FailedConnectionEventType event, const struct Port *port);
-extern PGDLLIMPORT FailedConnection_hook_type FailedConnection_hook;
-
 #endif							/* FMGR_H */
