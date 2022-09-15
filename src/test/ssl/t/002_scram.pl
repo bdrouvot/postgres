@@ -60,7 +60,7 @@ $node->start;
 
 # Configure server for SSL connections, with password handling.
 $ssl_server->configure_test_server_for_ssl(
-	$node, $SERVERHOSTADDR, $SERVERHOSTCIDR,
+	$node, $SERVERHOSTADDR, "localhost",
 	"scram-sha-256",
 	'password'     => "pass",
 	'password_enc' => "scram-sha-256");
