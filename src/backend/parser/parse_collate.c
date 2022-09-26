@@ -707,6 +707,19 @@ assign_collations_walker(Node *node, assign_collations_context *context)
 				 * Now figure out what collation to assign to this node.
 				 */
 				typcollation = get_typcollation(exprType(node));
+
+				/*
+				 * If this is a SQLValueFunction with a TEXT type, then
+				 * assign its collation to the standard C collation.
+				 */
+				if (IsA(node, SQLValueFunction))
+				{
+					if (((SQLValueFunction *) node)->type == TEXTOID)
+					{
+						typcollation = C_COLLATION_OID;
+					}
+				}
+
 				if (OidIsValid(typcollation))
 				{
 					/* Node's result is collatable; what about its input? */

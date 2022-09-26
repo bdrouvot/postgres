@@ -1144,7 +1144,8 @@ exprSetCollation(Node *expr, Oid collation)
 			((MinMaxExpr *) expr)->minmaxcollid = collation;
 			break;
 		case T_SQLValueFunction:
-			Assert((((SQLValueFunction *) expr)->type == NAMEOID) ?
+			Assert((((SQLValueFunction *) expr)->type == NAMEOID ||
+					((SQLValueFunction *) expr)->type == TEXTOID) ?
 				   (collation == C_COLLATION_OID) :
 				   (collation == InvalidOid));
 			break;

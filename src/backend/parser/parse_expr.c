@@ -2239,6 +2239,9 @@ transformSQLValueFunction(ParseState *pstate, SQLValueFunction *svf)
 		case SVFOP_CURRENT_SCHEMA:
 			svf->type = NAMEOID;
 			break;
+		case SVFOP_SYSTEM_USER:
+			svf->type = TEXTOID;
+			break;
 	}
 
 	return (Node *) svf;
