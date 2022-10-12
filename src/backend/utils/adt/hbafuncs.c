@@ -274,10 +274,8 @@ fill_hba_line(Tuplestorestate *tuple_store, TupleDesc tupdesc,
 		switch (hba->ip_cmp_method)
 		{
 			case ipCmpMask:
-				if (hba->hostname)
-				{
-					addrstr = hba->hostname;
-				}
+				if (hba->tok_hostname.string)
+					addrstr = hba->tok_hostname.string;
 				else
 				{
 					/*

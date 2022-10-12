@@ -22,7 +22,8 @@ if ($ENV{with_ssl} ne 'openssl')
 }
 elsif ($ENV{PG_TEST_EXTRA} !~ /\bssl\b/)
 {
-	plan skip_all => 'Potentially unsafe test SSL not enabled in PG_TEST_EXTRA';
+	plan skip_all =>
+	  'Potentially unsafe test SSL not enabled in PG_TEST_EXTRA';
 }
 
 my $ssl_server = SSL::Server->new();
@@ -35,6 +36,20 @@ sub sslkey
 sub switch_server_cert
 {
 	$ssl_server->switch_server_cert(@_);
+}
+
+# Delete pg_hba.conf from the given node, add a new entry to it
+# and then execute a reload to refresh it.
+sub reset_pg_hba
+{
+	my $node     = shift;
+	my $hostname = shift;
+
+	unlink($node->data_dir . '/pg_hba.conf');
+	# just for testing purposes, use a continuation line
+	$node->append_conf('pg_hba.conf', "host all all $hostname scram-sha-256");
+	$node->reload;
+	return;
 }
 
 
@@ -135,5 +150,26 @@ $node->connect_ok(
 	log_like => [
 		qr/connection authenticated: identity="ssltestuser" method=scram-sha-256/
 	]);
+
+# Testing with regular expression for hostname
+SKIP:
+{
+	# Being able to do a reverse lookup of a hostname on Windows for localhost
+	# is not guaranteed on all environments by default.
+	# So, skip the regular expression test for hostname on Windows.
+	skip "Regular expression for hostname not tested on Windows", 2
+	  if ($windows_os);
+
+	# Test regular expression on hostname, this one matches any host.
+	reset_pg_hba($node, '/^.*$');
+	$node->connect_ok("$common_connstr user=ssltestuser",
+		"Basic SCRAM authentication with SSL matching regexp on hostname");
+	# Test regular expression on hostname, this one does not match.
+	reset_pg_hba($node, '/^$');
+	$node->connect_fails(
+		"$common_connstr user=ssltestuser",
+		"Basic SCRAM authentication with SSL non matching regexp on hostname",
+		log_like => [qr/no pg_hba.conf entry for host/]);
+}
 
 done_testing();
