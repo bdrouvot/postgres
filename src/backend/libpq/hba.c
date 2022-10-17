@@ -66,6 +66,7 @@ typedef struct check_network_data
 } check_network_data;
 
 
+#define token_is_regexp(t)	(t->regex)
 #define token_is_keyword(t, k)	(!t->quoted && strcmp(t->string, k) == 0)
 #define token_matches(t, k)  (strcmp(t->string, k) == 0)
 
@@ -117,6 +118,9 @@ static List *tokenize_inc_file(List *tokens, const char *outer_filename,
 							   const char *inc_filename, int elevel, char **err_msg);
 static bool parse_hba_auth_opt(char *name, char *val, HbaLine *hbaline,
 							   int elevel, char **err_msg);
+static void token_regcomp(AuthToken *token);
+static int	token_regexec(const char *match, regex_t *re, size_t nmatch,
+						  regmatch_t pmatch[]);
 
 
 /*
@@ -267,10 +271,20 @@ make_auth_token(const char *token, bool quoted)
 
 	toklen = strlen(token);
 	/* we copy string into same palloc block as the struct */
-	authtoken = (AuthToken *) palloc(sizeof(AuthToken) + toklen + 1);
+	authtoken = (AuthToken *) palloc0(sizeof(AuthToken) + toklen + 1);
 	authtoken->string = (char *) authtoken + sizeof(AuthToken);
 	authtoken->quoted = quoted;
+	authtoken->regcomp_rc = 0;
 	memcpy(authtoken->string, token, toklen + 1);
+
+	if (authtoken->string[0] == '/')
+	{
+		/*
+		 * When the string starts with a slash, treat it as a regular
+		 * expression. Pre-compile it.
+		 */
+		token_regcomp(authtoken);
+	}
 
 	return authtoken;
 }
@@ -2326,7 +2340,30 @@ parse_ident_line(TokenizedAuthLine *tok_line, int elevel)
 	tokens = lfirst(field);
 	IDENT_MULTI_VALUE(tokens);
 	token = linitial(tokens);
-	parsedline->ident_user = pstrdup(token->string);
+
+	/* Copy the ident user token */
+	parsedline->token = copy_auth_token(token);
+
+	if (parsedline->token->regcomp_rc)
+	{
+		char		errstr[100];
+
+		Assert(token_is_regexp(parsedline->token));
+
+		pg_regerror(parsedline->token->regcomp_rc, parsedline->token->regex,
+					errstr, sizeof(errstr));
+		ereport(elevel,
+				(errcode(ERRCODE_INVALID_REGULAR_EXPRESSION),
+				 errmsg("invalid regular expression \"%s\": %s",
+						parsedline->token->string + 1, errstr),
+				 errcontext("line %d of configuration file \"%s\"",
+							line_num, IdentFileName)));
+
+		*err_msg = psprintf("invalid regular expression \"%s\": %s",
+							parsedline->token->string + 1, errstr);
+
+		return NULL;
+	}
 
 	/* Get the PG rolename token */
 	field = lnext(tok_line->fields, field);
@@ -2335,42 +2372,6 @@ parse_ident_line(TokenizedAuthLine *tok_line, int elevel)
 	IDENT_MULTI_VALUE(tokens);
 	token = linitial(tokens);
 	parsedline->pg_role = pstrdup(token->string);
-
-	if (parsedline->ident_user[0] == '/')
-	{
-		/*
-		 * When system username starts with a slash, treat it as a regular
-		 * expression. Pre-compile it.
-		 */
-		int			r;
-		pg_wchar   *wstr;
-		int			wlen;
-
-		wstr = palloc((strlen(parsedline->ident_user + 1) + 1) * sizeof(pg_wchar));
-		wlen = pg_mb2wchar_with_len(parsedline->ident_user + 1,
-									wstr, strlen(parsedline->ident_user + 1));
-
-		r = pg_regcomp(&parsedline->re, wstr, wlen, REG_ADVANCED, C_COLLATION_OID);
-		if (r)
-		{
-			char		errstr[100];
-
-			pg_regerror(r, &parsedline->re, errstr, sizeof(errstr));
-			ereport(elevel,
-					(errcode(ERRCODE_INVALID_REGULAR_EXPRESSION),
-					 errmsg("invalid regular expression \"%s\": %s",
-							parsedline->ident_user + 1, errstr),
-					 errcontext("line %d of configuration file \"%s\"",
-							line_num, IdentFileName)));
-
-			*err_msg = psprintf("invalid regular expression \"%s\": %s",
-								parsedline->ident_user + 1, errstr);
-
-			pfree(wstr);
-			return NULL;
-		}
-		pfree(wstr);
-	}
 
 	return parsedline;
 }
@@ -2394,25 +2395,19 @@ check_ident_usermap(IdentLine *identLine, const char *usermap_name,
 		return;
 
 	/* Match? */
-	if (identLine->ident_user[0] == '/')
+	if (token_is_regexp(identLine->token))
 	{
 		/*
-		 * When system username starts with a slash, treat it as a regular
-		 * expression. In this case, we process the system username as a
-		 * regular expression that returns exactly one match. This is replaced
-		 * for \1 in the database username string, if present.
+		 * Process the system username as a regular expression that returns
+		 * exactly one match. This is replaced for \1 in the database username
+		 * string, if present.
 		 */
 		int			r;
 		regmatch_t	matches[2];
-		pg_wchar   *wstr;
-		int			wlen;
 		char	   *ofs;
 		char	   *regexp_pgrole;
 
-		wstr = palloc((strlen(ident_user) + 1) * sizeof(pg_wchar));
-		wlen = pg_mb2wchar_with_len(ident_user, wstr, strlen(ident_user));
-
-		r = pg_regexec(&identLine->re, wstr, wlen, 0, NULL, 2, matches, 0);
+		r = token_regexec(ident_user, identLine->token->regex, 2, matches);
 		if (r)
 		{
 			char		errstr[100];
@@ -2420,18 +2415,15 @@ check_ident_usermap(IdentLine *identLine, const char *usermap_name,
 			if (r != REG_NOMATCH)
 			{
 				/* REG_NOMATCH is not an error, everything else is */
-				pg_regerror(r, &identLine->re, errstr, sizeof(errstr));
+				pg_regerror(r, identLine->token->regex, errstr, sizeof(errstr));
 				ereport(LOG,
 						(errcode(ERRCODE_INVALID_REGULAR_EXPRESSION),
 						 errmsg("regular expression match for \"%s\" failed: %s",
-								identLine->ident_user + 1, errstr)));
+								identLine->token->string + 1, errstr)));
 				*error_p = true;
 			}
-
-			pfree(wstr);
 			return;
 		}
-		pfree(wstr);
 
 		if ((ofs = strstr(identLine->pg_role, "\\1")) != NULL)
 		{
@@ -2443,7 +2435,7 @@ check_ident_usermap(IdentLine *identLine, const char *usermap_name,
 				ereport(LOG,
 						(errcode(ERRCODE_INVALID_REGULAR_EXPRESSION),
 						 errmsg("regular expression \"%s\" has no subexpressions as requested by backreference in \"%s\"",
-								identLine->ident_user + 1, identLine->pg_role)));
+								identLine->token->string + 1, identLine->pg_role)));
 				*error_p = true;
 				return;
 			}
@@ -2490,13 +2482,13 @@ check_ident_usermap(IdentLine *identLine, const char *usermap_name,
 		if (case_insensitive)
 		{
 			if (pg_strcasecmp(identLine->pg_role, pg_role) == 0 &&
-				pg_strcasecmp(identLine->ident_user, ident_user) == 0)
+				pg_strcasecmp(identLine->token->string, ident_user) == 0)
 				*found_p = true;
 		}
 		else
 		{
 			if (strcmp(identLine->pg_role, pg_role) == 0 &&
-				strcmp(identLine->ident_user, ident_user) == 0)
+				strcmp(identLine->token->string, ident_user) == 0)
 				*found_p = true;
 		}
 	}
@@ -2646,8 +2638,8 @@ load_ident(void)
 		foreach(parsed_line_cell, new_parsed_lines)
 		{
 			newline = (IdentLine *) lfirst(parsed_line_cell);
-			if (newline->ident_user[0] == '/')
-				pg_regfree(&newline->re);
+			if (token_is_regexp(newline->token))
+				pg_regfree(newline->token->regex);
 		}
 		MemoryContextDelete(ident_context);
 		return false;
@@ -2659,8 +2651,8 @@ load_ident(void)
 		foreach(parsed_line_cell, parsed_ident_lines)
 		{
 			newline = (IdentLine *) lfirst(parsed_line_cell);
-			if (newline->ident_user[0] == '/')
-				pg_regfree(&newline->re);
+			if (token_is_regexp(newline->token))
+				pg_regfree(newline->token->regex);
 		}
 	}
 	if (parsed_ident_context != NULL)
@@ -2705,4 +2697,44 @@ hba_authname(UserAuth auth_method)
 					 "UserAuthName[] must match the UserAuth enum");
 
 	return UserAuthName[auth_method];
+}
+
+/*
+ * Compile the regular expression "re" and register the compilation return code
+ * in the token (so that the caller can decide what do to with it).
+ */
+static void
+token_regcomp(AuthToken *token)
+{
+	pg_wchar   *wstr;
+	int			wlen;
+
+	token->regex = (regex_t *) palloc0(sizeof(regex_t));
+	wstr = palloc((strlen(token->string + 1) + 1) * sizeof(pg_wchar));
+	wlen = pg_mb2wchar_with_len(token->string + 1,
+								wstr, strlen(token->string + 1));
+
+	token->regcomp_rc = pg_regcomp(token->regex, wstr, wlen, REG_ADVANCED,
+								   C_COLLATION_OID);
+
+	pfree(wstr);
+}
+
+/*
+ * Return the pg_regexec()'s result.
+ */
+static int
+token_regexec(const char *match, regex_t *re, size_t nmatch, regmatch_t pmatch[])
+{
+	pg_wchar   *wmatchstr;
+	int			wmatchlen;
+	int			r;
+
+	wmatchstr = palloc((strlen(match) + 1) * sizeof(pg_wchar));
+	wmatchlen = pg_mb2wchar_with_len(match, wmatchstr, strlen(match));
+
+	r = pg_regexec(re, wmatchstr, wmatchlen, 0, NULL, nmatch, pmatch, 0);
+
+	pfree(wmatchstr);
+	return r;
 }
