@@ -25,6 +25,7 @@
 #include "utils/pgstat_internal.h"
 #include "utils/rel.h"
 #include "utils/timestamp.h"
+#include "catalog/catalog.h"
 
 
 /* Record that's written to 2PC state file when pgstat state is persisted */
@@ -439,14 +440,8 @@ pgstat_fetch_stat_tabentry(Oid relid)
 {
 	PgStat_StatTabEntry *tabentry;
 
-	tabentry = pgstat_fetch_stat_tabentry_ext(false, relid);
-	if (tabentry != NULL)
-		return tabentry;
+	tabentry = pgstat_fetch_stat_tabentry_ext(IsSharedRelation(relid), relid);
 
-	/*
-	 * If we didn't find it, maybe it's a shared table.
-	 */
-	tabentry = pgstat_fetch_stat_tabentry_ext(true, relid);
 	return tabentry;
 }
 
