@@ -569,9 +569,8 @@ extern void pgstat_twophase_postcommit(TransactionId xid, uint16 info,
 extern void pgstat_twophase_postabort(TransactionId xid, uint16 info,
 									  void *recdata, uint32 len);
 
-extern PgStat_StatTabEntry *pgstat_fetch_stat_tabentry(Oid relid);
-extern PgStat_StatTabEntry *pgstat_fetch_stat_tabentry_ext(bool shared,
-														   Oid reloid);
+extern PgStat_StatTabEntry *pgstat_fetch_stat_tabentry(bool shared,
+													   Oid reloid);
 extern PgStat_TableStatus *find_tabstat_entry(Oid rel_id);
 
 

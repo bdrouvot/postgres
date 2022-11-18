@@ -2101,8 +2101,8 @@ do_autovacuum(void)
 
 		/* Fetch reloptions and the pgstat entry for this table */
 		relopts = extract_autovac_opts(tuple, pg_class_desc);
-		tabentry = pgstat_fetch_stat_tabentry_ext(classForm->relisshared,
-												  relid);
+		tabentry = pgstat_fetch_stat_tabentry(classForm->relisshared,
+											  relid);
 
 		/* Check if it needs vacuum or analyze */
 		relation_needs_vacanalyze(relid, relopts, classForm, tabentry,
@@ -2185,8 +2185,8 @@ do_autovacuum(void)
 		}
 
 		/* Fetch the pgstat entry for this table */
-		tabentry = pgstat_fetch_stat_tabentry_ext(classForm->relisshared,
-												  relid);
+		tabentry = pgstat_fetch_stat_tabentry(classForm->relisshared,
+											  relid);
 
 		relation_needs_vacanalyze(relid, relopts, classForm, tabentry,
 								  effective_multixact_freeze_max_age,
@@ -2913,8 +2913,8 @@ recheck_relation_needs_vacanalyze(Oid relid,
 	PgStat_StatTabEntry *tabentry;
 
 	/* fetch the pgstat table entry */
-	tabentry = pgstat_fetch_stat_tabentry_ext(classForm->relisshared,
-											  relid);
+	tabentry = pgstat_fetch_stat_tabentry(classForm->relisshared,
+										  relid);
 
 	relation_needs_vacanalyze(relid, avopts, classForm, tabentry,
 							  effective_multixact_freeze_max_age,

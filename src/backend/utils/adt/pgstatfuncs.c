@@ -31,6 +31,7 @@
 #include "utils/builtins.h"
 #include "utils/inet.h"
 #include "utils/timestamp.h"
+#include "catalog/catalog.h"
 
 #define UINT32_ACCESS_ONCE(var)		 ((uint32)(*((volatile uint32 *)&(var))))
 
@@ -43,7 +44,7 @@ pg_stat_get_numscans(PG_FUNCTION_ARGS)
 	int64		result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = (int64) (tabentry->numscans);
@@ -59,7 +60,7 @@ pg_stat_get_lastscan(PG_FUNCTION_ARGS)
 	TimestampTz result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = tabentry->lastscan;
@@ -78,7 +79,7 @@ pg_stat_get_tuples_returned(PG_FUNCTION_ARGS)
 	int64		result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = (int64) (tabentry->tuples_returned);
@@ -94,7 +95,7 @@ pg_stat_get_tuples_fetched(PG_FUNCTION_ARGS)
 	int64		result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = (int64) (tabentry->tuples_fetched);
@@ -110,7 +111,7 @@ pg_stat_get_tuples_inserted(PG_FUNCTION_ARGS)
 	int64		result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = (int64) (tabentry->tuples_inserted);
@@ -126,7 +127,7 @@ pg_stat_get_tuples_updated(PG_FUNCTION_ARGS)
 	int64		result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = (int64) (tabentry->tuples_updated);
@@ -142,7 +143,7 @@ pg_stat_get_tuples_deleted(PG_FUNCTION_ARGS)
 	int64		result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = (int64) (tabentry->tuples_deleted);
@@ -158,7 +159,7 @@ pg_stat_get_tuples_hot_updated(PG_FUNCTION_ARGS)
 	int64		result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = (int64) (tabentry->tuples_hot_updated);
@@ -174,7 +175,7 @@ pg_stat_get_live_tuples(PG_FUNCTION_ARGS)
 	int64		result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = (int64) (tabentry->n_live_tuples);
@@ -190,7 +191,7 @@ pg_stat_get_dead_tuples(PG_FUNCTION_ARGS)
 	int64		result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = (int64) (tabentry->n_dead_tuples);
@@ -206,7 +207,7 @@ pg_stat_get_mod_since_analyze(PG_FUNCTION_ARGS)
 	int64		result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = (int64) (tabentry->changes_since_analyze);
@@ -222,7 +223,7 @@ pg_stat_get_ins_since_vacuum(PG_FUNCTION_ARGS)
 	int64		result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = (int64) (tabentry->inserts_since_vacuum);
@@ -238,7 +239,7 @@ pg_stat_get_blocks_fetched(PG_FUNCTION_ARGS)
 	int64		result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = (int64) (tabentry->blocks_fetched);
@@ -254,7 +255,7 @@ pg_stat_get_blocks_hit(PG_FUNCTION_ARGS)
 	int64		result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = (int64) (tabentry->blocks_hit);
@@ -269,7 +270,7 @@ pg_stat_get_last_vacuum_time(PG_FUNCTION_ARGS)
 	TimestampTz result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = tabentry->vacuum_timestamp;
@@ -287,7 +288,7 @@ pg_stat_get_last_autovacuum_time(PG_FUNCTION_ARGS)
 	TimestampTz result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = tabentry->autovac_vacuum_timestamp;
@@ -305,7 +306,7 @@ pg_stat_get_last_analyze_time(PG_FUNCTION_ARGS)
 	TimestampTz result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = tabentry->analyze_timestamp;
@@ -323,7 +324,7 @@ pg_stat_get_last_autoanalyze_time(PG_FUNCTION_ARGS)
 	TimestampTz result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = tabentry->autovac_analyze_timestamp;
@@ -341,7 +342,7 @@ pg_stat_get_vacuum_count(PG_FUNCTION_ARGS)
 	int64		result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = (int64) (tabentry->vacuum_count);
@@ -356,7 +357,7 @@ pg_stat_get_autovacuum_count(PG_FUNCTION_ARGS)
 	int64		result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = (int64) (tabentry->autovac_vacuum_count);
@@ -371,7 +372,7 @@ pg_stat_get_analyze_count(PG_FUNCTION_ARGS)
 	int64		result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = (int64) (tabentry->analyze_count);
@@ -386,7 +387,7 @@ pg_stat_get_autoanalyze_count(PG_FUNCTION_ARGS)
 	int64		result;
 	PgStat_StatTabEntry *tabentry;
 
-	if ((tabentry = pgstat_fetch_stat_tabentry(relid)) == NULL)
+	if ((tabentry = pgstat_fetch_stat_tabentry(IsSharedRelation(relid), relid)) == NULL)
 		result = 0;
 	else
 		result = (int64) (tabentry->autovac_analyze_count);
