@@ -2711,6 +2711,70 @@ sub wait_for_catchup
 
 =pod
 
+=item $node->wait_for_flush_catchup(standby_name, target_lsn)
+
+Helper function for wait_for_catchup when waiting for the flush_lsn column
+to catchup.
+
+=cut
+
+sub wait_for_flush_catchup
+{
+	my ($self, $standby_name, $target_lsn) = @_;
+
+	$self->wait_for_catchup($standby_name, 'flush', $target_lsn);
+}
+
+=pod
+
+=item $node->wait_for_replay_catchup(standby_name, target_lsn)
+
+Helper function for wait_for_catchup when waiting for the replay_lsn column
+to catchup.
+
+=cut
+
+sub wait_for_replay_catchup
+{
+	my ($self, $standby_name, $target_lsn) = @_;
+
+	$self->wait_for_catchup($standby_name, 'replay', $target_lsn);
+}
+
+=pod
+
+=item $node->wait_for_sent_catchup(standby_name, target_lsn)
+
+Helper function for wait_for_catchup when waiting for the sent_lsn column
+to catchup.
+
+=cut
+
+sub wait_for_sent_catchup
+{
+	my ($self, $standby_name, $target_lsn) = @_;
+
+	$self->wait_for_catchup($standby_name, 'sent', $target_lsn);
+}
+
+=pod
+
+=item $node->wait_for_write_catchup(standby_name, target_lsn)
+
+Helper function for wait_for_catchup when waiting for the write_lsn column
+to catchup.
+
+=cut
+
+sub wait_for_write_catchup
+{
+	my ($self, $standby_name, $target_lsn) = @_;
+
+	$self->wait_for_catchup($standby_name, 'write', $target_lsn);
+}
+
+=pod
+
 =item $node->wait_for_slot_catchup(slot_name, mode, target_lsn)
 
 Wait for the named replication slot to equal or pass the supplied target_lsn.

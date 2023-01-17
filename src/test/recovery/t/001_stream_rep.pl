@@ -48,8 +48,8 @@ $node_primary->safe_psql('postgres',
 
 # Wait for standbys to catch up
 my $primary_lsn = $node_primary->lsn('write');
-$node_primary->wait_for_catchup($node_standby_1, 'replay', $primary_lsn);
-$node_standby_1->wait_for_catchup($node_standby_2, 'replay', $primary_lsn);
+$node_primary->wait_for_replay_catchup($node_standby_1, $primary_lsn);
+$node_standby_1->wait_for_replay_catchup($node_standby_2, $primary_lsn);
 
 my $result =
   $node_standby_1->safe_psql('postgres', "SELECT count(*) FROM tab_int");
@@ -67,8 +67,8 @@ $node_primary->safe_psql('postgres',
 
 # Wait for standbys to catch up
 $primary_lsn = $node_primary->lsn('write');
-$node_primary->wait_for_catchup($node_standby_1, 'replay', $primary_lsn);
-$node_standby_1->wait_for_catchup($node_standby_2, 'replay', $primary_lsn);
+$node_primary->wait_for_replay_catchup($node_standby_1, $primary_lsn);
+$node_standby_1->wait_for_replay_catchup($node_standby_2, $primary_lsn);
 
 $result = $node_standby_1->safe_psql('postgres', "SELECT * FROM seq1");
 print "standby 1: $result\n";
@@ -373,9 +373,8 @@ sub replay_check
 		'INSERT INTO replayed(val) SELECT coalesce(max(val),0) + 1 AS newval FROM replayed RETURNING val'
 	);
 	my $primary_lsn = $node_primary->lsn('write');
-	$node_primary->wait_for_catchup($node_standby_1, 'replay', $primary_lsn);
-	$node_standby_1->wait_for_catchup($node_standby_2, 'replay',
-		$primary_lsn);
+	$node_primary->wait_for_replay_catchup($node_standby_1, $primary_lsn);
+	$node_standby_1->wait_for_replay_catchup($node_standby_2, $primary_lsn);
 
 	$node_standby_1->safe_psql('postgres',
 		qq[SELECT 1 FROM replayed WHERE val = $newval])

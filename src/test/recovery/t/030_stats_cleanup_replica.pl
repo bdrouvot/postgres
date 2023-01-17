@@ -39,7 +39,7 @@ drop_function_by_oid('postgres', $funcoid);
 
 $sect = 'post drop';
 my $primary_lsn = $node_primary->lsn('flush');
-$node_primary->wait_for_catchup($node_standby, 'replay', $primary_lsn);
+$node_primary->wait_for_replay_catchup($node_standby, $primary_lsn);
 test_standby_func_tab_stats_status('postgres',
 	$dboid, $tableoid, $funcoid, 'f');
 
@@ -50,7 +50,7 @@ $sect = "schema creation";
 
 $node_primary->safe_psql('postgres', "CREATE SCHEMA drop_schema_test1");
 $primary_lsn = $node_primary->lsn('flush');
-$node_primary->wait_for_catchup($node_standby, 'replay', $primary_lsn);
+$node_primary->wait_for_replay_catchup($node_standby, $primary_lsn);
 
 ($dboid, $tableoid, $funcoid) =
   populate_standby_stats('postgres', 'drop_schema_test1');
@@ -62,7 +62,7 @@ $node_primary->safe_psql('postgres', "DROP SCHEMA drop_schema_test1 CASCADE");
 $sect = "post schema drop";
 
 $primary_lsn = $node_primary->lsn('flush');
-$node_primary->wait_for_catchup($node_standby, 'replay', $primary_lsn);
+$node_primary->wait_for_replay_catchup($node_standby, $primary_lsn);
 
 # verify table and function stats removed from standby
 test_standby_func_tab_stats_status('postgres',
@@ -75,7 +75,7 @@ $sect = "createdb";
 
 $node_primary->safe_psql('postgres', "CREATE DATABASE test");
 $primary_lsn = $node_primary->lsn('flush');
-$node_primary->wait_for_catchup($node_standby, 'replay', $primary_lsn);
+$node_primary->wait_for_replay_catchup($node_standby, $primary_lsn);
 
 ($dboid, $tableoid, $funcoid) = populate_standby_stats('test', 'public');
 
@@ -86,7 +86,7 @@ test_standby_db_stats_status('test', $dboid, 't');
 $node_primary->safe_psql('postgres', "DROP DATABASE test");
 $sect        = "post dropdb";
 $primary_lsn = $node_primary->lsn('flush');
-$node_primary->wait_for_catchup($node_standby, 'replay', $primary_lsn);
+$node_primary->wait_for_replay_catchup($node_standby, $primary_lsn);
 
 # Test that the stats were cleaned up on standby
 # Note that this connects to 'postgres' but provides the dboid of dropped db
@@ -138,7 +138,7 @@ sub populate_standby_stats
 		"CREATE FUNCTION $schema.drop_func_test1() RETURNS VOID AS 'select 2;' LANGUAGE SQL IMMUTABLE"
 	);
 	my $primary_lsn = $node_primary->lsn('flush');
-	$node_primary->wait_for_catchup($node_standby, 'replay', $primary_lsn);
+	$node_primary->wait_for_replay_catchup($node_standby, $primary_lsn);
 
 	# collect object oids
 	my $dboid = $node_standby->safe_psql($connect_db,
