@@ -477,14 +477,36 @@ PgStat_TableStatus *
 find_tabstat_entry(Oid rel_id)
 {
 	PgStat_EntryRef *entry_ref;
+	PgStat_TableXactStatus *trans;
+	PgStat_TableStatus *tabentry = NULL;
+	PgStat_TableStatus *tablestatus = NULL;
 
 	entry_ref = pgstat_fetch_pending_entry(PGSTAT_KIND_RELATION, MyDatabaseId, rel_id);
 	if (!entry_ref)
+	{
 		entry_ref = pgstat_fetch_pending_entry(PGSTAT_KIND_RELATION, InvalidOid, rel_id);
+		if(!entry_ref)
+			return tablestatus;
+	}
 
-	if (entry_ref)
-		return entry_ref->pending;
-	return NULL;
+	tabentry = (PgStat_TableStatus *) entry_ref->pending;
+	tablestatus = palloc(sizeof(PgStat_TableStatus));
+	*tablestatus = *tabentry;
+
+	/*
+	 * Live subtransactions' counts aren't in t_counts yet. This is not a hot
+	 * code path so it sounds ok to reconcile for tuples_inserted,
+	 * tuples_updated and tuples_deleted even if this is not what the caller
+	 * is interested in.
+	 */
+	for (trans = tabentry->trans; trans != NULL; trans = trans->upper)
+	{
+		tablestatus->t_counts.t_tuples_inserted += trans->tuples_inserted;
+		tablestatus->t_counts.t_tuples_updated += trans->tuples_updated;
+		tablestatus->t_counts.t_tuples_deleted += trans->tuples_deleted;
+	}
+
+	return tablestatus;
 }
 
 /*
