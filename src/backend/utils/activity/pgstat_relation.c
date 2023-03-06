@@ -471,20 +471,46 @@ pgstat_fetch_stat_tabentry_ext(bool shared, Oid reloid)
  * Find any existing PgStat_TableStatus entry for rel_id in the current
  * database. If not found, try finding from shared tables.
  *
+ * If an entry is found, copy it and increment the copy's counters with their
+ * subtransactions counterparts. Then return the copy. The caller may need to
+ * pfree the copy (in case the MemoryContext is not reset soon after).
+ *
  * If no entry found, return NULL, don't create a new one
  */
 PgStat_TableStatus *
 find_tabstat_entry(Oid rel_id)
 {
 	PgStat_EntryRef *entry_ref;
+	PgStat_TableXactStatus *trans;
+	PgStat_TableStatus *tabentry = NULL;
+	PgStat_TableStatus *tablestatus = NULL;
 
 	entry_ref = pgstat_fetch_pending_entry(PGSTAT_KIND_RELATION, MyDatabaseId, rel_id);
 	if (!entry_ref)
+	{
 		entry_ref = pgstat_fetch_pending_entry(PGSTAT_KIND_RELATION, InvalidOid, rel_id);
+		if(!entry_ref)
+			return tablestatus;
+	}
 
-	if (entry_ref)
-		return entry_ref->pending;
-	return NULL;
+	tabentry = (PgStat_TableStatus *) entry_ref->pending;
+	tablestatus = palloc(sizeof(PgStat_TableStatus));
+	*tablestatus = *tabentry;
+
+	/*
+	 * Live subtransactions' counts aren't in t_counts yet. This is not a hot
+	 * code path so it sounds ok to reconcile for tuples_inserted,
+	 * tuples_updated and tuples_deleted even if this is not what the caller
+	 * is interested in.
+	 */
+	for (trans = tabentry->trans; trans != NULL; trans = trans->upper)
+	{
+		tablestatus->t_counts.t_tuples_inserted += trans->tuples_inserted;
+		tablestatus->t_counts.t_tuples_updated += trans->tuples_updated;
+		tablestatus->t_counts.t_tuples_deleted += trans->tuples_deleted;
+	}
+
+	return tablestatus;
 }
 
 /*

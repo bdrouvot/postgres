@@ -1546,17 +1546,11 @@ pg_stat_get_xact_tuples_inserted(PG_FUNCTION_ARGS)
 	Oid			relid = PG_GETARG_OID(0);
 	int64		result;
 	PgStat_TableStatus *tabentry;
-	PgStat_TableXactStatus *trans;
 
 	if ((tabentry = find_tabstat_entry(relid)) == NULL)
 		result = 0;
 	else
-	{
-		result = tabentry->t_counts.t_tuples_inserted;
-		/* live subtransactions' counts aren't in t_tuples_inserted yet */
-		for (trans = tabentry->trans; trans != NULL; trans = trans->upper)
-			result += trans->tuples_inserted;
-	}
+		result = (int64) (tabentry->t_counts.t_tuples_inserted);
 
 	PG_RETURN_INT64(result);
 }
@@ -1567,17 +1561,11 @@ pg_stat_get_xact_tuples_updated(PG_FUNCTION_ARGS)
 	Oid			relid = PG_GETARG_OID(0);
 	int64		result;
 	PgStat_TableStatus *tabentry;
-	PgStat_TableXactStatus *trans;
 
 	if ((tabentry = find_tabstat_entry(relid)) == NULL)
 		result = 0;
 	else
-	{
-		result = tabentry->t_counts.t_tuples_updated;
-		/* live subtransactions' counts aren't in t_tuples_updated yet */
-		for (trans = tabentry->trans; trans != NULL; trans = trans->upper)
-			result += trans->tuples_updated;
-	}
+		result = (int64) (tabentry->t_counts.t_tuples_updated);
 
 	PG_RETURN_INT64(result);
 }
@@ -1588,17 +1576,11 @@ pg_stat_get_xact_tuples_deleted(PG_FUNCTION_ARGS)
 	Oid			relid = PG_GETARG_OID(0);
 	int64		result;
 	PgStat_TableStatus *tabentry;
-	PgStat_TableXactStatus *trans;
 
 	if ((tabentry = find_tabstat_entry(relid)) == NULL)
 		result = 0;
 	else
-	{
-		result = tabentry->t_counts.t_tuples_deleted;
-		/* live subtransactions' counts aren't in t_tuples_deleted yet */
-		for (trans = tabentry->trans; trans != NULL; trans = trans->upper)
-			result += trans->tuples_deleted;
-	}
+		result = (int64) (tabentry->t_counts.t_tuples_deleted);
 
 	PG_RETURN_INT64(result);
 }
