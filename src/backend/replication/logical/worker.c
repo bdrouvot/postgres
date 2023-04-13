@@ -1600,7 +1600,8 @@ apply_handle_stream_start(StringInfo s)
 				 * Signal the leader apply worker, as it may be waiting for
 				 * us.
 				 */
-				logicalrep_worker_wakeup(MyLogicalRepWorker->subid, InvalidOid);
+				logicalrep_worker_wakeup(MyLogicalRepWorker->dbid,
+										 MyLogicalRepWorker->subid, InvalidOid);
 			}
 
 			parallel_stream_nchanges = 0;

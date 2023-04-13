@@ -63,8 +63,12 @@
 #include "postmaster/syslogger.h"
 #include "postmaster/walwriter.h"
 #include "replication/logicallauncher.h"
+#include "replication/logicalworker.h"
+#include "replication/reorderbuffer.h"
 #include "replication/slot.h"
 #include "replication/syncrep.h"
+#include "replication/walreceiver.h"
+#include "replication/walsender.h"
 #include "storage/bufmgr.h"
 #include "storage/large_object.h"
 #include "storage/pg_shmem.h"
@@ -4585,6 +4589,28 @@ struct config_string ConfigureNamesString[] =
 		&io_direct_string,
 		"",
 		check_io_direct, assign_io_direct, NULL
+	},
+
+	{
+		{"synchronize_slot_names", PGC_SIGHUP, REPLICATION_STANDBY,
+			gettext_noop("Sets the names of replication slots which to synchronize from primary to standby."),
+			gettext_noop("Value of \"*\" means all."),
+			GUC_LIST_INPUT | GUC_LIST_QUOTE
+		},
+		&synchronize_slot_names,
+		"",
+		check_synchronize_slot_names, NULL, NULL
+	},
+
+	{
+		{"standby_slot_names", PGC_SIGHUP, REPLICATION_PRIMARY,
+			gettext_noop("List of physical slots that must confirm changes before changes are sent to logical replication consumers."),
+			NULL,
+			GUC_LIST_INPUT | GUC_LIST_QUOTE
+		},
+		&standby_slot_names,
+		"",
+		check_standby_slot_names, NULL, NULL
 	},
 
 	/* End-of-list marker */

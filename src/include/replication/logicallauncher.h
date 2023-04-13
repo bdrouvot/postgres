@@ -31,4 +31,6 @@ extern bool IsLogicalLauncher(void);
 
 extern pid_t GetLeaderApplyWorkerPid(pid_t pid);
 
+extern PGDLLIMPORT char *PrimaryConnInfo;
+
 #endif							/* LOGICALLAUNCHER_H */

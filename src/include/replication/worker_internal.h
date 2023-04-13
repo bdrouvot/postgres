@@ -65,7 +65,7 @@ typedef struct LogicalRepWorker
 	 * would be created for each transaction which will be deleted after the
 	 * transaction is finished.
 	 */
-	FileSet    *stream_fileset;
+	struct FileSet    *stream_fileset;
 
 	/*
 	 * PID of leader apply worker if this slot is used for a parallel apply
@@ -226,15 +226,15 @@ extern PGDLLIMPORT LogicalRepWorker *MyLogicalRepWorker;
 extern PGDLLIMPORT bool in_remote_transaction;
 
 extern void logicalrep_worker_attach(int slot);
-extern LogicalRepWorker *logicalrep_worker_find(Oid subid, Oid relid,
+extern LogicalRepWorker *logicalrep_worker_find(Oid dbid, Oid subid, Oid relid,
 												bool only_running);
 extern List *logicalrep_workers_find(Oid subid, bool only_running);
 extern bool logicalrep_worker_launch(Oid dbid, Oid subid, const char *subname,
 									 Oid userid, Oid relid,
 									 dsm_handle subworker_dsm);
-extern void logicalrep_worker_stop(Oid subid, Oid relid);
+extern void logicalrep_worker_stop(Oid dbid, Oid subid, Oid relid);
 extern void logicalrep_pa_worker_stop(int slot_no, uint16 generation);
-extern void logicalrep_worker_wakeup(Oid subid, Oid relid);
+extern void logicalrep_worker_wakeup(Oid dbid, Oid subid, Oid relid);
 extern void logicalrep_worker_wakeup_ptr(LogicalRepWorker *worker);
 
 extern int	logicalrep_sync_worker_count(Oid subid);
