@@ -3310,6 +3310,8 @@ WalSndShmemInit(void)
 			SpinLockInit(&walsnd->mutex);
 		}
 	}
+
+	ConditionVariableInit(&WalSndCtl->cv);
 }
 
 /*
@@ -3368,9 +3370,13 @@ WalSndWait(uint32 socket_events, long timeout, uint32 wait_event)
 	WaitEvent	event;
 
 	ModifyWaitEvent(FeBeWaitSet, FeBeWaitSetSocketPos, socket_events, NULL);
+
+	ConditionVariablePrepareToSleep(&WalSndCtl->cv);
 	if (WaitEventSetWait(FeBeWaitSet, timeout, &event, 1, wait_event) == 1 &&
 		(event.events & WL_POSTMASTER_DEATH))
 		proc_exit(1);
+
+	ConditionVariableCancelSleep();
 }
 
 /*

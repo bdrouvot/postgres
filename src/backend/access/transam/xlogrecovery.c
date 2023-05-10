@@ -50,6 +50,7 @@
 #include "postmaster/startup.h"
 #include "replication/slot.h"
 #include "replication/walreceiver.h"
+#include "replication/walsender_private.h"
 #include "storage/fd.h"
 #include "storage/ipc.h"
 #include "storage/latch.h"
@@ -1958,7 +1959,7 @@ ApplyWalRecord(XLogReaderState *xlogreader, XLogRecord *record, TimeLineID *repl
 	 * ------
 	 */
 	if (AllowCascadeReplication())
-		WalSndWakeup(switchedTLI, true);
+		ConditionVariableBroadcast(&WalSndCtl->cv);
 
 	/*
 	 * If rm_redo called XLogRequestWalReceiverReply, then we wake up the
