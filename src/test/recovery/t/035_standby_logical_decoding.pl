@@ -185,7 +185,7 @@ sub change_hot_standby_feedback_and_wait_for_xmins
 # Check conflicting status in pg_replication_slots.
 sub check_slots_conflicting_status
 {
-	my ($conflicting) = @_;
+	my ($conflicting, $details) = @_;
 
 	if ($conflicting)
 	{
@@ -193,7 +193,7 @@ sub check_slots_conflicting_status
 			'postgres', qq(
 				 select bool_and(conflicting) from pg_replication_slots;));
 
-		is($res, 't', "Logical slots are reported as conflicting");
+		is($res, 't', "logical slots are reported as conflicting $details");
 	}
 	else
 	{
@@ -201,7 +201,7 @@ sub check_slots_conflicting_status
 			'postgres', qq(
 				select bool_or(conflicting) from pg_replication_slots;));
 
-		is($res, 'f', "Logical slots are reported as non conflicting");
+		is($res, 'f', "logical slots are reported as non conflicting $details");
 	}
 }
 
@@ -256,6 +256,22 @@ sub check_for_invalidation
 	) or die "Timed out waiting confl_active_logicalslot to be updated";
 }
 
+# Launch $sql and wait for a new snapshot that has a newer horizon before
+# doing the vacuum with $vac_option on $to_vac.
+sub wait_until_vacuum_can_remove
+{
+	my ($vac_option, $sql, $to_vac) = @_;
+
+	my $xid = $node_primary->safe_psql('testdb', qq[$sql
+													select txid_current();]);
+
+	$node_primary->poll_query_until('testdb',
+		"SELECT (select txid_snapshot_xmin(txid_current_snapshot()) - $xid) > 0")
+	  or die "new snapshot does not have a newer horizon";
+
+	$node_primary->safe_psql('testdb', qq[VACUUM $vac_option verbose $to_vac;
+										  INSERT INTO flush_wal DEFAULT VALUES; -- see create table flush_wal;]);
+}
 ########################
 # Initialize primary node
 ########################
@@ -266,6 +282,7 @@ $node_primary->append_conf(
 wal_level = 'logical'
 max_replication_slots = 4
 max_wal_senders = 4
+autovacuum = off
 });
 $node_primary->dump_info;
 $node_primary->start;
@@ -486,13 +503,8 @@ reactive_slots_change_hfs_and_wait_for_xmins('behaves_ok_', 'vacuum_full_',
 	0, 1);
 
 # This should trigger the conflict
-$node_primary->safe_psql(
-	'testdb', qq[
-  CREATE TABLE conflict_test(x integer, y text);
-  DROP TABLE conflict_test;
-  VACUUM full pg_class;
-  INSERT INTO flush_wal DEFAULT VALUES; -- see create table flush_wal
-]);
+wait_until_vacuum_can_remove('full', 'CREATE TABLE conflict_test(x integer, y text);
+								 DROP TABLE conflict_test;', 'pg_class');
 
 $node_primary->wait_for_replay_catchup($node_standby);
 
@@ -500,7 +512,7 @@ $node_primary->wait_for_replay_catchup($node_standby);
 check_for_invalidation('vacuum_full_', 1, 'with vacuum FULL on pg_class');
 
 # Verify slots are reported as conflicting in pg_replication_slots
-check_slots_conflicting_status(1);
+check_slots_conflicting_status(1, 'after vacuum FULL on pg_class');
 
 $handle =
   make_slot_active($node_standby, 'vacuum_full_', 0, \$stdout, \$stderr);
@@ -519,7 +531,7 @@ change_hot_standby_feedback_and_wait_for_xmins(1, 1);
 $node_standby->restart;
 
 # Verify slots are reported as conflicting in pg_replication_slots
-check_slots_conflicting_status(1);
+check_slots_conflicting_status(1, 'after a restart');
 
 ##################################################
 # Verify that invalidated logical slots do not lead to retaining WAL.
@@ -571,13 +583,8 @@ reactive_slots_change_hfs_and_wait_for_xmins('vacuum_full_', 'row_removal_',
 	0, 1);
 
 # This should trigger the conflict
-$node_primary->safe_psql(
-	'testdb', qq[
-  CREATE TABLE conflict_test(x integer, y text);
-  DROP TABLE conflict_test;
-  VACUUM pg_class;
-  INSERT INTO flush_wal DEFAULT VALUES; -- see create table flush_wal
-]);
+wait_until_vacuum_can_remove('', 'CREATE TABLE conflict_test(x integer, y text);
+							 DROP TABLE conflict_test;', 'pg_class');
 
 $node_primary->wait_for_replay_catchup($node_standby);
 
@@ -585,7 +592,7 @@ $node_primary->wait_for_replay_catchup($node_standby);
 check_for_invalidation('row_removal_', $logstart, 'with vacuum on pg_class');
 
 # Verify slots are reported as conflicting in pg_replication_slots
-check_slots_conflicting_status(1);
+check_slots_conflicting_status(1, 'after vacuum on pg_class');
 
 $handle =
   make_slot_active($node_standby, 'row_removal_', 0, \$stdout, \$stderr);
@@ -609,13 +616,8 @@ reactive_slots_change_hfs_and_wait_for_xmins('row_removal_',
 	'shared_row_removal_', 0, 1);
 
 # Trigger the conflict
-$node_primary->safe_psql(
-	'testdb', qq[
-  CREATE ROLE create_trash;
-  DROP ROLE create_trash;
-  VACUUM pg_authid;
-  INSERT INTO flush_wal DEFAULT VALUES; -- see create table flush_wal
-]);
+wait_until_vacuum_can_remove('', 'CREATE ROLE create_trash;
+							 DROP ROLE create_trash;', 'pg_authid');
 
 $node_primary->wait_for_replay_catchup($node_standby);
 
@@ -624,7 +626,7 @@ check_for_invalidation('shared_row_removal_', $logstart,
 	'with vacuum on pg_authid');
 
 # Verify slots are reported as conflicting in pg_replication_slots
-check_slots_conflicting_status(1);
+check_slots_conflicting_status(1, 'after vacuum on pg_authid');
 
 $handle = make_slot_active($node_standby, 'shared_row_removal_', 0, \$stdout,
 	\$stderr);
@@ -646,14 +648,10 @@ reactive_slots_change_hfs_and_wait_for_xmins('shared_row_removal_',
 	'no_conflict_', 0, 1);
 
 # This should not trigger a conflict
-$node_primary->safe_psql(
-	'testdb', qq[
-  CREATE TABLE conflict_test(x integer, y text);
-  INSERT INTO conflict_test(x,y) SELECT s, s::text FROM generate_series(1,4) s;
-  UPDATE conflict_test set x=1, y=1;
-  VACUUM conflict_test;
-  INSERT INTO flush_wal DEFAULT VALUES; -- see create table flush_wal
-]);
+wait_until_vacuum_can_remove('', 'CREATE TABLE conflict_test(x integer, y text);
+							 INSERT INTO conflict_test(x,y) SELECT s, s::text FROM generate_series(1,4) s;
+							 UPDATE conflict_test set x=1, y=1;', 'conflict_test');
+
 $node_primary->wait_for_replay_catchup($node_standby);
 
 # message should not be issued
@@ -678,7 +676,7 @@ ok( $node_standby->poll_query_until(
 ) or die "Timed out waiting confl_active_logicalslot to be updated";
 
 # Verify slots are reported as non conflicting in pg_replication_slots
-check_slots_conflicting_status(0);
+check_slots_conflicting_status(0, 'after vacuum on a non catalog table');
 
 # Turn hot_standby_feedback back on
 change_hot_standby_feedback_and_wait_for_xmins(1, 0);
@@ -715,7 +713,7 @@ $node_primary->wait_for_replay_catchup($node_standby);
 check_for_invalidation('pruning_', $logstart, 'with on-access pruning');
 
 # Verify slots are reported as conflicting in pg_replication_slots
-check_slots_conflicting_status(1);
+check_slots_conflicting_status(1, 'after on-access pruning');
 
 $handle = make_slot_active($node_standby, 'pruning_', 0, \$stdout, \$stderr);
 
@@ -759,7 +757,7 @@ $node_primary->wait_for_replay_catchup($node_standby);
 check_for_invalidation('wal_level_', $logstart, 'due to wal_level');
 
 # Verify slots are reported as conflicting in pg_replication_slots
-check_slots_conflicting_status(1);
+check_slots_conflicting_status(1, 'due to wal_level');
 
 $handle =
   make_slot_active($node_standby, 'wal_level_', 0, \$stdout, \$stderr);
