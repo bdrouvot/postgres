@@ -1951,6 +1951,7 @@ ProcessStartupPacket(Port *port, bool ssl_done, bool gss_done)
 	char	   *buf;
 	ProtocolVersion proto;
 	MemoryContext oldcontext;
+	int			client_encoding = -1;
 
 	pq_startmsgread();
 
@@ -2238,6 +2239,18 @@ retry1:
 				{
 					port->application_name = pg_clean_ascii(valptr, 0);
 				}
+				/* Record the client_encoding if we come across it */
+				else if (strcmp(nameptr, "client_encoding") == 0)
+				{
+					client_encoding = pg_valid_client_encoding(valptr);
+
+					if (client_encoding < 0)
+						ereport(FATAL,
+								(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
+								 errmsg("invalid value for parameter \"%s\": \"%s\"",
+										"client_encoding",
+										valptr)));
+				}
 			}
 			offset = valoffset + strlen(valptr) + 1;
 		}
@@ -2291,13 +2304,40 @@ retry1:
 	}
 
 	/*
-	 * Truncate given database and user names to length of a Postgres name.
-	 * This avoids lookup failures when overlength names are given.
+	 * Given the client encoding, truncate given database and user names to
+	 * length of a Postgres name. This avoids lookup failures when overlength
+	 * names are given.
 	 */
+	if (client_encoding < 0)
+	{
+		/*
+		 * client_encoding has not been found in the startup packet so let's
+		 * try to get it from locale.
+		 */
+		client_encoding = pg_get_encoding_from_locale(NULL, true);
+
+		if (client_encoding < 0)
+			client_encoding = PG_SQL_ASCII;
+	}
+
 	if (strlen(port->database_name) >= NAMEDATALEN)
-		port->database_name[NAMEDATALEN - 1] = '\0';
+	{
+		int			newlen;
+
+		newlen = pg_encoding_mbcliplen(client_encoding, port->database_name,
+									   strlen(port->database_name),
+									   NAMEDATALEN - 1);
+		port->database_name[newlen] = '\0';
+	}
 	if (strlen(port->user_name) >= NAMEDATALEN)
-		port->user_name[NAMEDATALEN - 1] = '\0';
+	{
+		int			newlen;
+
+		newlen = pg_encoding_mbcliplen(client_encoding, port->user_name,
+									   strlen(port->user_name),
+									   NAMEDATALEN - 1);
+		port->user_name[newlen] = '\0';
+	}
 
 	if (am_walsender)
 		MyBackendType = B_WAL_SENDER;
