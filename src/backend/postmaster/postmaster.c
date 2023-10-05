@@ -5572,6 +5572,7 @@ BackgroundWorkerInitializeConnection(const char *dbname, const char *username, u
 				 username, InvalidOid,	/* role to connect as */
 				 false,			/* never honor session_preload_libraries */
 				 (flags & BGWORKER_BYPASS_ALLOWCONN) != 0,	/* ignore datallowconn? */
+				 (flags & BGWORKER_BYPASS_ROLELOGINCHECK) != 0, /* bypass login check? */
 				 NULL);			/* no out_dbname */
 
 	/* it had better not gotten out of "init" mode yet */
@@ -5599,6 +5600,7 @@ BackgroundWorkerInitializeConnectionByOid(Oid dboid, Oid useroid, uint32 flags)
 				 NULL, useroid, /* role to connect as */
 				 false,			/* never honor session_preload_libraries */
 				 (flags & BGWORKER_BYPASS_ALLOWCONN) != 0,	/* ignore datallowconn? */
+				 (flags & BGWORKER_BYPASS_ROLELOGINCHECK) != 0, /* bypass login check? */
 				 NULL);			/* no out_dbname */
 
 	/* it had better not gotten out of "init" mode yet */

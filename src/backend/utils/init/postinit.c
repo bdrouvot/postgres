@@ -719,6 +719,7 @@ InitPostgres(const char *in_dbname, Oid dboid,
 			 const char *username, Oid useroid,
 			 bool load_session_libraries,
 			 bool override_allow_connections,
+			 bool bypass_login_check,
 			 char *out_dbname)
 {
 	bool		bootstrap = IsBootstrapProcessingMode();
@@ -901,7 +902,7 @@ InitPostgres(const char *in_dbname, Oid dboid,
 		}
 		else
 		{
-			InitializeSessionUserId(username, useroid);
+			InitializeSessionUserId(username, useroid, bypass_login_check);
 			am_superuser = superuser();
 		}
 	}
@@ -910,7 +911,7 @@ InitPostgres(const char *in_dbname, Oid dboid,
 		/* normal multiuser case */
 		Assert(MyProcPort != NULL);
 		PerformAuthentication(MyProcPort);
-		InitializeSessionUserId(username, useroid);
+		InitializeSessionUserId(username, useroid, false);
 		/* ensure that auth_method is actually valid, aka authn_id is not NULL */
 		if (MyClientConnectionInfo.authn_id)
 			InitializeSystemUser(MyClientConnectionInfo.authn_id,

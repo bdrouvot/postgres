@@ -364,7 +364,8 @@ extern bool InSecurityRestrictedOperation(void);
 extern bool InNoForceRLSOperation(void);
 extern void GetUserIdAndContext(Oid *userid, bool *sec_def_context);
 extern void SetUserIdAndContext(Oid userid, bool sec_def_context);
-extern void InitializeSessionUserId(const char *rolename, Oid roleid);
+extern void InitializeSessionUserId(const char *rolename, Oid roleid,
+									bool bypass_login_check);
 extern void InitializeSessionUserIdStandalone(void);
 extern void SetSessionAuthorization(Oid userid, bool is_superuser);
 extern Oid	GetCurrentRoleId(void);
@@ -469,6 +470,7 @@ extern void InitPostgres(const char *in_dbname, Oid dboid,
 						 const char *username, Oid useroid,
 						 bool load_session_libraries,
 						 bool override_allow_connections,
+						 bool bypass_login_check,
 						 char *out_dbname);
 extern void BaseInit(void);
 
