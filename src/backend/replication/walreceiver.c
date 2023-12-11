@@ -242,7 +242,6 @@ WalReceiverMain(void)
 	}
 	/* Advertise our PID so that the startup process can kill us */
 	walrcv->pid = MyProcPid;
-	walrcv->walRcvState = WALRCV_STREAMING;
 
 	/* Fetch information required to start streaming */
 	walrcv->ready_to_display = false;
@@ -413,9 +412,14 @@ WalReceiverMain(void)
 		if (walrcv_startstreaming(wrconn, &options))
 		{
 			if (first_stream)
+			{
+				SpinLockAcquire(&walrcv->mutex);
+				walrcv->walRcvState = WALRCV_STREAMING;
+				SpinLockRelease(&walrcv->mutex);
 				ereport(LOG,
 						(errmsg("started streaming WAL from primary at %X/%X on timeline %u",
 								LSN_FORMAT_ARGS(startpoint), startpointTLI)));
+			}
 			else
 				ereport(LOG,
 						(errmsg("restarted WAL streaming at %X/%X on timeline %u",
