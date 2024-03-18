@@ -38,7 +38,9 @@ die "Not possible to specify --docs and --code simultaneously"
 
 open my $wait_event_names, '<', $ARGV[0] or die;
 
+my @backpatch_lines;
 my @lines;
+my $backpatch = 0;
 my $section_name;
 my $note;
 my $note_name;
@@ -59,16 +61,38 @@ while (<$wait_event_names>)
 	{
 		$section_name = $_;
 		$section_name =~ s/^.*- //;
+		$backpatch = 0;
 		next;
 	}
 
-	push(@lines, $section_name . "\t" . $_);
+	# Are we dealing with backpatch wait events?
+	if (/^Backpatch:$/)
+	{
+		$backpatch = 1;
+		next;
+	}
+
+	# Backpatch wait events won't be sorted during code generation
+	if ($gen_code && $backpatch)
+	{
+		push(@backpatch_lines, $section_name . "\t" . $_);
+	}
+	else
+	{
+		push(@lines, $section_name . "\t" . $_);
+	}
 }
 
 # Sort the lines based on the second column.
 # uc() is being used to force the comparison to be case-insensitive.
 my @lines_sorted =
   sort { uc((split(/\t/, $a))[1]) cmp uc((split(/\t/, $b))[1]) } @lines;
+
+# If we are generating code then concat @lines_sorted and @backpatch_lines.
+if ($gen_code)
+{
+	push(@lines_sorted, @backpatch_lines);
+}
 
 # Read the sorted lines and populate the hash table
 foreach my $line (@lines_sorted)

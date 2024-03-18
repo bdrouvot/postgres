@@ -24,7 +24,11 @@
 #      SGML tables of wait events for inclusion in the documentation.
 #
 # When adding a new wait event, make sure it is placed in the appropriate
-# ClassName section.
+# ClassName section. If the wait event is backpatched from master to a version
+# >= 17 then put it under a "Backpatch:" delimiter at the end of the related
+# ClassName section (on the non master branches) or at its natural position on
+# the master branch.
+# Ensure that the backpatch regions are always empty on the master branch.
 #
 # WaitEventLWLock and WaitEventLock have their own C code for their wait event
 # enums and function names.  Hence, for these, only the SGML documentation is
@@ -61,6 +65,7 @@ WAL_SENDER_MAIN	"Waiting in main loop of WAL sender process."
 WAL_SUMMARIZER_WAL	"Waiting in WAL summarizer for more WAL to be generated."
 WAL_WRITER_MAIN	"Waiting in main loop of WAL writer process."
 
+Backpatch:
 
 #
 # Wait Events - Client
@@ -82,6 +87,7 @@ WAIT_FOR_STANDBY_CONFIRMATION	"Waiting for WAL to be received and flushed by the
 WAL_SENDER_WAIT_FOR_WAL	"Waiting for WAL to be flushed in WAL sender process."
 WAL_SENDER_WRITE_DATA	"Waiting for any activity when processing replies from WAL receiver in WAL sender process."
 
+Backpatch:
 
 #
 # Wait Events - IPC
@@ -149,6 +155,7 @@ WAL_RECEIVER_WAIT_START	"Waiting for startup process to send initial data for st
 WAL_SUMMARY_READY	"Waiting for a new WAL summary to be generated."
 XACT_GROUP_UPDATE	"Waiting for the group leader to update transaction status at end of a parallel operation."
 
+Backpatch:
 
 #
 # Wait Events - Timeout
@@ -169,6 +176,7 @@ VACUUM_DELAY	"Waiting in a cost-based vacuum delay point."
 VACUUM_TRUNCATE	"Waiting to acquire an exclusive lock to truncate off any empty pages at the end of a table vacuumed."
 WAL_SUMMARIZER_ERROR	"Waiting after a WAL summarizer error."
 
+Backpatch:
 
 #
 # Wait Events - IO
@@ -256,6 +264,7 @@ WAL_SYNC	"Waiting for a WAL file to reach durable storage."
 WAL_SYNC_METHOD_ASSIGN	"Waiting for data to reach durable storage while assigning a new WAL sync method."
 WAL_WRITE	"Waiting for a write to a WAL file."
 
+Backpatch:
 
 #
 # Wait Events - Buffer Pin
@@ -265,6 +274,7 @@ Section: ClassName - WaitEventBufferPin
 
 BUFFER_PIN	"Waiting to acquire an exclusive pin on a buffer."
 
+Backpatch:
 
 #
 # Wait Events - Extension
@@ -273,6 +283,8 @@ BUFFER_PIN	"Waiting to acquire an exclusive pin on a buffer."
 Section: ClassName - WaitEventExtension
 
 Extension	"Waiting in an extension."
+
+Backpatch:
 
 #
 # Wait Events - LWLock
@@ -330,6 +342,8 @@ DSMRegistry	"Waiting to read or update the dynamic shared memory registry."
 InjectionPoint	"Waiting to read or update information related to injection points."
 SerialControl	"Waiting to read or update shared <filename>pg_serial</filename> state."
 
+# Don't create a Backpatch region here.
+
 #
 # END OF PREDEFINED LWLOCKS (DO NOT CHANGE THIS LINE)
 #
@@ -377,6 +391,7 @@ SerialSLRU	"Waiting to access the serializable transaction conflict SLRU cache."
 SubtransSLRU	"Waiting to access the sub-transaction SLRU cache."
 XactSLRU	"Waiting to access the transaction status SLRU cache."
 
+# Don't create a Backpatch region here.
 
 #
 # Wait Events - Lock
@@ -399,3 +414,5 @@ object	"Waiting to acquire a lock on a non-relation database object."
 userlock	"Waiting to acquire a user lock."
 advisory	"Waiting to acquire an advisory user lock."
 applytransaction	"Waiting to acquire a lock on a remote transaction being applied by a logical replication subscriber."
+
+Backpatch:
