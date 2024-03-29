@@ -1688,6 +1688,8 @@ process_owned_by(Relation seqrel, List *owned_by, bool for_identity)
 		depobject.classId = RelationRelationId;
 		depobject.objectId = RelationGetRelid(seqrel);
 		depobject.objectSubId = 0;
+
+		LockNotPinnedObject(RelationRelationId, RelationGetRelid(tablerel));
 		recordDependencyOn(&depobject, &refobject, deptype);
 	}
 

@@ -4380,8 +4380,10 @@ IndexSetParentIndex(Relation partitionIdx, Oid parentOid)
 			ObjectAddressSet(parentIdx, RelationRelationId, parentOid);
 			ObjectAddressSet(partitionTbl, RelationRelationId,
 							 partitionIdx->rd_index->indrelid);
+			LockNotPinnedObject(RelationRelationId, parentOid);
 			recordDependencyOn(&partIdx, &parentIdx,
 							   DEPENDENCY_PARTITION_PRI);
+			LockNotPinnedObject(RelationRelationId, partitionIdx->rd_index->indrelid);
 			recordDependencyOn(&partIdx, &partitionTbl,
 							   DEPENDENCY_PARTITION_SEC);
 		}

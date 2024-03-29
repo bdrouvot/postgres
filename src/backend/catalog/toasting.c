@@ -367,6 +367,7 @@ create_toast_table(Relation rel, Oid toastOid, Oid toastIndexOid,
 		toastobject.objectId = toast_relid;
 		toastobject.objectSubId = 0;
 
+		LockNotPinnedObject(RelationRelationId, relOid);
 		recordDependencyOn(&toastobject, &baseobject, DEPENDENCY_INTERNAL);
 	}
 
