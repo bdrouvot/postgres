@@ -1,0 +1,5 @@
+# pg_logicalsnapinspect extension
+comment = 'functions to inspect contents of logical snapshot'
+default_version = '1.0'
+module_pathname = '$libdir/pg_logicalsnapinspect'
+relocatable = true
