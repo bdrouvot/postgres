@@ -242,7 +242,7 @@ static const char *const subdirs[] = {
 	"pg_multixact/offsets",
 	"base",
 	"base/1",
-	"pg_replslot",
+	"pg_replslot",				/* defined as PG_REPLSLOT_DIR */
 	"pg_tblspc",
 	"pg_stat",
 	"pg_stat_tmp",
