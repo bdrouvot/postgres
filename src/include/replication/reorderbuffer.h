@@ -19,6 +19,7 @@
 #include "utils/timestamp.h"
 
 #define PG_LOGICAL_MAPPINGS_DIR "pg_logical/mappings"
+#define PG_LOGICAL_SNAPSHOTS_DIR "pg_logical/snapshots"
 
 /* GUC variables */
 extern PGDLLIMPORT int logical_decoding_work_mem;
