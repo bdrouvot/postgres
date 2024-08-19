@@ -18,6 +18,8 @@
 #include "utils/snapshot.h"
 #include "utils/timestamp.h"
 
+#define PG_LOGICAL_MAPPINGS_DIR "pg_logical/mappings"
+
 /* GUC variables */
 extern PGDLLIMPORT int logical_decoding_work_mem;
 extern PGDLLIMPORT int debug_logical_replication_streaming;

@@ -699,12 +699,12 @@ pg_ls_logicalsnapdir(PG_FUNCTION_ARGS)
 }
 
 /*
- * Function to return the list of files in the pg_logical/mappings directory.
+ * Function to return the list of files in the PG_LOGICAL_MAPPINGS_DIR directory.
  */
 Datum
 pg_ls_logicalmapdir(PG_FUNCTION_ARGS)
 {
-	return pg_ls_dir_files(fcinfo, "pg_logical/mappings", false);
+	return pg_ls_dir_files(fcinfo, PG_LOGICAL_MAPPINGS_DIR, false);
 }
 
 /*
