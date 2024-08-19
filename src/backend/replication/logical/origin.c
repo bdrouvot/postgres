@@ -572,8 +572,8 @@ ReplicationOriginShmemInit(void)
 void
 CheckPointReplicationOrigin(void)
 {
-	const char *tmppath = "pg_logical/replorigin_checkpoint.tmp";
-	const char *path = "pg_logical/replorigin_checkpoint";
+	const char *tmppath = PG_LOGICAL_REPLORIGIN_CHECKPOINT_TMP_DIR;
+	const char *path = PG_LOGICAL_REPLORIGIN_CHECKPOINT_DIR;
 	int			tmpfd;
 	int			i;
 	uint32		magic = REPLICATION_STATE_MAGIC;
@@ -698,7 +698,7 @@ CheckPointReplicationOrigin(void)
 void
 StartupReplicationOrigin(void)
 {
-	const char *path = "pg_logical/replorigin_checkpoint";
+	const char *path = PG_LOGICAL_REPLORIGIN_CHECKPOINT_DIR;
 	int			fd;
 	int			readBytes;
 	uint32		magic = REPLICATION_STATE_MAGIC;

@@ -15,6 +15,9 @@
 #include "access/xlogreader.h"
 #include "catalog/pg_replication_origin.h"
 
+#define PG_LOGICAL_REPLORIGIN_CHECKPOINT_DIR "pg_logical/replorigin_checkpoint"
+#define PG_LOGICAL_REPLORIGIN_CHECKPOINT_TMP_DIR PG_LOGICAL_REPLORIGIN_CHECKPOINT_DIR ".tmp"
+
 typedef struct xl_replorigin_set
 {
 	XLogRecPtr	remote_lsn;
