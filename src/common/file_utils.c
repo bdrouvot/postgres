@@ -25,6 +25,7 @@
 #include <unistd.h>
 
 #include "common/file_utils.h"
+#include "common/relpath.h"
 #ifdef FRONTEND
 #include "common/logging.h"
 #endif
@@ -87,7 +88,7 @@ do_syncfs(const char *path)
  * Synchronize PGDATA and all its contents.
  *
  * We sync regular files and directories wherever they are, but we follow
- * symlinks only for pg_wal (or pg_xlog) and immediately under pg_tblspc.
+ * symlinks only for pg_wal (or pg_xlog) and immediately under PG_TBLSPC_DIR.
  * Other symlinks are presumed to point at files we're not responsible for
  * syncing, and might not have privileges to write at all.
  *
@@ -105,7 +106,7 @@ sync_pgdata(const char *pg_data,
 	/* handle renaming of pg_xlog to pg_wal in post-10 clusters */
 	snprintf(pg_wal, MAXPGPATH, "%s/%s", pg_data,
 			 serverVersion < MINIMUM_VERSION_FOR_PG_WAL ? "pg_xlog" : "pg_wal");
-	snprintf(pg_tblspc, MAXPGPATH, "%s/pg_tblspc", pg_data);
+	snprintf(pg_tblspc, MAXPGPATH, "%s/%s", pg_data, PG_TBLSPC_DIR);
 
 	/*
 	 * If pg_wal is a symlink, we'll need to recurse into it separately,
@@ -196,9 +197,9 @@ sync_pgdata(const char *pg_data,
 				 * Now we do the fsync()s in the same order.
 				 *
 				 * The main call ignores symlinks, so in addition to specially
-				 * processing pg_wal if it's a symlink, pg_tblspc has to be
+				 * processing pg_wal if it's a symlink, PG_TBLSPC_DIR has to be
 				 * visited separately with process_symlinks = true.  Note that
-				 * if there are any plain directories in pg_tblspc, they'll
+				 * if there are any plain directories in PG_TBLSPC_DIR, they'll
 				 * get fsync'd twice. That's not an expected case so we don't
 				 * worry about optimizing it.
 				 */

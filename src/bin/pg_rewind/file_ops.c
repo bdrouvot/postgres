@@ -448,11 +448,11 @@ recurse_dir(const char *datadir, const char *parentpath,
 			callback(path, FILE_TYPE_SYMLINK, 0, link_target);
 
 			/*
-			 * If it's a symlink within pg_tblspc, we need to recurse into it,
+			 * If it's a symlink within PG_TBLSPC_DIR, we need to recurse into it,
 			 * to process all the tablespaces.  We also follow a symlink if
 			 * it's for pg_wal.  Symlinks elsewhere are ignored.
 			 */
-			if ((parentpath && strcmp(parentpath, "pg_tblspc") == 0) ||
+			if ((parentpath && strcmp(parentpath, PG_TBLSPC_DIR) == 0) ||
 				strcmp(path, "pg_wal") == 0)
 				recurse_dir(datadir, path, callback);
 		}

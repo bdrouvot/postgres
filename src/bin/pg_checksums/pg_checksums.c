@@ -383,12 +383,12 @@ scan_directory(const char *basedir, const char *subdir, bool sizeonly)
 		else if (S_ISDIR(st.st_mode) || S_ISLNK(st.st_mode))
 		{
 			/*
-			 * If going through the entries of pg_tblspc, we assume to operate
+			 * If going through the entries of PG_TBLSPC_DIR, we assume to operate
 			 * on tablespace locations where only TABLESPACE_VERSION_DIRECTORY
 			 * is valid, resolving the linked locations and dive into them
 			 * directly.
 			 */
-			if (strncmp("pg_tblspc", subdir, strlen("pg_tblspc")) == 0)
+			if (strncmp(PG_TBLSPC_DIR, subdir, strlen(PG_TBLSPC_DIR)) == 0)
 			{
 				char		tblspc_path[MAXPGPATH];
 				struct stat tblspc_st;
@@ -593,12 +593,12 @@ main(int argc, char *argv[])
 		{
 			total_size = scan_directory(DataDir, "global", true);
 			total_size += scan_directory(DataDir, "base", true);
-			total_size += scan_directory(DataDir, "pg_tblspc", true);
+			total_size += scan_directory(DataDir, PG_TBLSPC_DIR, true);
 		}
 
 		(void) scan_directory(DataDir, "global", false);
 		(void) scan_directory(DataDir, "base", false);
-		(void) scan_directory(DataDir, "pg_tblspc", false);
+		(void) scan_directory(DataDir, PG_TBLSPC_DIR, false);
 
 		if (showprogress)
 			progress_report(true);

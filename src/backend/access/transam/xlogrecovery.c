@@ -677,7 +677,7 @@ InitWalRecovery(ControlFileData *ControlFile, bool *wasShutdown_ptr,
 				tablespaceinfo *ti = lfirst(lc);
 				char	   *linkloc;
 
-				linkloc = psprintf("pg_tblspc/%u", ti->oid);
+				linkloc = psprintf("%s/%u", PG_TBLSPC_DIR, ti->oid);
 
 				/*
 				 * Remove the existing symlink if any and Create the symlink
@@ -2138,11 +2138,11 @@ xlogrecovery_redo(XLogReaderState *record, TimeLineID replayTLI)
 }
 
 /*
- * Verify that, in non-test mode, ./pg_tblspc doesn't contain any real
+ * Verify that, in non-test mode, ./PG_TBLSPC_DIR doesn't contain any real
  * directories.
  *
  * Replay of database creation XLOG records for databases that were later
- * dropped can create fake directories in pg_tblspc.  By the time consistency
+ * dropped can create fake directories in PG_TBLSPC_DIR.  By the time consistency
  * is reached these directories should have been removed; here we verify
  * that this did indeed happen.  This is to be called at the point where
  * consistent state is reached.
@@ -2157,23 +2157,23 @@ CheckTablespaceDirectory(void)
 	DIR		   *dir;
 	struct dirent *de;
 
-	dir = AllocateDir("pg_tblspc");
-	while ((de = ReadDir(dir, "pg_tblspc")) != NULL)
+	dir = AllocateDir(PG_TBLSPC_DIR);
+	while ((de = ReadDir(dir, PG_TBLSPC_DIR)) != NULL)
 	{
-		char		path[MAXPGPATH + 10];
+		char		path[MAXPGPATH + sizeof(PG_TBLSPC_DIR)];
 
 		/* Skip entries of non-oid names */
 		if (strspn(de->d_name, "0123456789") != strlen(de->d_name))
 			continue;
 
-		snprintf(path, sizeof(path), "pg_tblspc/%s", de->d_name);
+		snprintf(path, sizeof(path), "%s/%s", PG_TBLSPC_DIR, de->d_name);
 
 		if (get_dirent_type(path, de, false, ERROR) != PGFILETYPE_LNK)
 			ereport(allow_in_place_tablespaces ? WARNING : PANIC,
 					(errcode(ERRCODE_DATA_CORRUPTED),
 					 errmsg("unexpected directory entry \"%s\" found in %s",
-							de->d_name, "pg_tblspc/"),
-					 errdetail("All directory entries in pg_tblspc/ should be symbolic links."),
+							de->d_name, PG_TBLSPC_DIR),
+					 errdetail("All directory entries in %s/ should be symbolic links.", PG_TBLSPC_DIR),
 					 errhint("Remove those directories, or set \"allow_in_place_tablespaces\" to ON transiently to let recovery complete.")));
 	}
 }
@@ -2247,10 +2247,10 @@ CheckRecoveryConsistency(void)
 		XLogCheckInvalidPages();
 
 		/*
-		 * Check that pg_tblspc doesn't contain any real directories. Replay
-		 * of Database/CREATE_* records may have created fictitious tablespace
-		 * directories that should have been removed by the time consistency
-		 * was reached.
+		 * Check that PG_TBLSPC_DIR doesn't contain any real directories.
+		 * Replay of Database/CREATE_* records may have created fictitious
+		 * tablespace directories that should have been removed by the time
+		 * consistency was reached.
 		 */
 		CheckTablespaceDirectory();
 

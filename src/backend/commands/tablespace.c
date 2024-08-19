@@ -13,13 +13,13 @@
  * files within a tablespace into database-specific subdirectories.
  *
  * To support file access via the information given in RelFileLocator, we
- * maintain a symbolic-link map in $PGDATA/pg_tblspc. The symlinks are
+ * maintain a symbolic-link map in $PGDATA/PG_TBLSPC_DIR. The symlinks are
  * named by tablespace OIDs and point to the actual tablespace directories.
  * There is also a per-cluster version directory in each tablespace.
  * Thus the full path to an arbitrary file is
- *			$PGDATA/pg_tblspc/spcoid/PG_MAJORVER_CATVER/dboid/relfilenumber
+ *			$PGDATA/PG_TBLSPC_DIR/spcoid/PG_MAJORVER_CATVER/dboid/relfilenumber
  * e.g.
- *			$PGDATA/pg_tblspc/20981/PG_9.0_201002161/719849/83292814
+ *			$PGDATA/PG_TBLSPC_DIR/20981/PG_9.0_201002161/719849/83292814
  *
  * There are two tablespaces created at initdb time: pg_global (for shared
  * tables) and pg_default (for everything else).  For backwards compatibility
@@ -565,7 +565,7 @@ DropTableSpace(DropTableSpaceStmt *stmt)
 /*
  * create_tablespace_directories
  *
- *	Attempt to create filesystem infrastructure linking $PGDATA/pg_tblspc/
+ *	Attempt to create filesystem infrastructure linking $PGDATA/PG_TBLSPC_DIR/
  *	to the specified directory
  */
 static void
@@ -576,7 +576,7 @@ create_tablespace_directories(const char *location, const Oid tablespaceoid)
 	struct stat st;
 	bool		in_place;
 
-	linkloc = psprintf("pg_tblspc/%u", tablespaceoid);
+	linkloc = psprintf("%s/%u", PG_TBLSPC_DIR, tablespaceoid);
 
 	/*
 	 * If we're asked to make an 'in place' tablespace, create the directory
@@ -692,7 +692,7 @@ destroy_tablespace_directories(Oid tablespaceoid, bool redo)
 	char	   *subfile;
 	struct stat st;
 
-	linkloc_with_version_dir = psprintf("pg_tblspc/%u/%s", tablespaceoid,
+	linkloc_with_version_dir = psprintf("%s/%u/%s", PG_TBLSPC_DIR, tablespaceoid,
 										TABLESPACE_VERSION_DIRECTORY);
 
 	/*
@@ -873,7 +873,7 @@ directory_is_empty(const char *path)
 /*
  *	remove_tablespace_symlink
  *
- * This function removes symlinks in pg_tblspc.  On Windows, junction points
+ * This function removes symlinks in PG_TBLSPC_DIR.  On Windows, junction points
  * act like directories so we must be able to apply rmdir.  This function
  * works like the symlink removal code in destroy_tablespace_directories,
  * except that failure to remove is always an ERROR.  But if the file doesn't

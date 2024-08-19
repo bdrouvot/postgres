@@ -5558,8 +5558,8 @@ StartupXLOG(void)
 	 * in place if the database had been cleanly shut down, but it seems
 	 * safest to just remove them always and let them be rebuilt during the
 	 * first backend startup.  These files needs to be removed from all
-	 * directories including pg_tblspc, however the symlinks are created only
-	 * after reading tablespace_map file in case of archive recovery from
+	 * directories including PG_TBLSPC_DIR, however the symlinks are created
+	 * only after reading tablespace_map file in case of archive recovery from
 	 * backup, so needs to clear old relcache files here after creating
 	 * symlinks.
 	 */
@@ -8944,10 +8944,10 @@ do_pg_backup_start(const char *backupidstr, bool fast, List **tablespaces,
 		datadirpathlen = strlen(DataDir);
 
 		/* Collect information about all tablespaces */
-		tblspcdir = AllocateDir("pg_tblspc");
-		while ((de = ReadDir(tblspcdir, "pg_tblspc")) != NULL)
+		tblspcdir = AllocateDir(PG_TBLSPC_DIR);
+		while ((de = ReadDir(tblspcdir, PG_TBLSPC_DIR)) != NULL)
 		{
-			char		fullpath[MAXPGPATH + 10];
+			char		fullpath[MAXPGPATH + sizeof(PG_TBLSPC_DIR)];
 			char		linkpath[MAXPGPATH];
 			char	   *relpath = NULL;
 			char	   *s;
@@ -8970,7 +8970,7 @@ do_pg_backup_start(const char *backupidstr, bool fast, List **tablespaces,
 			if (*badp != '\0' || errno == EINVAL || errno == ERANGE)
 				continue;
 
-			snprintf(fullpath, sizeof(fullpath), "pg_tblspc/%s", de->d_name);
+			snprintf(fullpath, sizeof(fullpath), "%s/%s", PG_TBLSPC_DIR, de->d_name);
 
 			de_type = get_dirent_type(fullpath, de, false, ERROR);
 
@@ -9025,14 +9025,14 @@ do_pg_backup_start(const char *backupidstr, bool fast, List **tablespaces,
 			{
 				/*
 				 * It's possible to use allow_in_place_tablespaces to create
-				 * directories directly under pg_tblspc, for testing purposes
-				 * only.
+				 * directories directly under PG_TBLSPC_DIR, for testing
+				 * purposes only.
 				 *
 				 * In this case, we store a relative path rather than an
 				 * absolute path into the tablespaceinfo.
 				 */
-				snprintf(linkpath, sizeof(linkpath), "pg_tblspc/%s",
-						 de->d_name);
+				snprintf(linkpath, sizeof(linkpath), "%s/%s",
+						 PG_TBLSPC_DIR, de->d_name);
 				relpath = pstrdup(linkpath);
 			}
 			else

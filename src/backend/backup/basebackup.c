@@ -1405,8 +1405,8 @@ sendDir(bbsink *sink, const char *path, int basepathlen, bool sizeonly,
 			continue;			/* don't recurse into pg_wal */
 		}
 
-		/* Allow symbolic links in pg_tblspc only */
-		if (strcmp(path, "./pg_tblspc") == 0 && S_ISLNK(statbuf.st_mode))
+		/* Allow symbolic links in PG_TBLSPC_DIR only */
+		if (strcmp(path, RELATIVE_PG_TBLSPC_DIR) == 0 && S_ISLNK(statbuf.st_mode))
 		{
 			char		linkpath[MAXPGPATH];
 			int			rllen;
@@ -1462,9 +1462,9 @@ sendDir(bbsink *sink, const char *path, int basepathlen, bool sizeonly,
 			}
 
 			/*
-			 * skip sending directories inside pg_tblspc, if not required.
+			 * skip sending directories inside PG_TBLSPC_DIR, if not required.
 			 */
-			if (strcmp(pathbuf, "./pg_tblspc") == 0 && !sendtblspclinks)
+			if (strcmp(pathbuf, RELATIVE_PG_TBLSPC_DIR) == 0 && !sendtblspclinks)
 				skip_this_dir = true;
 
 			if (!skip_this_dir)
@@ -1488,7 +1488,7 @@ sendDir(bbsink *sink, const char *path, int basepathlen, bool sizeonly,
 				if (OidIsValid(spcoid))
 				{
 					relspcoid = spcoid;
-					lookup_path = psprintf("pg_tblspc/%u/%s", spcoid,
+					lookup_path = psprintf("%s/%u/%s", PG_TBLSPC_DIR, spcoid,
 										   tarfilename);
 				}
 				else

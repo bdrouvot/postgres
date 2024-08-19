@@ -19,6 +19,7 @@
 
 #include "common/file_perm.h"
 #include "common/logging.h"
+#include "common/relpath.h"
 #include "common/string.h"
 #include "fe_utils/astreamer.h"
 
@@ -289,29 +290,31 @@ astreamer_extractor_content(astreamer *streamer, astreamer_member *member,
  * link before starting the actual backup.  So just ignore creation failures
  * on related directories.
  *
- * If in-place tablespaces are used, pg_tblspc and subdirectories may already
+ * If in-place tablespaces are used, PG_TBLSPC_DIR and subdirectories may already
  * exist when we get here. So tolerate that case, too.
  */
 static bool
 should_allow_existing_directory(const char *pathname)
 {
+#define PG_TBLSPC_DIR_CONCAT "/" PG_TBLSPC_DIR "/"
 	const char *filename = last_dir_separator(pathname) + 1;
 
 	if (strcmp(filename, "pg_wal") == 0 ||
 		strcmp(filename, "pg_xlog") == 0 ||
 		strcmp(filename, "archive_status") == 0 ||
 		strcmp(filename, "summaries") == 0 ||
-		strcmp(filename, "pg_tblspc") == 0)
+		strcmp(filename, PG_TBLSPC_DIR) == 0)
 		return true;
 
 	if (strspn(filename, "0123456789") == strlen(filename))
 	{
-		const char *pg_tblspc = strstr(pathname, "/pg_tblspc/");
+		const char *pg_tblspc = strstr(pathname, PG_TBLSPC_DIR_CONCAT);
 
 		return pg_tblspc != NULL && pg_tblspc + 11 == filename;
 	}
 
 	return false;
+#undef PG_TBLSPC_DIR_CONCAT
 }
 
 /*
@@ -335,10 +338,10 @@ extract_directory(const char *filename, mode_t mode)
 /*
  * Create a symbolic link.
  *
- * It's most likely a link in pg_tblspc directory, to the location of a
+ * It's most likely a link in PG_TBLSPC_DIR directory, to the location of a
  * tablespace. Apply any tablespace mapping given on the command line
  * (--tablespace-mapping). (We blindly apply the mapping without checking that
- * the link really is inside pg_tblspc. We don't expect there to be other
+ * the link really is inside PG_TBLSPC_DIR. We don't expect there to be other
  * symlinks in a data directory, but if there are, you can call it an
  * undocumented feature that you can map them too.)
  */

@@ -318,7 +318,7 @@ main(int argc, char *argv[])
 	 * for those directories to be cleaned up on failure. In-place tablespaces
 	 * aren't handled at this stage because they're located beneath the main
 	 * output directory, and thus the cleanup of that directory will get rid
-	 * of them. Plus, the pg_tblspc directory that needs to contain them
+	 * of them. Plus, the PG_TBLSPC_DIR directory that needs to contain them
 	 * doesn't exist yet.
 	 */
 	atexit(cleanup_directories_atexit);
@@ -366,14 +366,14 @@ main(int argc, char *argv[])
 
 		/*
 		 * If it's a normal tablespace, we need to set up a symbolic link from
-		 * pg_tblspc/${OID} to the target directory; if it's an in-place
-		 * tablespace, we need to create a directory at pg_tblspc/${OID}.
+		 * PG_TBLSPC_DIR/${OID} to the target directory; if it's an in-place
+		 * tablespace, we need to create a directory at PG_TBLSPC_DIR/${OID}.
 		 */
 		if (!ts->in_place)
 		{
 			char		linkpath[MAXPGPATH];
 
-			snprintf(linkpath, MAXPGPATH, "%s/pg_tblspc/%u", opt.output,
+			snprintf(linkpath, MAXPGPATH, "%s/%s/%u", opt.output, PG_TBLSPC_DIR,
 					 ts->oid);
 
 			if (opt.dry_run)
@@ -844,8 +844,9 @@ process_directory_recursively(Oid tsoid,
 	/*
 	 * Classify this directory.
 	 *
-	 * We set is_pg_tblspc only for the toplevel pg_tblspc directory, because
-	 * the symlinks in that specific directory require special handling.
+	 * We set is_pg_tblspc only for the toplevel PG_TBLSPC_DIR directory,
+	 * because the symlinks in that specific directory require special
+	 * handling.
 	 *
 	 * We set is_pg_wal for the toplevel WAL directory and all of its
 	 * subdirectories, because those files are not included in the backup
@@ -860,19 +861,19 @@ process_directory_recursively(Oid tsoid,
 	 * strange name like INCREMENTAL.config and then complaining that
 	 * incremental backups don't work properly. The test here is a bit tricky:
 	 * incremental files occur in subdirectories of base, in pg_global itself,
-	 * and in subdirectories of pg_tblspc only if in-place tablespaces are
+	 * and in subdirectories of PG_TBLSPC_DIR only if in-place tablespaces are
 	 * used.
 	 */
 	if (OidIsValid(tsoid))
 		is_incremental_dir = true;
 	else if (relative_path != NULL)
 	{
-		is_pg_tblspc = strcmp(relative_path, "pg_tblspc") == 0;
+		is_pg_tblspc = strcmp(relative_path, PG_TBLSPC_DIR) == 0;
 		is_pg_wal = (strcmp(relative_path, "pg_wal") == 0 ||
 					 strncmp(relative_path, "pg_wal/", 7) == 0);
 		is_incremental_dir = strncmp(relative_path, "base/", 5) == 0 ||
 			strcmp(relative_path, "global") == 0 ||
-			strncmp(relative_path, "pg_tblspc/", 10) == 0;
+			strncmp(relative_path, PG_TBLSPC_DIR_SLASH, 10) == 0;
 	}
 
 	/*
@@ -895,7 +896,7 @@ process_directory_recursively(Oid tsoid,
 		strlcpy(ifulldir, input_directory, MAXPGPATH);
 		strlcpy(ofulldir, output_directory, MAXPGPATH);
 		if (OidIsValid(tsoid))
-			snprintf(manifest_prefix, MAXPGPATH, "pg_tblspc/%u/", tsoid);
+			snprintf(manifest_prefix, MAXPGPATH, "%s/%u/", PG_TBLSPC_DIR, tsoid);
 		else
 			manifest_prefix[0] = '\0';
 	}
@@ -906,8 +907,8 @@ process_directory_recursively(Oid tsoid,
 		snprintf(ofulldir, MAXPGPATH, "%s/%s", output_directory,
 				 relative_path);
 		if (OidIsValid(tsoid))
-			snprintf(manifest_prefix, MAXPGPATH, "pg_tblspc/%u/%s/",
-					 tsoid, relative_path);
+			snprintf(manifest_prefix, MAXPGPATH, "%s/%u/%s/",
+					 PG_TBLSPC_DIR, tsoid, relative_path);
 		else
 			snprintf(manifest_prefix, MAXPGPATH, "%s/", relative_path);
 	}
@@ -956,7 +957,7 @@ process_directory_recursively(Oid tsoid,
 			exit(1);
 
 		/*
-		 * If we're processing pg_tblspc, then check whether the filename
+		 * If we're processing PG_TBLSPC_DIR, then check whether the filename
 		 * looks like it could be a tablespace OID. If so, and if the
 		 * directory entry is a symbolic link or a directory, skip it.
 		 *
@@ -1235,7 +1236,7 @@ reset_directory_cleanup_list(void)
 }
 
 /*
- * Scan the pg_tblspc directory of the final input backup to get a canonical
+ * Scan the PG_TBLSPC_DIR directory of the final input backup to get a canonical
  * list of what tablespaces are part of the backup.
  *
  * 'pathname' should be the path to the toplevel backup directory for the
@@ -1249,7 +1250,7 @@ scan_for_existing_tablespaces(char *pathname, cb_options *opt)
 	struct dirent *de;
 	cb_tablespace *tslist = NULL;
 
-	snprintf(pg_tblspc, MAXPGPATH, "%s/pg_tblspc", pathname);
+	snprintf(pg_tblspc, MAXPGPATH, "%s/%s", pathname, PG_TBLSPC_DIR);
 	pg_log_debug("scanning \"%s\"", pg_tblspc);
 
 	if ((dir = opendir(pg_tblspc)) == NULL)
@@ -1344,8 +1345,8 @@ scan_for_existing_tablespaces(char *pathname, cb_options *opt)
 			 * we just record the paths within the data directories.
 			 */
 			snprintf(ts->old_dir, MAXPGPATH, "%s/%s", pg_tblspc, de->d_name);
-			snprintf(ts->new_dir, MAXPGPATH, "%s/pg_tblspc/%s", opt->output,
-					 de->d_name);
+			snprintf(ts->new_dir, MAXPGPATH, "%s/%s/%s", opt->output,
+					 PG_TBLSPC_DIR, de->d_name);
 			ts->in_place = true;
 		}
 

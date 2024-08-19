@@ -3241,9 +3241,9 @@ database_is_invalid_oid(Oid dboid)
  * removed before the server stopped.  Since we expect that the directory will
  * be gone before reaching recovery consistency, and we have no knowledge about
  * the tablespace other than its OID here, we create a real directory under
- * pg_tblspc here instead of restoring the symlink.
+ * PG_TBLSPC_DIR here instead of restoring the symlink.
  *
- * If only_tblspc is true, then the requested directory must be in pg_tblspc/
+ * If only_tblspc is true, then the requested directory must be in PG_TBLSPC_DIR/
  */
 static void
 recovery_create_dbdir(char *path, bool only_tblspc)
@@ -3255,7 +3255,7 @@ recovery_create_dbdir(char *path, bool only_tblspc)
 	if (stat(path, &st) == 0)
 		return;
 
-	if (only_tblspc && strstr(path, "pg_tblspc/") == NULL)
+	if (only_tblspc && strstr(path, PG_TBLSPC_DIR_SLASH) == NULL)
 		elog(PANIC, "requested to created invalid directory: %s", path);
 
 	if (reachedConsistency && !allow_in_place_tablespaces)
