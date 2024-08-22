@@ -366,11 +366,12 @@ typedef struct PgStatShared_Checkpointer
 typedef struct PgStatShared_IO
 {
 	/*
-	 * locks[i] protects stats.stats[i]. locks[0] also protects
-	 * stats.stat_reset_timestamp.
+	 * locks[i] protects global_stats.stats[i]. locks[0] also protects
+	 * global_stats.stat_reset_timestamp.
 	 */
 	LWLock		locks[BACKEND_NUM_TYPES];
-	PgStat_IO	stats;
+	PgStat_IO	global_stats;
+	PgStat_Backend_IO	stat[FLEXIBLE_ARRAY_MEMBER];
 } PgStatShared_IO;
 
 typedef struct PgStatShared_SLRU
@@ -463,7 +464,6 @@ typedef struct PgStat_ShmemControl
 	PgStatShared_Archiver archiver;
 	PgStatShared_BgWriter bgwriter;
 	PgStatShared_Checkpointer checkpointer;
-	PgStatShared_IO io;
 	PgStatShared_SLRU slru;
 	PgStatShared_Wal wal;
 
@@ -473,6 +473,8 @@ typedef struct PgStat_ShmemControl
 	 */
 	void	   *custom_data[PGSTAT_KIND_CUSTOM_SIZE];
 
+	/* has to be at the end due to FLEXIBLE_ARRAY_MEMBER */
+	PgStatShared_IO io;
 } PgStat_ShmemControl;
 
 
@@ -494,7 +496,8 @@ typedef struct PgStat_Snapshot
 
 	PgStat_CheckpointerStats checkpointer;
 
-	PgStat_IO	io;
+	PgStat_Backend_IO	my_io;
+	PgStat_IO	global_io;
 
 	PgStat_SLRUStats slru[SLRU_NUM_ELEMENTS];
 
@@ -629,6 +632,7 @@ extern bool pgstat_io_flush_cb(bool nowait);
 extern void pgstat_io_init_shmem_cb(void *stats);
 extern void pgstat_io_reset_all_cb(TimestampTz ts);
 extern void pgstat_io_snapshot_cb(void);
+extern void pgstat_io_init_backend_cb(void);
 
 
 /*
