@@ -23,6 +23,17 @@
 
 
 /*
+ * Test if a memory region (representing a struct "s") starting
+ * at addr and of size sizeof(s) is full of zeroes.
+ */
+#define pg_structiszero(addr, s, r)									\
+	do {															\
+		/* We assume this initializes to zeroes */					\
+		static const s all_zeroes;									\
+		r = (memcmp(addr, &all_zeroes, sizeof(all_zeroes)) == 0);	\
+	} while (0)
+
+/*
  * Types related to shared memory storage of statistics.
  *
  * Per-object statistics are stored in the "shared stats" hashtable. That
