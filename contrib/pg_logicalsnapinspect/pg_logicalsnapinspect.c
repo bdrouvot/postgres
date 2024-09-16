@@ -23,9 +23,6 @@ PG_MODULE_MAGIC;
 PG_FUNCTION_INFO_V1(pg_get_logical_snapshot_meta);
 PG_FUNCTION_INFO_V1(pg_get_logical_snapshot_info);
 
-static void ValidateSnapshotFile(XLogRecPtr lsn, SnapBuildOnDisk *ondisk,
-								 const char *path);
-
 /*
  * NOTE: For any code change or issue fix here, it is highly recommended to
  * give a thought about doing the same in SnapBuildRestore() as well.
