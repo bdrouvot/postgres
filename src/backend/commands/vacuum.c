@@ -118,7 +118,7 @@ int			VacuumCostBalanceLocal = 0;
 static instr_time last_report_time;
 
 /* total nap time between two reports */
-static double nap_time_since_last_report = 0;
+double nap_time_since_last_report = 0;
 
 /* non-export function prototypes */
 static List *expand_vacuum_rel(VacuumRelation *vrel,
