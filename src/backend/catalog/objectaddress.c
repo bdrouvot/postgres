@@ -896,8 +896,8 @@ static void getRelationIdentity(StringInfo buffer, Oid relid, List **object,
  *
  * If the object is a relation or a child object of a relation (e.g. an
  * attribute or constraint), the relation is also opened and *relp receives
- * the open relcache entry pointer; otherwise, *relp is set to NULL.  This
- * is a bit grotty but it makes life simpler, since the caller will
+ * the open relcache entry pointer (if *relp is not passed as a NULL argument).
+ * This is a bit grotty but it makes life simpler, since the caller will
  * typically need the relcache entry too.  Caller must close the relcache
  * entry when done with it.  The relation is locked with the specified lockmode
  * if the target object is the relation itself or an attribute, but for other
@@ -1204,8 +1204,10 @@ get_object_address(ObjectType objtype, Node *object,
 		old_address = address;
 	}
 
+	Assert(!relation || relp);
 	/* Return the object address and the relation. */
-	*relp = relation;
+	if (relp)
+		*relp = relation;
 	return address;
 }
 
