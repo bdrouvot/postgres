@@ -124,7 +124,7 @@ StaticAssertDecl(LW_VAL_EXCLUSIVE > (uint32) MAX_BACKENDS,
  * ... and do not forget to update the documentation's list of wait events.
  */
 static const char *const BuiltinTrancheNames[] = {
-#define PG_LWLOCK(id, lockname) [id] = CppAsString(lockname) "Lock",
+#define PG_LWLOCK(id, lockname) [id] = CppAsString(lockname),
 #include "storage/lwlocklist.h"
 #undef PG_LWLOCK
 	[LWTRANCHE_XACT_BUFFER] = "XactBuffer",
