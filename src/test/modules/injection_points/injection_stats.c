@@ -48,7 +48,7 @@ static const PgStat_KindInfo injection_stats = {
 	.shared_data_off = offsetof(PgStatShared_InjectionPoint, stats),
 	.shared_data_len = sizeof(((PgStatShared_InjectionPoint *) 0)->stats),
 	.pending_size = sizeof(PgStat_StatInjEntry),
-	.flush_pending_cb = injection_stats_flush_cb,
+	.flush_dynamic_cb = injection_stats_flush_cb,
 };
 
 /*
