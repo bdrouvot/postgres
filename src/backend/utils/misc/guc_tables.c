@@ -1471,6 +1471,15 @@ struct config_bool ConfigureNamesBool[] =
 		NULL, NULL, NULL
 	},
 	{
+		{"track_cost_delay_timing", PGC_SUSET, STATS_CUMULATIVE,
+			gettext_noop("Collects timing statistics for cost-based vacuum delay."),
+			NULL
+		},
+		&track_cost_delay_timing,
+		false,
+		NULL, NULL, NULL
+	},
+	{
 		{"track_io_timing", PGC_SUSET, STATS_CUMULATIVE,
 			gettext_noop("Collects timing statistics for database I/O activity."),
 			NULL
