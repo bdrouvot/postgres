@@ -830,6 +830,12 @@ heap_vacuum_rel(Relation rel, VacuumParams *params,
 				appendStringInfo(&buf, _("I/O timings: read: %.3f ms, write: %.3f ms\n"),
 								 read_ms, write_ms);
 			}
+			if (track_cost_delay_timing)
+			{
+				double		delayed_ms = (double) MyBEEntry->st_progress_param[PROGRESS_VACUUM_DELAY_TIME] / 1000000.0;
+
+				appendStringInfo(&buf, _("delay time: %.3f ms\n"), delayed_ms);
+			}
 			if (secs_dur > 0 || usecs_dur > 0)
 			{
 				read_rate = (double) BLCKSZ * total_blks_read /

@@ -816,6 +816,12 @@ do_analyze_rel(Relation onerel, VacuumParams *params,
 				appendStringInfo(&buf, _("I/O timings: read: %.3f ms, write: %.3f ms\n"),
 								 read_ms, write_ms);
 			}
+			if (track_cost_delay_timing)
+			{
+				double		delayed_ms = (double) MyBEEntry->st_progress_param[PROGRESS_ANALYZE_DELAY_TIME] / 1000000.0;
+
+				appendStringInfo(&buf, _("delay time: %.3f ms\n"), delayed_ms);
+			}
 			appendStringInfo(&buf, _("avg read rate: %.3f MB/s, avg write rate: %.3f MB/s\n"),
 							 read_rate, write_rate);
 			appendStringInfo(&buf, _("buffer usage: %lld hits, %lld reads, %lld dirtied\n"),
