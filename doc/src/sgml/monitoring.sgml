@@ -2959,6 +2959,15 @@ description | Waiting for a newly initialized WAL file to reach durable storage
       linkend="wal-configuration"/>.
      </para>
     </listitem>
+    <listitem>
+     <para>
+      For the WAL <structfield>object</structfield>, <varname>fsyncs</varname>
+      and <varname>sync_time</varname> track the sync activity of WAL files via
+      issue_xlog_fsync(). <varname>writes</varname> and <varname>write_time</varname>
+      track the write activity of WAL files via XLogWrite().
+      See <xref linkend="wal-configuration"/> for more information.
+     </para>
+    </listitem>
    </itemizedlist>
   </para>
 
