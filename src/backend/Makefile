@@ -54,6 +54,9 @@ ifeq ($(with_systemd),yes)
 LIBS += -lsystemd
 endif
 
+# FIXME: filter-out / with/without with_libnuma?
+LIBS += $(LIBNUMA_LIBS)
+
 override LDFLAGS := $(LDFLAGS) $(LDFLAGS_EX) $(LDFLAGS_EX_BE)
 
 ##########################################################################
