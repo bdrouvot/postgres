@@ -6,6 +6,7 @@
  *	  contrib/pg_buffercache/pg_buffercache_pages.c
  *-------------------------------------------------------------------------
  */
+#include "pg_config.h"
 #include "postgres.h"
 
 #include "access/htup_details.h"
@@ -13,10 +14,12 @@
 #include "funcapi.h"
 #include "storage/buf_internals.h"
 #include "storage/bufmgr.h"
+#include "port/pg_numa.h"
+#include "storage/pg_shmem.h"
 
 
 #define NUM_BUFFERCACHE_PAGES_MIN_ELEM	8
-#define NUM_BUFFERCACHE_PAGES_ELEM	9
+#define NUM_BUFFERCACHE_PAGES_ELEM	10
 #define NUM_BUFFERCACHE_SUMMARY_ELEM 5
 #define NUM_BUFFERCACHE_USAGE_COUNTS_ELEM 4
 
@@ -43,6 +46,7 @@ typedef struct
 	 * because of bufmgr.c's PrivateRefCount infrastructure.
 	 */
 	int32		pinning_backends;
+	int32		numa_zone_id;
 } BufferCachePagesRec;
 
 
@@ -65,6 +69,17 @@ PG_FUNCTION_INFO_V1(pg_buffercache_summary);
 PG_FUNCTION_INFO_V1(pg_buffercache_usage_counts);
 PG_FUNCTION_INFO_V1(pg_buffercache_evict);
 
+static void
+pg_buffercache_mark_numa_invalid(BufferCachePagesContext *fctx, int n)
+{
+	int			i;
+
+	for (i = 0; i < n; i++)
+	{
+		fctx->record[i].numa_zone_id = -1;
+	}
+}
+
 Datum
 pg_buffercache_pages(PG_FUNCTION_ARGS)
 {
@@ -75,14 +90,33 @@ pg_buffercache_pages(PG_FUNCTION_ARGS)
 	TupleDesc	tupledesc;
 	TupleDesc	expected_tupledesc;
 	HeapTuple	tuple;
+	Buffer		query_numa = PG_GETARG_BOOL(0);
 
 	if (SRF_IS_FIRSTCALL())
 	{
-		int			i;
+		int			i,
+					blk2page,
+					j;
+		Size		os_page_size;
+		void	  **os_page_ptrs;
+		int		   *os_pages_status;
+		int			os_page_count;
+		float		pages_per_blk;
 
 		funcctx = SRF_FIRSTCALL_INIT();
 
-		/* Switch context when allocating stuff to be used in later calls */
+		if (query_numa)
+		{
+			if (pg_numa_init() == -1)
+			{
+				elog(NOTICE, "libnuma initialization failed or NUMA is not supported on this platform, some NUMA data might be unavailable.");
+				query_numa = false;
+			}
+		}
+
+		/*
+		 * Switch context when allocating stuff to be used in later calls
+		 */
 		oldcontext = MemoryContextSwitchTo(funcctx->multi_call_memory_ctx);
 
 		/* Create a user function context for cross-call persistence */
@@ -122,8 +156,12 @@ pg_buffercache_pages(PG_FUNCTION_ARGS)
 		TupleDescInitEntry(tupledesc, (AttrNumber) 8, "usage_count",
 						   INT2OID, -1, 0);
 
-		if (expected_tupledesc->natts == NUM_BUFFERCACHE_PAGES_ELEM)
+		if (expected_tupledesc->natts >= NUM_BUFFERCACHE_PAGES_ELEM - 1)
 			TupleDescInitEntry(tupledesc, (AttrNumber) 9, "pinning_backends",
+							   INT4OID, -1, 0);
+
+		if (expected_tupledesc->natts == NUM_BUFFERCACHE_PAGES_ELEM)
+			TupleDescInitEntry(tupledesc, (AttrNumber) 10, "numa_zone_id",
 							   INT4OID, -1, 0);
 
 		fctx->tupdesc = BlessTupleDesc(tupledesc);
@@ -137,8 +175,34 @@ pg_buffercache_pages(PG_FUNCTION_ARGS)
 		funcctx->max_calls = NBuffers;
 		funcctx->user_fctx = fctx;
 
-		/* Return to original context when allocating transient memory */
+		/*
+		 * Return to original context when allocating transient memory
+		 */
 		MemoryContextSwitchTo(oldcontext);
+
+		/*
+		 * This is for gathering some NUMA statistics. We might be using
+		 * various DB block sizes (4kB, 8kB , .. 32kB) that end up being
+		 * allocated in various different OS memory pages sizes, so first we
+		 * need to understand the OS memory page size before calling
+		 * move_pages()
+		 */
+		os_page_size = pg_numa_get_pagesize();
+		os_page_count = ((uint64)NBuffers * BLCKSZ) / os_page_size;
+		pages_per_blk = (float) BLCKSZ / os_page_size;
+
+		elog(DEBUG1, "NUMA os_page_count=%d os_page_size=%ld pages_per_blk=%f",
+			 os_page_count, os_page_size, pages_per_blk);
+
+		os_page_ptrs = palloc(sizeof(void *) * os_page_count);
+		os_pages_status = palloc(sizeof(int) * os_page_count);
+		memset(os_page_ptrs, 0, sizeof(void *) * os_page_count);
+
+		/*
+		 * If we ever get 0xff back from kernel inquiry, then we probably have
+		 * bug in our buffers to OS page mapping code here
+		 */
+		memset(os_pages_status, 0xff, sizeof(int) * os_page_count);
 
 		/*
 		 * Scan through all the buffers, saving the relevant fields in the
@@ -171,14 +235,79 @@ pg_buffercache_pages(PG_FUNCTION_ARGS)
 			else
 				fctx->record[i].isdirty = false;
 
-			/* Note if the buffer is valid, and has storage created */
+			/*
+			 * Note if the buffer is valid, and has storage created
+			 */
 			if ((buf_state & BM_VALID) && (buf_state & BM_TAG_VALID))
 				fctx->record[i].isvalid = true;
 			else
 				fctx->record[i].isvalid = false;
 
+			if (query_numa)
+			{
+				blk2page = (int) i * pages_per_blk;
+				j = 0;
+				do
+				{
+					/*
+					 * Many buffers can point to the same page (in case of
+					 * BLCKSZ < 4kB), but we want to also query just first
+					 * address.
+					 *
+					 * In order to get reliable results we also need to touch
+					 * memory pages, so that inquiry about NUMA zone doesn't
+					 * return -2.
+					 */
+					if (os_page_ptrs[blk2page + j] == 0)
+					{
+						volatile uint64 touch pg_attribute_unused();
+
+						/*
+						 * NBuffers count start really from 1
+						 */
+						os_page_ptrs[blk2page + j] = (char *) BufferGetBlock(i + 1) + (os_page_size * j);
+						pg_numa_touch_mem_if_required(touch, os_page_ptrs[blk2page + j]);
+
+						/*
+						 * Every 1GB of scanned memory we give process chance
+						 * to respond
+						 */
+#define ONE_GIGABYTE 1024*1024*1024
+						if ((i * os_page_size) % ONE_GIGABYTE == 0)
+							CHECK_FOR_INTERRUPTS();
+					}
+					j++;
+				} while (j < (int) pages_per_blk);
+			}
+
 			UnlockBufHdr(bufHdr, buf_state);
 		}
+
+
+		if (query_numa)
+		{
+			if (pg_numa_query_pages(0, os_page_count, os_page_ptrs, os_pages_status) == -1)
+				elog(ERROR, "failed NUMA pages inquiry: %m");
+
+			for (i = 0; i < NBuffers; i++)
+			{
+				blk2page = (int) i * pages_per_blk;
+
+				/*
+				 * Technically we can get errors too here and pass that to
+				 * user
+				 *
+				 * XXX:: also we could somehow report single DB block spanning
+				 * more than 2 NUMA zones, but it should be rare (?)
+				 */
+				fctx->record[i].numa_zone_id = os_pages_status[blk2page];
+			}
+		}
+		else
+			pg_buffercache_mark_numa_invalid(fctx, NBuffers);
+
+		pfree(os_page_ptrs);
+		pfree(os_pages_status);
 	}
 
 	funcctx = SRF_PERCALL_SETUP();
@@ -209,8 +338,12 @@ pg_buffercache_pages(PG_FUNCTION_ARGS)
 			nulls[5] = true;
 			nulls[6] = true;
 			nulls[7] = true;
-			/* unused for v1.0 callers, but the array is always long enough */
+
+			/*
+			 * unused for v1.0 callers, but the array is always long enough
+			 */
 			nulls[8] = true;
+			nulls[9] = true;
 		}
 		else
 		{
@@ -228,9 +361,14 @@ pg_buffercache_pages(PG_FUNCTION_ARGS)
 			nulls[6] = false;
 			values[7] = Int16GetDatum(fctx->record[i].usagecount);
 			nulls[7] = false;
-			/* unused for v1.0 callers, but the array is always long enough */
+
+			/*
+			 * unused for v1.0 callers, but the array is always long enough
+			 */
 			values[8] = Int32GetDatum(fctx->record[i].pinning_backends);
 			nulls[8] = false;
+			values[9] = Int32GetDatum(fctx->record[i].numa_zone_id);
+			nulls[9] = false;
 		}
 
 		/* Build and return the tuple. */
