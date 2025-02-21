@@ -672,6 +672,9 @@
 /* Define to 1 to build with libcurl support. (--with-libcurl) */
 #undef USE_LIBCURL
 
+/* Define to 1 to build with NUMA awareness support. (--with-libnuma) */
+#undef USE_LIBNUMA
+
 /* Define to 1 to build with XML support. (--with-libxml) */
 #undef USE_LIBXML
 
