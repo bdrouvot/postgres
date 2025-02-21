@@ -73,6 +73,7 @@
 #include "storage/shmem.h"
 #include "storage/spin.h"
 #include "utils/builtins.h"
+#include "port/pg_numa.h"
 
 static void *ShmemAllocRaw(Size size, Size *allocated_size);
 
@@ -565,6 +566,130 @@ pg_get_shmem_allocations(PG_FUNCTION_ARGS)
 	tuplestore_putvalues(rsinfo->setResult, rsinfo->setDesc, values, nulls);
 
 	LWLockRelease(ShmemIndexLock);
+
+	return (Datum) 0;
+}
+
+/* SQL SRF showing NUMA zones for allocated shared memory */
+Datum
+pg_get_shmem_numa_allocations(PG_FUNCTION_ARGS)
+{
+#define PG_GET_SHMEM_NUMA_SIZES_COLS 3
+
+	ReturnSetInfo *rsinfo = (ReturnSetInfo *) fcinfo->resultinfo;
+	HASH_SEQ_STATUS hstat;
+	ShmemIndexEnt *ent;
+	Datum		values[PG_GET_SHMEM_NUMA_SIZES_COLS];
+	bool		nulls[PG_GET_SHMEM_NUMA_SIZES_COLS];
+	Size		os_page_size;
+	void	  **page_ptrs;
+	int		   *pages_status;
+	int			shm_total_page_count,
+				shm_ent_page_count;
+
+	InitMaterializedSRF(fcinfo, 0);
+
+	if (pg_numa_init() == -1)
+	{
+		elog(NOTICE, "libnuma initialization failed or NUMA is not supported on this platform, some NUMA data might be unavailable.");;
+		return (Datum) 0;
+	}
+
+	/*
+	 * This is for gathering some NUMA statistics. We might be using various
+	 * DB block sizes (4kB, 8kB , .. 32kB) that end up being allocated in
+	 * various different OS memory pages sizes, so first we need to understand
+	 * the OS memory page size before calling move_pages()
+	 */
+	os_page_size = pg_numa_get_pagesize();
+
+	/*
+	 * Preallocate memory all at once without going into details which shared
+	 * memory segment is the biggest (technically min s_b can be as low as
+	 * 16xBLCKSZ)
+	 */
+	shm_total_page_count = ShmemSegHdr->totalsize / os_page_size;
+	page_ptrs = palloc(sizeof(void *) * shm_total_page_count);
+	pages_status = palloc(sizeof(int) * shm_total_page_count);
+	memset(page_ptrs, 0, sizeof(void *) * shm_total_page_count);
+
+	LWLockAcquire(ShmemIndexLock, LW_SHARED);
+
+	hash_seq_init(&hstat, ShmemIndex);
+
+	/* output all allocated entries */
+	memset(nulls, 0, sizeof(nulls));
+	while ((ent = (ShmemIndexEnt *) hash_seq_search(&hstat)) != NULL)
+	{
+		int			i;
+#define MAX_NUMA_ZONES 32		/* FIXME? */
+		Size		zones[MAX_NUMA_ZONES];
+
+		shm_ent_page_count = ent->allocated_size / os_page_size;
+		/* It is always at least 1 page */
+		shm_ent_page_count = shm_ent_page_count == 0 ? 1 : shm_ent_page_count;
+
+		/*
+		 * If we get ever 0xff back from kernel inquiry, then we probably have
+		 * bug in our buffers to OS page mapping code here
+		 */
+		memset(pages_status, 0xff, sizeof(int) * shm_ent_page_count);
+
+		for (i = 0; i < shm_ent_page_count; i++)
+		{
+			/*
+			 * In order to get reliable results we also need to touch memory
+			 * pages so that inquiry about NUMA zone doesn't return -2.
+			 */
+			volatile uint64 touch pg_attribute_unused();
+
+			page_ptrs[i] = (char *) ent->location + (i * os_page_size);
+			pg_numa_touch_mem_if_required(touch, page_ptrs[i]);
+
+			/* Every 1GB of scanned memory we give process chance to respond */
+#define ONE_GIGABYTE 1024*1024*1024
+			if ((i * os_page_size) % ONE_GIGABYTE == 0)
+				CHECK_FOR_INTERRUPTS();
+		}
+
+		if (pg_numa_query_pages(0, shm_ent_page_count, page_ptrs, pages_status) == -1) {
+			/* FIXME: should we release LWlock and pfree here? */
+			elog(ERROR, "failed NUMA pages inquiry status: %m");
+		}
+
+		memset(zones, 0, sizeof(zones));
+		/* Count number of NUMA zones used for this shared memory entry */
+		for (i = 0; i < shm_ent_page_count; i++)
+		{
+			int			s = pages_status[i];
+
+			if (s >= 0)
+				zones[s]++;
+		}
+
+		for (i = 0; i <= pg_numa_get_max_node(); i++)
+		{
+			values[0] = CStringGetTextDatum(ent->key);
+			values[1] = i;
+			values[2] = Int64GetDatum(zones[i] * os_page_size);
+
+			tuplestore_putvalues(rsinfo->setResult, rsinfo->setDesc,
+								 values, nulls);
+		}
+
+	}
+
+	/*
+	 * XXX: We are ignoring in NUMA version reporting of the following regions
+	 * (compare to pg_get_shmem_allocations() case): - output shared memory
+	 * allocated but not counted via the shmem index - output as-of-yet unused
+	 * shared memory
+	 */
+
+	LWLockRelease(ShmemIndexLock);
+
+	pfree(page_ptrs);
+	pfree(pages_status);
 
 	return (Datum) 0;
 }

@@ -8463,6 +8463,14 @@
   proargnames => '{name,off,size,allocated_size}',
   prosrc => 'pg_get_shmem_allocations' },
 
+# shared memory usage with NUMA info
+{ oid => '5101', descr => 'NUMA mappings for the main shared memory segment',
+  proname => 'pg_get_shmem_numa_allocations', prorows => '50', proretset => 't',
+  provolatile => 'v', prorettype => 'record', proargtypes => '',
+  proallargtypes => '{text,int8,int8}', proargmodes => '{o,o,o}',
+  proargnames => '{name,numa_zone_id,numa_size}',
+  prosrc => 'pg_get_shmem_numa_allocations' },
+
 # memory context of local backend
 { oid => '2282',
   descr => 'information about all memory contexts of local backend',
