@@ -25064,6 +25064,19 @@ SELECT * FROM pg_ls_dir('.') WITH ORDINALITY AS t(ls,n);
       <row>
        <entry role="func_table_entry"><para role="func_signature">
         <indexterm>
+         <primary>pg_numa_available</primary>
+        </indexterm>
+        <function>pg_numa_available</function> ()
+        <returnvalue>boolean</returnvalue>
+       </para>
+       <para>
+        Returns true if a <acronym>NUMA</acronym> support is available.
+       </para></entry>
+      </row>
+
+      <row>
+       <entry role="func_table_entry"><para role="func_signature">
+        <indexterm>
          <primary>pg_notification_queue_usage</primary>
         </indexterm>
         <function>pg_notification_queue_usage</function> ()

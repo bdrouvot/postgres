@@ -68,6 +68,7 @@
 #include "fmgr.h"
 #include "funcapi.h"
 #include "miscadmin.h"
+#include "port/pg_numa.h"
 #include "storage/lwlock.h"
 #include "storage/pg_shmem.h"
 #include "storage/shmem.h"
@@ -568,3 +569,13 @@ pg_get_shmem_allocations(PG_FUNCTION_ARGS)
 
 	return (Datum) 0;
 }
+
+/* SQL level function returning whether NUMA support was compiled in. */
+Datum
+pg_numa_available(PG_FUNCTION_ARGS)
+{
+	if(pg_numa_init() == -1)
+		PG_RETURN_BOOL(false);
+	PG_RETURN_BOOL(true);
+}
+

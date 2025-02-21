@@ -949,6 +949,25 @@ else
 endif
 
 
+###############################################################
+# Library: libnuma
+###############################################################
+
+libnumaopt = get_option('libnuma')
+if not libnumaopt.disabled()
+  libnuma = dependency('numa', required: libnumaopt)
+  if not libnuma.found()
+    libnuma = cc.find_library('numa', required: libnumaopt)
+  endif
+  if libnuma.found()
+    cdata.set('USE_LIBNUMA', 1)
+  else
+    libnuma = not_found_dep
+  endif
+else
+  libnuma = not_found_dep
+endif
+
 
 ###############################################################
 # Library: libxml
@@ -3168,6 +3187,7 @@ backend_both_deps += [
   icu_i18n,
   ldap,
   libintl,
+  libnuma,
   libxml,
   lz4,
   pam,
@@ -3823,6 +3843,7 @@ if meson.version().version_compare('>=0.57')
       'icu': icu,
       'ldap': ldap,
       'libcurl': libcurl,
+      'libnuma': libnuma,
       'libxml': libxml,
       'libxslt': libxslt,
       'llvm': llvm,

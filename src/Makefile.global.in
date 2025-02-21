@@ -191,6 +191,7 @@ with_gssapi	= @with_gssapi@
 with_krb_srvnam	= @with_krb_srvnam@
 with_ldap	= @with_ldap@
 with_libcurl	= @with_libcurl@
+with_libnuma	= @with_libnuma@
 with_libxml	= @with_libxml@
 with_libxslt	= @with_libxslt@
 with_llvm	= @with_llvm@
