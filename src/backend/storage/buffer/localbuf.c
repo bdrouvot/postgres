@@ -244,7 +244,7 @@ GetLocalVictimBuffer(void)
 
 		PageSetChecksumInplace(localpage, bufHdr->tag.blockNum);
 
-		io_start = pgstat_prepare_io_time();
+		io_start = pgstat_prepare_io_time(track_io_timing);
 
 		/* And write... */
 		smgrwrite(oreln,
@@ -255,7 +255,7 @@ GetLocalVictimBuffer(void)
 
 		/* Temporary table I/O does not use Buffer Access Strategies */
 		pgstat_count_io_op_time(IOOBJECT_TEMP_RELATION, IOCONTEXT_NORMAL,
-								IOOP_WRITE, io_start, 1, BLCKSZ);
+								IOOP_WRITE, io_start, 1, BLCKSZ, track_io_timing);
 
 		/* Mark not-dirty now in case we error out below */
 		buf_state &= ~BM_DIRTY;
@@ -414,13 +414,13 @@ ExtendBufferedRelLocal(BufferManagerRelation bmr,
 		}
 	}
 
-	io_start = pgstat_prepare_io_time();
+	io_start = pgstat_prepare_io_time(track_io_timing);
 
 	/* actually extend relation */
 	smgrzeroextend(bmr.smgr, fork, first_block, extend_by, false);
 
 	pgstat_count_io_op_time(IOOBJECT_TEMP_RELATION, IOCONTEXT_NORMAL, IOOP_EXTEND,
-							io_start, 1, extend_by * BLCKSZ);
+							io_start, 1, extend_by * BLCKSZ, track_io_timing);
 
 	for (uint32 i = 0; i < extend_by; i++)
 	{

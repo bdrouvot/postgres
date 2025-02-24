@@ -3401,7 +3401,7 @@ retry:
 	readOff = targetPageOff;
 
 	/* Measure I/O timing when reading segment */
-	io_start = pgstat_prepare_io_time();
+	io_start = pgstat_prepare_io_time(track_io_timing);
 
 	pgstat_report_wait_start(WAIT_EVENT_WAL_READ);
 	r = pg_pread(readFile, readBuf, XLOG_BLCKSZ, (off_t) readOff);
@@ -3413,7 +3413,7 @@ retry:
 		pgstat_report_wait_end();
 
 		pgstat_count_io_op_time(IOOBJECT_WAL, IOCONTEXT_NORMAL, IOOP_READ,
-								io_start, 1, r);
+								io_start, 1, r, track_io_timing);
 
 		XLogFileName(fname, curFileTLI, readSegNo, wal_segment_size);
 		if (r < 0)
@@ -3436,7 +3436,7 @@ retry:
 	pgstat_report_wait_end();
 
 	pgstat_count_io_op_time(IOOBJECT_WAL, IOCONTEXT_NORMAL, IOOP_READ,
-							io_start, 1, r);
+							io_start, 1, r, track_io_timing);
 
 	Assert(targetSegNo == readSegNo);
 	Assert(targetPageOff == readOff);

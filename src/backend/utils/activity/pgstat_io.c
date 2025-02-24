@@ -83,14 +83,15 @@ pgstat_count_io_op(IOObject io_object, IOContext io_context, IOOp io_op,
 }
 
 /*
- * Initialize the internal timing for an IO operation.
+ * Initialize the internal timing for an IO operation, depending on an
+ * IO timing GUC.
  */
 instr_time
-pgstat_prepare_io_time(void)
+pgstat_prepare_io_time(bool track_io_guc)
 {
 	instr_time	io_start;
 
-	if (track_io_timing)
+	if (track_io_guc)
 		INSTR_TIME_SET_CURRENT(io_start);
 	else
 	{
@@ -117,9 +118,10 @@ pgstat_prepare_io_time(void)
  */
 void
 pgstat_count_io_op_time(IOObject io_object, IOContext io_context, IOOp io_op,
-						instr_time start_time, uint32 cnt, uint64 bytes)
+						instr_time start_time, uint32 cnt, uint64 bytes,
+						bool track_timing)
 {
-	if (track_io_timing)
+	if (track_timing)
 	{
 		instr_time	io_time;
 

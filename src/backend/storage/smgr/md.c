@@ -1381,7 +1381,7 @@ register_dirty_segment(SMgrRelation reln, ForkNumber forknum, MdfdVec *seg)
 		ereport(DEBUG1,
 				(errmsg_internal("could not forward fsync request because request queue is full")));
 
-		io_start = pgstat_prepare_io_time();
+		io_start = pgstat_prepare_io_time(track_io_timing);
 
 		if (FileSync(seg->mdfd_vfd, WAIT_EVENT_DATA_FILE_SYNC) < 0)
 			ereport(data_sync_elevel(ERROR),
@@ -1401,7 +1401,7 @@ register_dirty_segment(SMgrRelation reln, ForkNumber forknum, MdfdVec *seg)
 		 * backend fsyncs.
 		 */
 		pgstat_count_io_op_time(IOOBJECT_RELATION, IOCONTEXT_NORMAL,
-								IOOP_FSYNC, io_start, 1, 0);
+								IOOP_FSYNC, io_start, 1, 0, track_io_timing);
 	}
 }
 
@@ -1786,7 +1786,7 @@ mdsyncfiletag(const FileTag *ftag, char *path)
 		need_to_close = true;
 	}
 
-	io_start = pgstat_prepare_io_time();
+	io_start = pgstat_prepare_io_time(track_io_timing);
 
 	/* Sync the file. */
 	result = FileSync(file, WAIT_EVENT_DATA_FILE_SYNC);
@@ -1796,7 +1796,7 @@ mdsyncfiletag(const FileTag *ftag, char *path)
 		FileClose(file);
 
 	pgstat_count_io_op_time(IOOBJECT_RELATION, IOCONTEXT_NORMAL,
-							IOOP_FSYNC, io_start, 1, 0);
+							IOOP_FSYNC, io_start, 1, 0, track_io_timing);
 
 	errno = save_errno;
 	return result;

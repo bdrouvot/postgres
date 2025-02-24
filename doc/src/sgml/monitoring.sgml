@@ -184,6 +184,11 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
   </para>
 
   <para>
+   The parameter <xref linkend="guc-track-wal-io-timing"/> enables monitoring
+   of WAL write and fsync times.
+  </para>
+
+  <para>
    Normally these parameters are set in <filename>postgresql.conf</filename> so
    that they apply to all server processes, but it is possible to turn
    them on or off in individual sessions using the <xref

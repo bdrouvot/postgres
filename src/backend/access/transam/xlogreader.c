@@ -1557,7 +1557,7 @@ WALRead(XLogReaderState *state,
 
 #ifndef FRONTEND
 		/* Measure I/O timing when reading segment */
-		io_start = pgstat_prepare_io_time();
+		io_start = pgstat_prepare_io_time(track_io_timing);
 
 		pgstat_report_wait_start(WAIT_EVENT_WAL_READ);
 #endif
@@ -1570,7 +1570,7 @@ WALRead(XLogReaderState *state,
 		pgstat_report_wait_end();
 
 		pgstat_count_io_op_time(IOOBJECT_WAL, IOCONTEXT_NORMAL, IOOP_READ,
-								io_start, 1, readbytes);
+								io_start, 1, readbytes, track_io_timing);
 #endif
 
 		if (readbytes <= 0)
