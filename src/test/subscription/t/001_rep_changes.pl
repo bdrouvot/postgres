@@ -184,6 +184,19 @@ $result =
   $node_subscriber->safe_psql('postgres', "SELECT count(*) FROM tab_no_col");
 is($result, qq(2), 'check replicated changes for table having no columns');
 
+# Wait for the walsender to update its IO statistics.
+# Has to be done far enough from the CREATE SUBSCRIPTION to minimize the risk
+# of polling for too long.
+$node_publisher->poll_query_until(
+	'postgres',
+	qq[SELECT sum(reads) > 0
+       FROM pg_catalog.pg_stat_io
+       WHERE backend_type = 'walsender'
+       AND object = 'wal']
+  )
+  or die
+  "Timed out while waiting for the walsender to update its IO statistics";
+
 # insert some duplicate rows
 $node_publisher->safe_psql('postgres',
 	"INSERT INTO tab_full SELECT generate_series(1,10)");

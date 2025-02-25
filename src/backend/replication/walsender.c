@@ -91,9 +91,13 @@
 #include "utils/guc.h"
 #include "utils/memutils.h"
 #include "utils/pg_lsn.h"
+#include "utils/pgstat_internal.h"
 #include "utils/ps_status.h"
 #include "utils/timeout.h"
 #include "utils/timestamp.h"
+
+/* Minimum interval walsender IO stats flushes */
+#define MIN_IOSTATS_FLUSH_INTERVAL         1000
 
 /*
  * Maximum data payload in a WAL data message.  Must be >= XLOG_BLCKSZ.
@@ -2742,6 +2746,8 @@ WalSndCheckTimeOut(void)
 static void
 WalSndLoop(WalSndSendDataCallback send_data)
 {
+	TimestampTz last_flush = 0;
+
 	/*
 	 * Initialize the last reply timestamp. That enables timeout processing
 	 * from hereon.
@@ -2836,30 +2842,51 @@ WalSndLoop(WalSndSendDataCallback send_data)
 		 * WalSndWaitForWal() handle any other blocking; idle receivers need
 		 * its additional actions.  For physical replication, also block if
 		 * caught up; its send_data does not block.
+		 *
+		 * When the WAL sender is caught up or has pending data to send, we
+		 * also periodically report I/O statistics. It's done periodically to
+		 * not overload the WAL sender.
 		 */
-		if ((WalSndCaughtUp && send_data != XLogSendLogical &&
-			 !streamingDoneSending) ||
-			pq_is_send_pending())
+		if ((WalSndCaughtUp && !streamingDoneSending) || pq_is_send_pending())
 		{
-			long		sleeptime;
-			int			wakeEvents;
+			TimestampTz now;
 
-			if (!streamingDoneReceiving)
-				wakeEvents = WL_SOCKET_READABLE;
-			else
-				wakeEvents = 0;
+			now = GetCurrentTimestamp();
 
-			/*
-			 * Use fresh timestamp, not last_processing, to reduce the chance
-			 * of reaching wal_sender_timeout before sending a keepalive.
-			 */
-			sleeptime = WalSndComputeSleeptime(GetCurrentTimestamp());
+			if (TimestampDifferenceExceeds(last_flush, now, MIN_IOSTATS_FLUSH_INTERVAL))
+			{
+				/*
+				 * Report IO statistics
+				 */
+				pgstat_flush_io(false);
+				(void) pgstat_flush_backend(false, PGSTAT_BACKEND_FLUSH_IO);
+				last_flush = now;
+			}
 
-			if (pq_is_send_pending())
-				wakeEvents |= WL_SOCKET_WRITEABLE;
+			if (send_data != XLogSendLogical || pq_is_send_pending())
+			{
+				long		sleeptime;
+				int			wakeEvents;
 
-			/* Sleep until something happens or we time out */
-			WalSndWait(wakeEvents, sleeptime, WAIT_EVENT_WAL_SENDER_MAIN);
+				if (!streamingDoneReceiving)
+					wakeEvents = WL_SOCKET_READABLE;
+				else
+					wakeEvents = 0;
+
+				/*
+				 * Use fresh timestamp, not last_processing, to reduce the
+				 * chance of reaching wal_sender_timeout before sending a
+				 * keepalive.
+				 */
+				sleeptime = WalSndComputeSleeptime(now);
+
+				if (pq_is_send_pending())
+					wakeEvents |= WL_SOCKET_WRITEABLE;
+
+				/* Sleep until something happens or we time out */
+				WalSndWait(wakeEvents, sleeptime, WAIT_EVENT_WAL_SENDER_MAIN);
+			}
+
 		}
 	}
 }
