@@ -17,6 +17,7 @@
 #include "postgres.h"
 #include "port/pg_numa.h"
 #include "storage/pg_shmem.h"
+#include <unistd.h>
 #ifdef WIN32
 #include <windows.h>
 #endif
@@ -31,7 +32,6 @@
 
 #include <numa.h>
 #include <numaif.h>
-#include <unistd.h>
 
 /* libnuma requires initialization as per numa(3) on Linux */
 int
@@ -141,7 +141,7 @@ pg_numa_get_pagesize(void)
 	SYSTEM_INFO sysinfo;
 	GetSystemInfo(&sysinfo);
 	os_page_size = sysinfo.dwPageSize;
-#endif;
+#endif
 	if (huge_pages_status == HUGE_PAGES_ON)
 		 GetHugePageSize(&os_page_size, NULL);
 	return os_page_size;
