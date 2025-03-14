@@ -67,56 +67,59 @@ PG_FUNCTION_INFO_V1(pg_buffercache_summary);
 PG_FUNCTION_INFO_V1(pg_buffercache_usage_counts);
 PG_FUNCTION_INFO_V1(pg_buffercache_evict);
 
-/*
- * To get reliable results we need to "touch pages" once, see
- * comments nearby pg_buffercache_numa_prepare_ptrs().
- */
-static bool firstUseInBackend = true;
+/* Only need to touch memory once per backend process lifetime */
+static bool firstNumaTouch = true;
 
 /*
- * Helper routine to map Buffers into addresses that can be
- * later consumed by pg_numa_query_pages()
+ * Helper routine to map Buffers into addresses that is used by
+ * pg_numa_query_pages().
  *
- * Many buffers can point to the same page (in case of
- * BLCKSZ < 4kB), but we want to also query just first
- * address.
+ * When database block size (BLCKSZ) is smaller than the OS page size (4kB),
+ * multiple database buffers will map to the same OS memory page. In this case,
+ * we only need to query the NUMA zone for the first memory address of each
+ * unique OS page rather than for every buffer.
  *
- * In order to get reliable results we also need to touch
- * memory pages, so that inquiry about NUMA zone doesn't
- * return -2.
+ * In order to get reliable results we also need to touch memory pages, so that
+ * inquiry about NUMA zone doesn't return -2 (which indicates unmapped/unallocated
+ * pages)
  */
 static inline void
-pg_buffercache_numa_prepare_ptrs(int buffer_id, float pages_per_blk, Size os_page_size,
+pg_buffercache_numa_prepare_ptrs(int buffer_id, float pages_per_blk,
+								 Size os_page_size,
 								 void **os_page_ptrs)
 {
-	size_t blk2page = (size_t)(buffer_id * pages_per_blk);
+	size_t		blk2page = (size_t) (buffer_id * pages_per_blk);
 
 	for (size_t j = 0; j < pages_per_blk; j++)
 	{
-		size_t blk2pageoff = blk2page + j;
+		size_t		blk2pageoff = blk2page + j;
+
 		if (os_page_ptrs[blk2pageoff] == 0)
 		{
 			volatile uint64 touch pg_attribute_unused();
 
-			/* NBuffers count start really from 1 */
-			os_page_ptrs[blk2pageoff] = (char *) BufferGetBlock(buffer_id + 1) + (os_page_size * j);
+			/* NBuffers starts from 1 */
+			os_page_ptrs[blk2pageoff] = (char *) BufferGetBlock(buffer_id + 1) +
+				(os_page_size * j);
 
-			/* We just need to do it only once in backend */
-			if (firstUseInBackend)
+			/* Only need to touch memory once per backend process lifetime */
+			if (firstNumaTouch)
 				pg_numa_touch_mem_if_required(touch, os_page_ptrs[blk2pageoff]);
 
-			CHECK_FOR_INTERRUPTS();
 		}
+
+		CHECK_FOR_INTERRUPTS();
 	}
 }
 
 /*
- * Helper routine for pg_buffercache_(numa_)pages.
+ * Helper routine for pg_buffercache_pages() and pg_buffercache_numa_pages().
  *
- * We need  fcinfo here and we pass it here with PG_FUNCTION_ARGS
+ * This is almost identical to pg_buffercache_numa_pages(), but this one performs
+ * memory mapping inquiries to display NUMA zone information for each buffer.
  */
 static BufferCachePagesContext *
-pg_buffercache_init_entries(FuncCallContext *funcctx, PG_FUNCTION_ARGS)
+pg_buffercache_init_entries(FuncCallContext *funcctx, FunctionCallInfo fcinfo)
 {
 	BufferCachePagesContext *fctx;	/* User function context. */
 	MemoryContext oldcontext;
@@ -191,64 +194,68 @@ pg_buffercache_init_entries(FuncCallContext *funcctx, PG_FUNCTION_ARGS)
 }
 
 /*
- * Helper routine for pg_buffercache_(numa_)pages
+ * Helper routine for pg_buffercache_pages() and pg_buffercache_numa_pages().
+ *
+ * Build buffer cache information for a single buffer.
  */
 static void
-pg_buffercache_build_tuple(int i, BufferCachePagesContext *fctx)
+pg_buffercache_build_tuple(int record_id, BufferCachePagesContext *fctx)
 {
 	BufferDesc *bufHdr;
 	uint32		buf_state;
 
-	bufHdr = GetBufferDescriptor(i);
+	bufHdr = GetBufferDescriptor(record_id);
 	/* Lock each buffer header before inspecting. */
 	buf_state = LockBufHdr(bufHdr);
 
-	fctx->record[i].bufferid = BufferDescriptorGetBuffer(bufHdr);
-	fctx->record[i].relfilenumber = BufTagGetRelNumber(&bufHdr->tag);
-	fctx->record[i].reltablespace = bufHdr->tag.spcOid;
-	fctx->record[i].reldatabase = bufHdr->tag.dbOid;
-	fctx->record[i].forknum = BufTagGetForkNum(&bufHdr->tag);
-	fctx->record[i].blocknum = bufHdr->tag.blockNum;
-	fctx->record[i].usagecount = BUF_STATE_GET_USAGECOUNT(buf_state);
-	fctx->record[i].pinning_backends = BUF_STATE_GET_REFCOUNT(buf_state);
+	fctx->record[record_id].bufferid = BufferDescriptorGetBuffer(bufHdr);
+	fctx->record[record_id].relfilenumber = BufTagGetRelNumber(&bufHdr->tag);
+	fctx->record[record_id].reltablespace = bufHdr->tag.spcOid;
+	fctx->record[record_id].reldatabase = bufHdr->tag.dbOid;
+	fctx->record[record_id].forknum = BufTagGetForkNum(&bufHdr->tag);
+	fctx->record[record_id].blocknum = bufHdr->tag.blockNum;
+	fctx->record[record_id].usagecount = BUF_STATE_GET_USAGECOUNT(buf_state);
+	fctx->record[record_id].pinning_backends = BUF_STATE_GET_REFCOUNT(buf_state);
 
 	if (buf_state & BM_DIRTY)
-		fctx->record[i].isdirty = true;
+		fctx->record[record_id].isdirty = true;
 	else
-		fctx->record[i].isdirty = false;
+		fctx->record[record_id].isdirty = false;
 
 	/*
 	 * Note if the buffer is valid, and has storage created
 	 */
 	if ((buf_state & BM_VALID) && (buf_state & BM_TAG_VALID))
-		fctx->record[i].isvalid = true;
+		fctx->record[record_id].isvalid = true;
 	else
-		fctx->record[i].isvalid = false;
+		fctx->record[record_id].isvalid = false;
 
-	fctx->record[i].numa_zone_id = -1;
+	fctx->record[record_id].numa_zone_id = -1;
 
 	UnlockBufHdr(bufHdr, buf_state);
 }
 
 /*
- * Helper routine for pg_buffercache_(numa_)pages
+ * Helper routine for pg_buffercache_pages() and pg_buffercache_numa_pages().
+ *
+ * Format and return a tuple for a single buffer cache entry.
  */
 static Datum
-get_buffercache_tuple(int i, BufferCachePagesContext *fctx)
+get_buffercache_tuple(int record_id, BufferCachePagesContext *fctx)
 {
 	Datum		values[NUM_BUFFERCACHE_PAGES_ELEM];
 	bool		nulls[NUM_BUFFERCACHE_PAGES_ELEM];
 	HeapTuple	tuple;
 
-	values[0] = Int32GetDatum(fctx->record[i].bufferid);
+	values[0] = Int32GetDatum(fctx->record[record_id].bufferid);
 	nulls[0] = false;
 
 	/*
 	 * Set all fields except the bufferid to null if the buffer is unused or
 	 * not valid.
 	 */
-	if (fctx->record[i].blocknum == InvalidBlockNumber ||
-		fctx->record[i].isvalid == false)
+	if (fctx->record[record_id].blocknum == InvalidBlockNumber ||
+		fctx->record[record_id].isvalid == false)
 	{
 		nulls[1] = true;
 		nulls[2] = true;
@@ -266,27 +273,27 @@ get_buffercache_tuple(int i, BufferCachePagesContext *fctx)
 	}
 	else
 	{
-		values[1] = ObjectIdGetDatum(fctx->record[i].relfilenumber);
+		values[1] = ObjectIdGetDatum(fctx->record[record_id].relfilenumber);
 		nulls[1] = false;
-		values[2] = ObjectIdGetDatum(fctx->record[i].reltablespace);
+		values[2] = ObjectIdGetDatum(fctx->record[record_id].reltablespace);
 		nulls[2] = false;
-		values[3] = ObjectIdGetDatum(fctx->record[i].reldatabase);
+		values[3] = ObjectIdGetDatum(fctx->record[record_id].reldatabase);
 		nulls[3] = false;
-		values[4] = ObjectIdGetDatum(fctx->record[i].forknum);
+		values[4] = ObjectIdGetDatum(fctx->record[record_id].forknum);
 		nulls[4] = false;
-		values[5] = Int64GetDatum((int64) fctx->record[i].blocknum);
+		values[5] = Int64GetDatum((int64) fctx->record[record_id].blocknum);
 		nulls[5] = false;
-		values[6] = BoolGetDatum(fctx->record[i].isdirty);
+		values[6] = BoolGetDatum(fctx->record[record_id].isdirty);
 		nulls[6] = false;
-		values[7] = Int16GetDatum(fctx->record[i].usagecount);
+		values[7] = Int16GetDatum(fctx->record[record_id].usagecount);
 		nulls[7] = false;
 
 		/*
 		 * unused for v1.0 callers, but the array is always long enough
 		 */
-		values[8] = Int32GetDatum(fctx->record[i].pinning_backends);
+		values[8] = Int32GetDatum(fctx->record[record_id].pinning_backends);
 		nulls[8] = false;
-		values[9] = Int32GetDatum(fctx->record[i].numa_zone_id);
+		values[9] = Int32GetDatum(fctx->record[record_id].numa_zone_id);
 		nulls[9] = false;
 	}
 
@@ -295,10 +302,6 @@ get_buffercache_tuple(int i, BufferCachePagesContext *fctx)
 	return HeapTupleGetDatum(tuple);
 }
 
-/*
- * When updating this routine please sync it with below one:
- * pg_buffercache_numa_pages()
- */
 Datum
 pg_buffercache_pages(PG_FUNCTION_ARGS)
 {
@@ -359,39 +362,46 @@ pg_buffercache_numa_pages(PG_FUNCTION_ARGS)
 		Size		os_page_size = 0;
 		void	  **os_page_ptrs = NULL;
 		int		   *os_pages_status = NULL;
-		int			os_page_count = 0;
+		uint64		os_page_count = 0;
 		float		pages_per_blk = 0;
 
 		funcctx = SRF_FIRSTCALL_INIT();
+
 		if (pg_numa_init() == -1)
-			elog(ERROR, "libnuma initialization failed or NUMA is not supported on this platform, some NUMA data might be unavailable.");
+			elog(ERROR, "libnuma initialization failed or NUMA is not supported on this platform");
+
 		fctx = pg_buffercache_init_entries(funcctx, fcinfo);
 
 		/*
-			* This is for gathering some NUMA statistics. We might be using
-			* various DB block sizes (4kB, 8kB , .. 32kB) that end up being
-			* allocated in various different OS memory pages sizes, so first
-			* we need to understand the OS memory page size before calling
-			* move_pages()
-			*/
+		 * Different database block sizes (4kB, 8kB, ..., 32kB) can be used,
+		 * while the OS may have different memory page sizes.
+		 *
+		 * To correctly map between them, we need to: - Determine the OS
+		 * memory page size - Calculate how many OS pages are used by all
+		 * buffer blocks - Calculate how many OS pages are contained within
+		 * each database block
+		 *
+		 * This information is needed before calling move_pages() for NUMA
+		 * zone inquiry.
+		 */
 		os_page_size = pg_numa_get_pagesize();
 		os_page_count = ((uint64) NBuffers * BLCKSZ) / os_page_size;
 		pages_per_blk = (float) BLCKSZ / os_page_size;
 
-		elog(DEBUG1, "NUMA: os_page_count=%d os_page_size=%zu pages_per_blk=%f",
-				os_page_count, os_page_size, pages_per_blk);
+		elog(DEBUG1, "NUMA: os_page_count=%lu os_page_size=%zu pages_per_blk=%.2f",
+			 (unsigned long) os_page_count, os_page_size, pages_per_blk);
 
 		os_page_ptrs = palloc(sizeof(void *) * os_page_count);
-		os_pages_status = palloc(sizeof(int) * os_page_count);
+		os_pages_status = palloc(sizeof(uint64) * os_page_count);
 		memset(os_page_ptrs, 0, sizeof(void *) * os_page_count);
 
 		/*
-			* If we ever get 0xff back from kernel inquiry, then we probably
-			* have bug in our buffers to OS page mapping code here
-			*/
+		 * If we ever get 0xff back from kernel inquiry, then we probably have
+		 * bug in our buffers to OS page mapping code here
+		 */
 		memset(os_pages_status, 0xff, sizeof(int) * os_page_count);
 
-		if (firstUseInBackend)
+		if (firstNumaTouch)
 			elog(DEBUG1, "NUMA: page-faulting the buffercache for proper NUMA readouts");
 
 		/*
@@ -405,7 +415,8 @@ pg_buffercache_numa_pages(PG_FUNCTION_ARGS)
 		for (i = 0; i < NBuffers; i++)
 		{
 			pg_buffercache_build_tuple(i, fctx);
-			pg_buffercache_numa_prepare_ptrs(i, pages_per_blk, os_page_size, os_page_ptrs);
+			pg_buffercache_numa_prepare_ptrs(i, pages_per_blk, os_page_size,
+											 os_page_ptrs);
 		}
 
 		if (pg_numa_query_pages(0, os_page_count, os_page_ptrs, os_pages_status) == -1)
@@ -416,10 +427,15 @@ pg_buffercache_numa_pages(PG_FUNCTION_ARGS)
 			int			blk2page = (int) i * pages_per_blk;
 
 			/*
-				* Technically we can get errors too here and pass that to
-				* user. Also we could somehow report single DB block spanning
-				* more than one NUMA zone, but it should be rare.
-				*/
+			 * Set the NUMA zone ID for this buffer based on the first OS page
+			 * it maps to.
+			 *
+			 * Note: We could check for errors in os_pages_status and report
+			 * them. Also, a single DB block might span multiple NUMA zones if
+			 * it crosses OS pages on zone boundaries, but we only record the
+			 * zone of the first page. This is a simplification but should be
+			 * sufficient for most analyses.
+			 */
 			fctx->record[i].numa_zone_id = os_pages_status[blk2page];
 		}
 	}
@@ -439,7 +455,7 @@ pg_buffercache_numa_pages(PG_FUNCTION_ARGS)
 	}
 	else
 	{
-		firstUseInBackend = false;
+		firstNumaTouch = false;
 		SRF_RETURN_DONE(funcctx);
 	}
 }
