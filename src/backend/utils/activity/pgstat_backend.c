@@ -133,16 +133,16 @@ pgstat_fetch_stat_backend_by_pid(int pid, BackendType *bktype)
 	if (!pgstat_tracks_backend_bktype(beentry->st_backendType))
 		return NULL;
 
-	backend_stats = pgstat_fetch_stat_backend(procNumber);
-	if (!backend_stats)
-		return NULL;
-
 	/* if PID does not match, leave */
 	if (beentry->st_procpid != pid)
 		return NULL;
 
 	if (bktype)
 		*bktype = beentry->st_backendType;
+
+	backend_stats = pgstat_fetch_stat_backend(procNumber);
+	if (!backend_stats)
+		return NULL;
 
 	return backend_stats;
 }
