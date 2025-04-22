@@ -32,8 +32,6 @@ static const struct
 			waitEventData[] =
 {
 #include "wait_event_funcs_data.c"
-	/* end of list */
-	{NULL, NULL, NULL}
 };
 
 
@@ -54,7 +52,7 @@ pg_get_wait_events(PG_FUNCTION_ARGS)
 	InitMaterializedSRF(fcinfo, 0);
 
 	/* Iterate over the list of wait events */
-	for (int idx = 0; waitEventData[idx].type != NULL; idx++)
+	for (int idx = 0; idx < NB_WAIT_EVENTS; idx++)
 	{
 		Datum		values[PG_GET_WAIT_EVENTS_COLS] = {0};
 		bool		nulls[PG_GET_WAIT_EVENTS_COLS] = {0};

@@ -21,6 +21,7 @@ use Getopt::Long;
 my $output_path = '.';
 my $gen_docs = 0;
 my $gen_code = 0;
+my $nb_wait_events = 0;
 
 my $continue = "\n";
 my %hashwe;
@@ -266,9 +267,12 @@ if ($gen_code)
 			# wait event info, as of (type, name, description).
 			printf $wc "\t{\"%s\", \"%s\", \"%s\"},\n", $last, $wev->[1],
 			  $new_desc;
+
+			$nb_wait_events++;
 		}
 	}
 
+	printf $h "#define NB_WAIT_EVENTS $nb_wait_events\n\n";
 	printf $h "#endif                          /* WAIT_EVENT_TYPES_H */\n";
 	close $h;
 	close $c;
