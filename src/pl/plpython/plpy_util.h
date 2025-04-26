@@ -6,7 +6,7 @@
 #ifndef PLPY_UTIL_H
 #define PLPY_UTIL_H
 
-#include "plpython.h"
+#include "plpython_base.h"
 
 extern PGDLLEXPORT PyObject *PLyUnicode_Bytes(PyObject *unicode);
 extern PGDLLEXPORT char *PLyUnicode_AsString(PyObject *unicode);
