@@ -7,7 +7,9 @@
  * the PG_LWLOCK macro, which is not defined in this file; it can be
  * defined by the caller for special purposes.
  *
- * Also, generate-lwlocknames.pl processes this file to create lwlocknames.h.
+ * Also, generate-lwlocknames.pl processes this file to create lwlocknames.h
+ * and generate-wait_event_types.pl processes this file to ensure that
+ * no predefined LWLock is missed in wait_event_names.txt.
  *
  * Portions Copyright (c) 1996-2025, PostgreSQL Global Development Group
  * Portions Copyright (c) 1994, Regents of the University of California

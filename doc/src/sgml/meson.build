@@ -48,7 +48,7 @@ doc_generated += custom_target('errcodes-table.sgml',
 
 doc_generated += custom_target('wait_event_types.sgml',
   input: files(
-    '../../../src/backend/utils/activity/wait_event_names.txt'),
+    '../../../src/backend/utils/activity/wait_event_names.txt','../../../src/include/storage/lwlock.h','../../../src/include/storage/lwlocklist.h'),
   output: 'wait_event_types.sgml',
   command: [perl,
     files('../../../src/backend/utils/activity/generate-wait_event_types.pl'),

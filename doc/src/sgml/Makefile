@@ -109,8 +109,8 @@ errcodes-table.sgml: $(top_srcdir)/src/backend/utils/errcodes.txt generate-errco
 keywords-table.sgml: $(top_srcdir)/src/include/parser/kwlist.h $(wildcard $(srcdir)/keywords/sql*.txt) generate-keywords-table.pl
 	$(PERL) $(srcdir)/generate-keywords-table.pl $(srcdir) > $@
 
-wait_event_types.sgml: $(top_srcdir)/src/backend/utils/activity/wait_event_names.txt $(top_srcdir)/src/backend/utils/activity/generate-wait_event_types.pl
-	$(PERL) $(top_srcdir)/src/backend/utils/activity/generate-wait_event_types.pl --docs $<
+wait_event_types.sgml: $(top_srcdir)/src/backend/utils/activity/wait_event_names.txt $(top_srcdir)/src/include/storage/lwlock.h $(top_srcdir)/src/include/storage/lwlocklist.h $(top_srcdir)/src/backend/utils/activity/generate-wait_event_types.pl
+	$(PERL) $(top_srcdir)/src/backend/utils/activity/generate-wait_event_types.pl --docs $(wordlist 1,3,$^)
 
 targets-meson.sgml: targets-meson.txt $(srcdir)/generate-targets-meson.pl
 	$(PERL) $(srcdir)/generate-targets-meson.pl $^ > $@

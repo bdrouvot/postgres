@@ -36,7 +36,106 @@ die "Needs to specify --docs or --code"
 die "Not possible to specify --docs and --code simultaneously"
   if ($gen_docs && $gen_code);
 
+# Check arguments based on mode
+if ($gen_docs)
+{
+	die "Usage: $0 --docs wait_event_names.txt lwlock.h lwlocklist.h\n"
+	  if (@ARGV != 3);
+}
+else
+{
+	die "Usage: $0 --code wait_event_names.txt\n"
+	  if (@ARGV != 1);
+}
+
 open my $wait_event_names, '<', $ARGV[0] or die;
+
+# LWLock count validation function to ensure that all the LWLocks are documented
+sub validate_lwlock_count
+{
+	my ($lwlock_h_file, $lwlocklist_h_file) = @_;
+
+	unless (-f $lwlock_h_file)
+	{
+		die "ERROR: Cannot find lwlock.h file: $lwlock_h_file\n";
+	}
+
+	unless (-f $lwlocklist_h_file)
+	{
+		die "ERROR: Cannot find lwlocklist.h file: $lwlocklist_h_file\n";
+	}
+
+	# Parse BuiltinTrancheIds enum from lwlock.h to count entries
+	open(my $h_fh, '<', $lwlock_h_file);
+
+	my $builtin_tranche_ids_count = 0;
+	my $in_builtin_tranche_ids = 0;
+
+	while (my $line = <$h_fh>)
+	{
+		chomp $line;
+
+		# Look for the start of BuiltinTrancheIds enum
+		if ($line =~ /typedef\s+enum\s+BuiltinTrancheIds/)
+		{
+			$in_builtin_tranche_ids = 1;
+			next;
+		}
+
+		if ($in_builtin_tranche_ids)
+		{
+			# Count LWTRANCHE_ entries (excluding LWTRANCHE_FIRST_USER_DEFINED)
+			if ($line =~ /^\s*LWTRANCHE_\w+/ && $line !~ /FIRST_USER_DEFINED/)
+			{
+				$builtin_tranche_ids_count++;
+			}
+
+			# End of enum
+			if ($line =~ /^\s*\}\s*BuiltinTrancheIds;/)
+			{
+				last;
+			}
+		}
+	}
+	close($h_fh);
+
+	# Parse lwlocklist.h to count PG_LWLOCK entries
+	open(my $list_fh, '<', $lwlocklist_h_file);
+
+	my $lwlocklist_count = 0;
+	while (my $line = <$list_fh>)
+	{
+		chomp $line;
+		# Count PG_LWLOCK entries
+		if ($line =~ /^\s*PG_LWLOCK\s*\(/)
+		{
+			$lwlocklist_count++;
+		}
+	}
+	close($list_fh);
+
+	# Total expected LWLock count is lwlocklist + builtin tranches
+	my $total_expected_count = $lwlocklist_count + $builtin_tranche_ids_count;
+
+	# Get LWLock events count from our parsed wait events
+	my $lwlock_wait_events_count = 0;
+	if (exists $hashwe{'WaitEventLWLock'})
+	{
+		$lwlock_wait_events_count = scalar(@{ $hashwe{'WaitEventLWLock'} });
+	}
+
+	# Count validation
+	if ($total_expected_count != $lwlock_wait_events_count)
+	{
+		die "ERROR: LWLock count mismatch!\n"
+		  . "  PG_LWLOCK entries in lwlocklist.h: $lwlocklist_count entries\n"
+		  . "  BuiltinTrancheIds in lwlock.h: $builtin_tranche_ids_count entries\n"
+		  . "  Total expected: $total_expected_count entries\n"
+		  . "  WaitEventLWLock in wait_event_names.txt: $lwlock_wait_events_count entries\n"
+		  . "\nThe counts do not match. Please ensure all LWLock entries\n"
+		  . "have corresponding entries in the LWLock section of wait_event_names.txt.\n";
+	}
+}
 
 my @abi_compatibility_lines;
 my @lines;
@@ -284,6 +383,9 @@ if ($gen_code)
 # Generate the .sgml file.
 elsif ($gen_docs)
 {
+	# Validate LWLock count when generating documentation
+	validate_lwlock_count($ARGV[1], $ARGV[2]);
+
 	# Include PID in suffix in case parallel make runs this multiple times.
 	my $stmp = "$output_path/wait_event_names.s.tmp$$";
 	open my $s, '>', $stmp or die "Could not open $stmp: $!";

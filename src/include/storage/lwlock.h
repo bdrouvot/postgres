@@ -7,6 +7,9 @@
  * Portions Copyright (c) 1996-2025, PostgreSQL Global Development Group
  * Portions Copyright (c) 1994, Regents of the University of California
  *
+ * generate-wait_event_types.pl processes this file to ensure that no
+ * BuiltinTrancheIds are missed in wait_event_names.txt.
+ *
  * src/include/storage/lwlock.h
  *
  *-------------------------------------------------------------------------
