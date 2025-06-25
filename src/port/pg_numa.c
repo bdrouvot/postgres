@@ -46,7 +46,30 @@ pg_numa_init(void)
 int
 pg_numa_query_pages(int pid, unsigned long count, void **pages, int *status)
 {
+/*
+ * Work around Linux kernel bug in 32-bit compat mode: do_pages_stat() has
+ * incorrect pointer arithmetic for more than DO_PAGES_STAT_CHUNK_NR pages.
+ */
+#if SIZEOF_SIZE_T == 4
+#define NUMA_QUERY_CHUNK_SIZE 16	/* has to be <= DO_PAGES_STAT_CHUNK_NR
+									 * (do_pages_stat()) */
+	for (size_t chunk_start = 0; chunk_start < count; chunk_start += NUMA_QUERY_CHUNK_SIZE)
+	{
+
+		int			result;
+		uint64		chunk_size = Min(NUMA_QUERY_CHUNK_SIZE, count - chunk_start);
+
+		result = numa_move_pages(pid, chunk_size, &pages[chunk_start], NULL,
+								 &status[chunk_start], 0);
+
+		if (result != 0)
+			return result;
+	}
+
+	return 0;
+#else
 	return numa_move_pages(pid, count, pages, NULL, status, 0);
+#endif
 }
 
 int
