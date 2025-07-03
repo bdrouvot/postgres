@@ -42,6 +42,7 @@
 #include "storage/latch.h"
 #include "storage/proc.h"
 #include "tcop/tcopprot.h"
+#include "utils/backend_status.h"
 #include "utils/injection_point.h"
 #include "utils/memdebug.h"
 #include "utils/ps_status.h"
@@ -560,7 +561,9 @@ IoWorkerMain(const void *startup_data, size_t startup_data_len)
 			 * pgaio_io_perform_synchronously() contains a critical section to
 			 * ensure we don't accidentally fail.
 			 */
+			pgstat_report_activity(STATE_RUNNING, NULL);
 			pgaio_io_perform_synchronously(ioh);
+			pgstat_report_activity(STATE_IDLE, NULL);
 
 			RESUME_INTERRUPTS();
 			errcallback.arg = NULL;
