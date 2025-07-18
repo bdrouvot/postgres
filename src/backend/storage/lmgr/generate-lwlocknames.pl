@@ -14,7 +14,8 @@ my $lastlockidx = -1;
 GetOptions('outdir:s' => \$output_path);
 
 open my $lwlocklist, '<', $ARGV[0] or die;
-open my $wait_event_names, '<', $ARGV[1] or die;
+open my $builtin_lwtranche_list, '<', $ARGV[1] or die;
+open my $wait_event_names, '<', $ARGV[2] or die;
 
 # Include PID in suffix in case parallel make runs this multiple times.
 my $htmp = "$output_path/lwlocknames.h.tmp$$";
@@ -27,18 +28,25 @@ print $h "/* there is deliberately not an #ifndef LWLOCKNAMES_H here */\n\n";
 
 
 #
-# First, record the predefined LWLocks listed in wait_event_names.txt.  We'll
-# cross-check those with the ones in lwlocklist.h.
+# First, record the predefined LWLocks and built-in tranches listed in
+# wait_event_names.txt. We'll cross-check those with the ones in lwlocklist.h
+# and in lwlocktranchelist.h.
 #
+my @wait_event_builtin_tranches;
 my @wait_event_lwlocks;
 my $record_lwlocks = 0;
+my $in_builtin_tranches = 0;
 
 while (<$wait_event_names>)
 {
 	chomp;
 
-	# Check for end marker.
-	last if /^# END OF PREDEFINED LWLOCKS/;
+	# Check for predefined end marker.
+	if (/^# END OF PREDEFINED LWLOCKS/)
+	{
+		$in_builtin_tranches = 1;
+		next;
+	}
 
 	# Skip comments and empty lines.
 	next if /^#/;
@@ -54,9 +62,20 @@ while (<$wait_event_names>)
 	# Go to the next line if we are not yet recording LWLocks.
 	next if not $record_lwlocks;
 
+	# Stop recording if we reach another section.
+	last if /^Section:/;
+
 	# Record the LWLock.
 	(my $waiteventname, my $waitevendocsentence) = split(/\t/, $_);
-	push(@wait_event_lwlocks, $waiteventname);
+
+	if ($in_builtin_tranches)
+	{
+		push(@wait_event_builtin_tranches, $waiteventname);
+	}
+	else
+	{
+		push(@wait_event_lwlocks, $waiteventname);
+	}
 }
 
 my $in_comment = 0;
@@ -113,6 +132,52 @@ die
   "$wait_event_lwlocks[$i] defined in wait_event_names.txt but missing from "
   . "lwlocklist.h"
   if $i < scalar @wait_event_lwlocks;
+
+$in_comment = 0;
+$i = 0;
+
+# Cross-check the built-in tranches in lwlocktranchelist.h with
+# wait_event_names.txt.
+while (<$builtin_lwtranche_list>)
+{
+	chomp;
+
+	# Skip single-line C comments and empty lines
+	next if m{^\s*/\*.*\*/$};
+	next if /^\s*$/;
+
+	# skip multiline C comments
+	if ($in_comment == 1)
+	{
+		$in_comment = 0 if m{\*/};
+		next;
+	}
+	elsif (m{^\s*/\*})
+	{
+		$in_comment = 1;
+		next;
+	}
+
+	die "unable to parse lwlocktranchelist.h line \"$_\""
+	  unless /^PG_BUILTIN_LWTRANCHE\((\w+),\s*"([^"]+)"\)$/;
+
+	my ($tranche_id, $tranche_name) = ($1, $2);
+
+	die "$tranche_name defined in lwlocktranchelist.h.h but missing from "
+	  . "wait_event_names.txt"
+	  if $i >= scalar @wait_event_builtin_tranches;
+	die "lists of built-in tranches do not match (first mismatch at "
+	  . "$wait_event_builtin_tranches[$i] in wait_event_names.txt and $tranche_name in "
+	  . "lwlocktranchelist.h)"
+	  if $wait_event_builtin_tranches[$i] ne $tranche_name;
+
+	$i++;
+}
+
+die
+  "$wait_event_builtin_tranches[$i] defined in wait_event_names.txt but missing from "
+  . "lwlocktranchelist.h"
+  if $i < scalar @wait_event_builtin_tranches;
 
 print $h "\n";
 printf $h "#define NUM_INDIVIDUAL_LWLOCKS		%s\n", $lastlockidx + 1;

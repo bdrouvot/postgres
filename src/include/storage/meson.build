@@ -3,6 +3,7 @@
 lwlocknames_h = custom_target('lwlocknames_h',
   input: files(
     '../../include/storage/lwlocklist.h',
+    '../../include/storage/lwlocktranchelist.h',
     '../../backend/utils/activity/wait_event_names.txt'),
   output: ['lwlocknames.h'],
   command: [
