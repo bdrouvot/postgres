@@ -1,0 +1,72 @@
+/*-------------------------------------------------------------------------
+ *
+ * lwlocktranchelist.h
+ *
+ * The predefined built-in LWLock tranche list is kept in its own source
+ * file for use by automatic tools. The exact representation of a tranche
+ * is determined by the PG_BUILTIN_LWTRANCHE macro, which is not defined in
+ * this file; it can be defined by the caller for special purposes.
+ *
+ * Also, generate-lwlocknames.pl processes this file for validation against
+ * wait_event_names.txt.
+ *
+ * Portions Copyright (c) 1996-2025, PostgreSQL Global Development Group
+ * Portions Copyright (c) 1994, Regents of the University of California
+ *
+ * IDENTIFICATION
+ *    src/include/storage/lwlocktranchelist.h
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/*
+ * Predefined tranches for built-in groups of locks.
+ *
+ * If you add a tranche, do not forget to update the section WaitEventLWLock of
+ * wait_event_names.txt.
+ *
+ * Note that the tranche names here should match exactly what appears
+ * in wait_event_names.txt.
+ */
+
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_XACT_BUFFER, "XactBuffer")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_COMMITTS_BUFFER, "CommitTsBuffer")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_SUBTRANS_BUFFER, "SubtransBuffer")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_MULTIXACTOFFSET_BUFFER, "MultiXactOffsetBuffer")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_MULTIXACTMEMBER_BUFFER, "MultiXactMemberBuffer")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_NOTIFY_BUFFER, "NotifyBuffer")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_SERIAL_BUFFER, "SerialBuffer")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_WAL_INSERT, "WALInsert")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_BUFFER_CONTENT, "BufferContent")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_REPLICATION_ORIGIN_STATE, "ReplicationOriginState")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_REPLICATION_SLOT_IO, "ReplicationSlotIO")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_LOCK_FASTPATH, "LockFastPath")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_BUFFER_MAPPING, "BufferMapping")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_LOCK_MANAGER, "LockManager")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_PREDICATE_LOCK_MANAGER, "PredicateLockManager")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_PARALLEL_HASH_JOIN, "ParallelHashJoin")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_PARALLEL_BTREE_SCAN, "ParallelBtreeScan")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_PARALLEL_QUERY_DSA, "ParallelQueryDSA")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_PER_SESSION_DSA, "PerSessionDSA")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_PER_SESSION_RECORD_TYPE, "PerSessionRecordType")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_PER_SESSION_RECORD_TYPMOD, "PerSessionRecordTypmod")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_SHARED_TUPLESTORE, "SharedTupleStore")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_SHARED_TIDBITMAP, "SharedTidBitmap")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_PARALLEL_APPEND, "ParallelAppend")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_PER_XACT_PREDICATE_LIST, "PerXactPredicateList")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_PGSTATS_DSA, "PgStatsDSA")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_PGSTATS_HASH, "PgStatsHash")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_PGSTATS_DATA, "PgStatsData")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_LAUNCHER_DSA, "LogicalRepLauncherDSA")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_LAUNCHER_HASH, "LogicalRepLauncherHash")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_DSM_REGISTRY_DSA, "DSMRegistryDSA")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_DSM_REGISTRY_HASH, "DSMRegistryHash")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_COMMITTS_SLRU, "CommitTsSLRU")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_MULTIXACTOFFSET_SLRU, "MultiXactOffsetSLRU")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_MULTIXACTMEMBER_SLRU, "MultiXactMemberSLRU")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_NOTIFY_SLRU, "NotifySLRU")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_SERIAL_SLRU, "SerialSLRU")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_SUBTRANS_SLRU, "SubtransSLRU")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_XACT_SLRU, "XactSLRU")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_PARALLEL_VACUUM_DSA, "ParallelVacuumDSA")
+PG_BUILTIN_LWTRANCHE(LWTRANCHE_AIO_URING_COMPLETION, "AioUringCompletion")
