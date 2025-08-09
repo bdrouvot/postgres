@@ -38,6 +38,9 @@ SELECT t.seq_scan, t.seq_tup_read, t.idx_scan, t.idx_tup_fetch,
  WHERE t.relname='tenk2' AND b.relname='tenk2';
 COMMIT;
 
+SELECT seq_scan AS seq_scan_before
+  FROM pg_stat_backend_relation WHERE pid = pg_backend_pid() \gset
+
 -- test effects of TRUNCATE on n_live_tup/n_dead_tup counters
 CREATE TABLE trunc_stats_test(id serial);
 CREATE TABLE trunc_stats_test1(id serial, stuff text);
@@ -121,6 +124,11 @@ SELECT st.seq_scan >= pr.seq_scan + 1,
        st.idx_tup_fetch >= pr.idx_tup_fetch + 1
   FROM pg_stat_user_tables AS st, pg_class AS cl, prevstats AS pr
  WHERE st.relname='tenk2' AND cl.relname='tenk2';
+
+SELECT seq_scan AS seq_scan_after
+  FROM pg_stat_backend_relation WHERE pid = pg_backend_pid() \gset
+
+SELECT :seq_scan_after > :seq_scan_before;
 
 SELECT st.heap_blks_read + st.heap_blks_hit >= pr.heap_blks + cl.relpages,
        st.idx_blks_read + st.idx_blks_hit >= pr.idx_blks + 1
