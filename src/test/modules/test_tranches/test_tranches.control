@@ -1,0 +1,6 @@
+# test_tranches.control
+
+comment = 'Test LWLock tranch names tracking'
+default_version = '1.0'
+relocatable = false
+module_pathname = '$libdir/test_tranches'
