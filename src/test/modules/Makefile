@@ -44,7 +44,8 @@ SUBDIRS = \
 		  test_tidstore \
 		  unsafe_tests \
 		  worker_spi \
-		  xid_wraparound
+		  xid_wraparound \
+		  test_tranches
 
 
 ifeq ($(enable_injection_points),yes)
