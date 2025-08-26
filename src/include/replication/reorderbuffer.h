@@ -690,6 +690,9 @@ struct ReorderBuffer
 	int64		streamCount;	/* streaming invocation counter */
 	int64		streamBytes;	/* amount of data decoded */
 
+	/* Number of times logical_decoding_work_mem has been reached */
+	int64		memExceededCount;
+
 	/*
 	 * Statistics about all the transactions sent to the decoding output
 	 * plugin

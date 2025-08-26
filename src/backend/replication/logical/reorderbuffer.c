@@ -390,6 +390,7 @@ ReorderBufferAllocate(void)
 	buffer->streamTxns = 0;
 	buffer->streamCount = 0;
 	buffer->streamBytes = 0;
+	buffer->memExceededCount = 0;
 	buffer->totalTxns = 0;
 	buffer->totalBytes = 0;
 
@@ -3898,13 +3899,17 @@ static void
 ReorderBufferCheckMemoryLimit(ReorderBuffer *rb)
 {
 	ReorderBufferTXN *txn;
+	bool		memory_limit_reached = (rb->size >= logical_decoding_work_mem * (Size) 1024);
+
+	if (memory_limit_reached)
+		rb->memExceededCount += 1;
 
 	/*
 	 * Bail out if debug_logical_replication_streaming is buffered and we
 	 * haven't exceeded the memory limit.
 	 */
 	if (debug_logical_replication_streaming == DEBUG_LOGICAL_REP_STREAMING_BUFFERED &&
-		rb->size < logical_decoding_work_mem * (Size) 1024)
+		!memory_limit_reached)
 		return;
 
 	/*
