@@ -408,7 +408,7 @@ LWLockShmemSize(void)
 	size = add_size(size, mul_size(MAX_NAMED_TRANCHES, NAMEDATALEN));
 
 	/* Space for the LWLock array, plus room for cache line alignment. */
-	size = add_size(size, LWLOCK_PADDED_SIZE);
+	size = CACHELINEALIGN(size);
 	size = add_size(size, mul_size(numLocks, sizeof(LWLockPadded)));
 
 	return size;
@@ -444,7 +444,7 @@ CreateLWLocks(void)
 		}
 
 		/* Ensure desired alignment of LWLock array */
-		ptr += LWLOCK_PADDED_SIZE - ((uintptr_t) ptr) % LWLOCK_PADDED_SIZE;
+		ptr = (char *) CACHELINEALIGN(ptr);
 		MainLWLockArray = (LWLockPadded *) ptr;
 
 		/* Initialize all LWLocks */
