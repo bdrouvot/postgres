@@ -312,8 +312,9 @@ SELECT pg_stat_force_next_flush();
 SELECT last_seq_scan, last_idx_scan FROM pg_stat_all_tables WHERE relid = 'test_last_scan'::regclass;
 COMMIT;
 
+SELECT stats_reset IS NULL AS has_no_stats_reset FROM pg_stat_all_tables WHERE relid = 'test_last_scan'::regclass;
 SELECT pg_stat_reset_single_table_counters('test_last_scan'::regclass);
-SELECT seq_scan, idx_scan FROM pg_stat_all_tables WHERE relid = 'test_last_scan'::regclass;
+SELECT seq_scan, idx_scan, stats_reset IS NOT NULL AS has_stats_reset FROM pg_stat_all_tables WHERE relid = 'test_last_scan'::regclass;
 
 -- ensure we start out with exactly one index and sequential scan
 BEGIN;
@@ -384,13 +385,13 @@ FROM pg_stat_all_tables WHERE relid = 'test_last_scan'::regclass;
 
 -- also check from pg_stat_all_indexes
 SELECT indexrelid AS idx_relid FROM pg_stat_all_indexes WHERE relid = 'test_last_scan'::regclass \gset
-SELECT idx_scan, :'test_last_idx' < last_idx_scan AS idx_ok
+SELECT idx_scan, :'test_last_idx' < last_idx_scan AS idx_ok, stats_reset IS NULL AS has_no_stats_reset
 FROM pg_stat_all_indexes WHERE indexrelid = :idx_relid;
 
 -- check that the stats are reset
 SELECT pg_stat_reset_single_table_counters(:idx_relid);
 
-SELECT idx_scan
+SELECT idx_scan, stats_reset IS NOT NULL AS has_stats_reset
 FROM pg_stat_all_indexes WHERE indexrelid = :idx_relid;
 
 -----

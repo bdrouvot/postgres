@@ -1004,3 +1004,9 @@ restore_truncdrop_counters(PgStat_TableXactStatus *trans)
 		trans->tuples_deleted = trans->deleted_pre_truncdrop;
 	}
 }
+
+void
+pgstat_relation_reset_timestamp_cb(PgStatShared_Common *header, TimestampTz ts)
+{
+	((PgStatShared_Relation *) header)->stats.stat_reset_time = ts;
+}

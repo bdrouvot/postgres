@@ -454,6 +454,8 @@ typedef struct PgStat_StatTabEntry
 	PgStat_Counter total_autovacuum_time;
 	PgStat_Counter total_analyze_time;
 	PgStat_Counter total_autoanalyze_time;
+
+	TimestampTz stat_reset_time;
 } PgStat_StatTabEntry;
 
 /* ------
