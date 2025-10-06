@@ -12,13 +12,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s1_func_call: SELECT test_stat_func();
@@ -44,13 +45,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 
@@ -66,13 +68,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s1_func_call: SELECT test_stat_func();
@@ -98,13 +101,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         2|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         2|t               |t              |f              
 (1 row)
 
 
@@ -121,13 +125,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s2_func_stats: 
@@ -135,13 +140,14 @@ step s2_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s1_func_call: SELECT test_stat_func();
@@ -191,13 +197,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         5|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         5|t               |t              |f              
 (1 row)
 
 step s2_func_stats: 
@@ -205,13 +212,14 @@ step s2_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         5|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         5|t               |t              |f              
 (1 row)
 
 
@@ -228,13 +236,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s2_func_stats: 
@@ -242,13 +251,14 @@ step s2_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s1_func_call: SELECT test_stat_func();
@@ -286,13 +296,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         3|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         3|t               |t              |f              
 (1 row)
 
 step s2_func_stats: 
@@ -300,13 +311,14 @@ step s2_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         3|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         3|t               |t              |f              
 (1 row)
 
 
@@ -323,13 +335,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s2_func_stats: 
@@ -337,13 +350,14 @@ step s2_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s1_begin: BEGIN;
@@ -371,13 +385,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         2|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         2|t               |t              |f              
 (1 row)
 
 step s2_func_stats: 
@@ -385,13 +400,14 @@ step s2_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         2|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         2|t               |t              |f              
 (1 row)
 
 
@@ -408,13 +424,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s2_func_stats: 
@@ -422,13 +439,14 @@ step s2_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s1_begin: BEGIN;
@@ -462,13 +480,14 @@ step s2_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         2|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         2|t               |t              |f              
 (1 row)
 
 step s1_commit: COMMIT;
@@ -483,13 +502,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s2_func_stats: 
@@ -497,13 +517,14 @@ step s2_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 
@@ -520,13 +541,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s2_func_stats: 
@@ -534,13 +556,14 @@ step s2_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s1_begin: BEGIN;
@@ -574,13 +597,14 @@ step s2_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         2|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         2|t               |t              |f              
 (1 row)
 
 step s1_rollback: ROLLBACK;
@@ -595,13 +619,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         3|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         3|t               |t              |f              
 (1 row)
 
 step s2_func_stats: 
@@ -609,13 +634,14 @@ step s2_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         3|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         3|t               |t              |f              
 (1 row)
 
 
@@ -652,13 +678,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s2_commit: COMMIT;
@@ -673,13 +700,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s2_func_stats: 
@@ -687,13 +715,14 @@ step s2_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 
@@ -718,13 +747,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s2_commit: COMMIT;
@@ -739,13 +769,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s2_func_stats: 
@@ -753,13 +784,14 @@ step s2_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 
@@ -803,13 +835,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s2_func_stats: 
@@ -817,13 +850,14 @@ step s2_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 
@@ -859,13 +893,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         1|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         1|t               |t              |f              
 (1 row)
 
 step s1_func_drop: DROP FUNCTION test_stat_func();
@@ -875,13 +910,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s2_func_call_ifexists: SELECT test_stat_func_ifexists();
@@ -902,13 +938,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s2_func_stats: 
@@ -916,13 +953,14 @@ step s2_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 
@@ -958,13 +996,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         1|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         1|t               |t              |f              
 (1 row)
 
 step s1_func_drop: DROP FUNCTION test_stat_func();
@@ -974,13 +1013,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s2_func_call_ifexists: SELECT test_stat_func_ifexists();
@@ -1001,13 +1041,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s2_func_stats: 
@@ -1015,13 +1056,14 @@ step s2_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 
@@ -1068,13 +1110,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         2|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         2|t               |t              |f              
 (1 row)
 
 step s2_func_call: SELECT test_stat_func()
@@ -1100,13 +1143,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         3|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         3|t               |t              |f              
 (1 row)
 
 step s1_func_stats2: 
@@ -1114,13 +1158,14 @@ step s1_func_stats2:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func2'
 
-name           |pg_stat_get_function_calls|total_above_zero|self_above_zero
----------------+--------------------------+----------------+---------------
-test_stat_func2|                         2|t               |t              
+name           |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+---------------+--------------------------+----------------+---------------+---------------
+test_stat_func2|                         2|t               |t              |f              
 (1 row)
 
 step s1_func_stats: 
@@ -1128,13 +1173,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         3|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         3|t               |t              |f              
 (1 row)
 
 step s1_func_stats_reset: SELECT pg_stat_reset_single_function_counters('test_stat_func'::regproc);
@@ -1148,13 +1194,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         0|f               |f              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         0|f               |f              |t              
 (1 row)
 
 step s1_func_stats2: 
@@ -1162,13 +1209,14 @@ step s1_func_stats2:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func2'
 
-name           |pg_stat_get_function_calls|total_above_zero|self_above_zero
----------------+--------------------------+----------------+---------------
-test_stat_func2|                         2|t               |t              
+name           |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+---------------+--------------------------+----------------+---------------+---------------
+test_stat_func2|                         2|t               |t              |f              
 (1 row)
 
 step s1_func_stats: 
@@ -1176,13 +1224,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         0|f               |f              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         0|f               |f              |t              
 (1 row)
 
 
@@ -1258,13 +1307,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         2|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         2|t               |t              |f              
 (1 row)
 
 step s1_func_stats2: 
@@ -1272,13 +1322,14 @@ step s1_func_stats2:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func2'
 
-name           |pg_stat_get_function_calls|total_above_zero|self_above_zero
----------------+--------------------------+----------------+---------------
-test_stat_func2|                         1|t               |t              
+name           |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+---------------+--------------------------+----------------+---------------+---------------
+test_stat_func2|                         1|t               |t              |f              
 (1 row)
 
 step s1_func_stats: 
@@ -1286,13 +1337,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         2|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         2|t               |t              |f              
 (1 row)
 
 step s1_reset: SELECT pg_stat_reset();
@@ -1306,13 +1358,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         0|f               |f              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         0|f               |f              |t              
 (1 row)
 
 step s1_func_stats2: 
@@ -1320,13 +1373,14 @@ step s1_func_stats2:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func2'
 
-name           |pg_stat_get_function_calls|total_above_zero|self_above_zero
----------------+--------------------------+----------------+---------------
-test_stat_func2|                         0|f               |f              
+name           |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+---------------+--------------------------+----------------+---------------+---------------
+test_stat_func2|                         0|f               |f              |t              
 (1 row)
 
 step s1_func_stats: 
@@ -1334,13 +1388,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         0|f               |f              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         0|f               |f              |t              
 (1 row)
 
 
@@ -1369,13 +1424,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         1|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         1|t               |t              |f              
 (1 row)
 
 
@@ -1404,13 +1460,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         1|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         1|t               |t              |f              
 (1 row)
 
 
@@ -1439,13 +1496,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         1|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         1|t               |t              |f              
 (1 row)
 
 
@@ -1476,13 +1534,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         1|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         1|t               |t              |f              
 (1 row)
 
 step s2_func_call: SELECT test_stat_func()
@@ -1502,13 +1561,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         2|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         2|t               |t              |f              
 (1 row)
 
 step s1_commit: COMMIT;
@@ -1546,13 +1606,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         1|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         1|t               |t              |f              
 (1 row)
 
 step s2_func_call: SELECT test_stat_func()
@@ -1578,13 +1639,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         1|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         1|t               |t              |f              
 (1 row)
 
 step s1_func_stats2: 
@@ -1592,13 +1654,14 @@ step s1_func_stats2:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func2'
 
-name           |pg_stat_get_function_calls|total_above_zero|self_above_zero
----------------+--------------------------+----------------+---------------
-test_stat_func2|                         2|t               |t              
+name           |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+---------------+--------------------------+----------------+---------------+---------------
+test_stat_func2|                         2|t               |t              |f              
 (1 row)
 
 step s1_commit: COMMIT;
@@ -1636,13 +1699,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         1|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         1|t               |t              |f              
 (1 row)
 
 step s2_func_call: SELECT test_stat_func()
@@ -1668,13 +1732,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         1|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         1|t               |t              |f              
 (1 row)
 
 step s1_func_stats2: 
@@ -1682,13 +1747,14 @@ step s1_func_stats2:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func2'
 
-name           |pg_stat_get_function_calls|total_above_zero|self_above_zero
----------------+--------------------------+----------------+---------------
-test_stat_func2|                         1|t               |t              
+name           |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+---------------+--------------------------+----------------+---------------+---------------
+test_stat_func2|                         1|t               |t              |f              
 (1 row)
 
 step s1_commit: COMMIT;
@@ -1835,13 +1901,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         5|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         5|t               |t              |f              
 (1 row)
 
 step s1_commit_prepared_a: COMMIT PREPARED 'a';
@@ -1850,13 +1917,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 
@@ -1924,13 +1992,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         5|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         5|t               |t              |f              
 (1 row)
 
 step s1_rollback_prepared_a: ROLLBACK PREPARED 'a';
@@ -1939,13 +2008,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         5|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         5|t               |t              |f              
 (1 row)
 
 
@@ -2013,13 +2083,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         5|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         5|t               |t              |f              
 (1 row)
 
 step s2_commit_prepared_a: COMMIT PREPARED 'a';
@@ -2028,13 +2099,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 
@@ -2102,13 +2174,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         5|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         5|t               |t              |f              
 (1 row)
 
 step s2_rollback_prepared_a: ROLLBACK PREPARED 'a';
@@ -2117,13 +2190,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         5|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         5|t               |t              |f              
 (1 row)
 
 
@@ -3606,13 +3680,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s2_big_notify: SELECT pg_notify('stats_test_use',
@@ -3703,13 +3778,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                          |                |               
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                          |                |               |f              
 (1 row)
 
 step s1_clear_snapshot: SELECT pg_stat_clear_snapshot();
@@ -3723,13 +3799,14 @@ step s1_func_stats:
         tso.name,
         pg_stat_get_function_calls(tso.oid),
         pg_stat_get_function_total_time(tso.oid) > 0 total_above_zero,
-        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero
+        pg_stat_get_function_self_time(tso.oid) > 0 self_above_zero,
+        pg_stat_get_function_stat_reset_time(tso.oid) IS NOT NULL has_stats_reset
     FROM test_stat_oid AS tso
     WHERE tso.name = 'test_stat_func'
 
-name          |pg_stat_get_function_calls|total_above_zero|self_above_zero
---------------+--------------------------+----------------+---------------
-test_stat_func|                         1|t               |t              
+name          |pg_stat_get_function_calls|total_above_zero|self_above_zero|has_stats_reset
+--------------+--------------------------+----------------+---------------+---------------
+test_stat_func|                         1|t               |t              |f              
 (1 row)
 
 step s1_commit: COMMIT;

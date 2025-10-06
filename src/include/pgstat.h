@@ -384,6 +384,7 @@ typedef struct PgStat_StatFuncEntry
 
 	PgStat_Counter total_time;	/* times in microseconds */
 	PgStat_Counter self_time;
+	TimestampTz stat_reset_timestamp;
 } PgStat_StatFuncEntry;
 
 typedef struct PgStat_StatReplSlotEntry
