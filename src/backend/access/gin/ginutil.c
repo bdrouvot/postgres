@@ -134,7 +134,7 @@ initGinState(GinState *state, Relation index)
 		 * If the compare proc isn't specified in the opclass definition, look
 		 * up the index key type's default btree comparator.
 		 */
-		if (index_getprocid(index, i + 1, GIN_COMPARE_PROC) != InvalidOid)
+		if (RegProcedureIsValid(index_getprocid(index, i + 1, GIN_COMPARE_PROC)))
 		{
 			fmgr_info_copy(&(state->compareFn[i]),
 						   index_getprocinfo(index, i + 1, GIN_COMPARE_PROC),
@@ -168,14 +168,14 @@ initGinState(GinState *state, Relation index)
 		 * Check opclass capability to do tri-state or binary logic consistent
 		 * check.
 		 */
-		if (index_getprocid(index, i + 1, GIN_TRICONSISTENT_PROC) != InvalidOid)
+		if (RegProcedureIsValid(index_getprocid(index, i + 1, GIN_TRICONSISTENT_PROC)))
 		{
 			fmgr_info_copy(&(state->triConsistentFn[i]),
 						   index_getprocinfo(index, i + 1, GIN_TRICONSISTENT_PROC),
 						   CurrentMemoryContext);
 		}
 
-		if (index_getprocid(index, i + 1, GIN_CONSISTENT_PROC) != InvalidOid)
+		if (RegProcedureIsValid(index_getprocid(index, i + 1, GIN_CONSISTENT_PROC)))
 		{
 			fmgr_info_copy(&(state->consistentFn[i]),
 						   index_getprocinfo(index, i + 1, GIN_CONSISTENT_PROC),
@@ -193,7 +193,7 @@ initGinState(GinState *state, Relation index)
 		/*
 		 * Check opclass capability to do partial match.
 		 */
-		if (index_getprocid(index, i + 1, GIN_COMPARE_PARTIAL_PROC) != InvalidOid)
+		if (RegProcedureIsValid(index_getprocid(index, i + 1, GIN_COMPARE_PARTIAL_PROC)))
 		{
 			fmgr_info_copy(&(state->comparePartialFn[i]),
 						   index_getprocinfo(index, i + 1, GIN_COMPARE_PARTIAL_PROC),

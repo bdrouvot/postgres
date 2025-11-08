@@ -2088,7 +2088,7 @@ restriction_selectivity(PlannerInfo *root,
 	 * if the oprrest procedure is missing for whatever reason, use a
 	 * selectivity of 0.5
 	 */
-	if (!oprrest)
+	if (!RegProcedureIsValid(oprrest))
 		return (Selectivity) 0.5;
 
 	result = DatumGetFloat8(OidFunctionCall4Coll(oprrest,
@@ -2128,7 +2128,7 @@ join_selectivity(PlannerInfo *root,
 	 * if the oprjoin procedure is missing for whatever reason, use a
 	 * selectivity of 0.5
 	 */
-	if (!oprjoin)
+	if (!RegProcedureIsValid(oprjoin))
 		return (Selectivity) 0.5;
 
 	result = DatumGetFloat8(OidFunctionCall5Coll(oprjoin,
@@ -2167,7 +2167,7 @@ function_selectivity(PlannerInfo *root,
 	SupportRequestSelectivity req;
 	SupportRequestSelectivity *sresult;
 
-	if (!prosupport)
+	if (!RegProcedureIsValid(prosupport))
 		return (Selectivity) -1;	/* no support function */
 
 	req.type = T_SupportRequestSelectivity;

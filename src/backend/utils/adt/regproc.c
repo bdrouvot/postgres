@@ -142,7 +142,7 @@ regprocout(PG_FUNCTION_ARGS)
 	char	   *result;
 	HeapTuple	proctup;
 
-	if (proid == InvalidOid)
+	if (!RegProcedureIsValid(proid))
 	{
 		result = pstrdup("-");
 		PG_RETURN_CSTRING(result);
@@ -443,7 +443,7 @@ regprocedureout(PG_FUNCTION_ARGS)
 	RegProcedure proid = PG_GETARG_OID(0);
 	char	   *result;
 
-	if (proid == InvalidOid)
+	if (!RegProcedureIsValid(proid))
 		result = pstrdup("-");
 	else
 		result = format_procedure(proid);

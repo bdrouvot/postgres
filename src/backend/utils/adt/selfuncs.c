@@ -1904,7 +1904,7 @@ scalararraysel(PlannerInfo *root,
 		oprsel = get_oprjoin(operator);
 	else
 		oprsel = get_oprrest(operator);
-	if (!oprsel)
+	if (!RegProcedureIsValid(oprsel))
 		return (Selectivity) 0.5;
 	fmgr_info(oprsel, &oprselproc);
 
