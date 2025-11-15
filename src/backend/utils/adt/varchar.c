@@ -994,7 +994,7 @@ hashbpchar(PG_FUNCTION_ARGS)
 	pg_locale_t mylocale;
 	Datum		result;
 
-	if (!collid)
+	if (!OidIsValid(collid))
 		ereport(ERROR,
 				(errcode(ERRCODE_INDETERMINATE_COLLATION),
 				 errmsg("could not determine which collation to use for string hashing"),
@@ -1050,7 +1050,7 @@ hashbpcharextended(PG_FUNCTION_ARGS)
 	pg_locale_t mylocale;
 	Datum		result;
 
-	if (!collid)
+	if (!OidIsValid(collid))
 		ereport(ERROR,
 				(errcode(ERRCODE_INDETERMINATE_COLLATION),
 				 errmsg("could not determine which collation to use for string hashing"),

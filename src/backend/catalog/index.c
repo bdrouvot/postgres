@@ -823,7 +823,7 @@ index_create(Relation heapRelation,
 		Oid			collation = collationIds[i];
 		Oid			opclass = opclassIds[i];
 
-		if (collation)
+		if (OidIsValid(collation))
 		{
 			if ((opclass == TEXT_BTREE_PATTERN_OPS_OID ||
 				 opclass == VARCHAR_BTREE_PATTERN_OPS_OID ||

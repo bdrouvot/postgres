@@ -3692,7 +3692,7 @@ CheckRelationTableSpaceMove(Relation rel, Oid newTableSpaceId)
 	 */
 	oldTableSpaceId = rel->rd_rel->reltablespace;
 	if (newTableSpaceId == oldTableSpaceId ||
-		(newTableSpaceId == MyDatabaseTableSpace && oldTableSpaceId == 0))
+		(newTableSpaceId == MyDatabaseTableSpace && !OidIsValid(oldTableSpaceId)))
 		return false;
 
 	/*
@@ -4050,9 +4050,9 @@ rename_constraint_internal(Oid myrelid,
 	Form_pg_constraint con;
 	ObjectAddress address;
 
-	Assert(!myrelid || !mytypid);
+	Assert(!OidIsValid(myrelid) || !OidIsValid(mytypid));
 
-	if (mytypid)
+	if (OidIsValid(mytypid))
 	{
 		constraintOid = get_domain_constraint_oid(mytypid, oldconname, false);
 	}
@@ -4075,7 +4075,7 @@ rename_constraint_internal(Oid myrelid,
 			 constraintOid);
 	con = (Form_pg_constraint) GETSTRUCT(tuple);
 
-	if (myrelid &&
+	if (OidIsValid(myrelid) &&
 		(con->contype == CONSTRAINT_CHECK ||
 		 con->contype == CONSTRAINT_NOTNULL) &&
 		!con->connoinherit)
@@ -5917,7 +5917,7 @@ ATRewriteTables(AlterTableStmt *parsetree, List **wqueue, LOCKMODE lockmode,
 			 * Select destination tablespace (same as original unless user
 			 * requested a change)
 			 */
-			if (tab->newTableSpace)
+			if (OidIsValid(tab->newTableSpace))
 				NewTableSpace = tab->newTableSpace;
 			else
 				NewTableSpace = OldHeap->rd_rel->reltablespace;
@@ -6018,7 +6018,7 @@ ATRewriteTables(AlterTableStmt *parsetree, List **wqueue, LOCKMODE lockmode,
 			 * If we had SET TABLESPACE but no reason to reconstruct tuples,
 			 * just do a block-by-block copy.
 			 */
-			if (tab->newTableSpace)
+			if (OidIsValid(tab->newTableSpace))
 				ATExecSetTableSpace(tab->relid, tab->newTableSpace, lockmode);
 		}
 
@@ -12090,12 +12090,12 @@ GetForeignKeyActionTriggers(Relation trigrel,
 			continue;
 		if (TRIGGER_FOR_DELETE(trgform->tgtype))
 		{
-			Assert(*deleteTriggerOid == InvalidOid);
+			Assert(!OidIsValid(*deleteTriggerOid));
 			*deleteTriggerOid = trgform->oid;
 		}
 		else if (TRIGGER_FOR_UPDATE(trgform->tgtype))
 		{
-			Assert(*updateTriggerOid == InvalidOid);
+			Assert(!OidIsValid(*updateTriggerOid));
 			*updateTriggerOid = trgform->oid;
 		}
 #ifndef USE_ASSERT_CHECKING
@@ -12151,12 +12151,12 @@ GetForeignKeyCheckTriggers(Relation trigrel,
 			continue;
 		if (TRIGGER_FOR_INSERT(trgform->tgtype))
 		{
-			Assert(*insertTriggerOid == InvalidOid);
+			Assert(!OidIsValid(*insertTriggerOid));
 			*insertTriggerOid = trgform->oid;
 		}
 		else if (TRIGGER_FOR_UPDATE(trgform->tgtype))
 		{
-			Assert(*updateTriggerOid == InvalidOid);
+			Assert(!OidIsValid(*updateTriggerOid));
 			*updateTriggerOid = trgform->oid;
 		}
 #ifndef USE_ASSERT_CHECKING
@@ -17112,7 +17112,7 @@ AlterTableMoveAll(AlterTableMoveAllStmt *stmt)
 		ereport(NOTICE,
 				(errcode(ERRCODE_NO_DATA_FOUND),
 				 errmsg("no matching relations in tablespace \"%s\" found",
-						orig_tablespaceoid == InvalidOid ? "(database default)" :
+						!OidIsValid(orig_tablespaceoid) ? "(database default)" :
 						get_tablespace_name(orig_tablespaceoid))));
 
 	/* Everything is locked, loop through and move all of the relations. */

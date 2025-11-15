@@ -677,14 +677,14 @@ gistFetchTuple(GISTSTATE *giststate, Relation r, IndexTuple tuple)
 
 		datum = index_getattr(tuple, i + 1, giststate->leafTupdesc, &isnull[i]);
 
-		if (giststate->fetchFn[i].fn_oid != InvalidOid)
+		if (OidIsValid(giststate->fetchFn[i].fn_oid))
 		{
 			if (!isnull[i])
 				fetchatt[i] = gistFetchAtt(giststate, i, datum, r);
 			else
 				fetchatt[i] = (Datum) 0;
 		}
-		else if (giststate->compressFn[i].fn_oid == InvalidOid)
+		else if (!OidIsValid(giststate->compressFn[i].fn_oid))
 		{
 			/*
 			 * If opclass does not provide compress method that could change

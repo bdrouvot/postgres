@@ -3258,7 +3258,7 @@ match_rowcompare_to_indexcol(PlannerInfo *root,
 	{
 		/* indexkey is on right, so commute the operator */
 		expr_op = get_commutator(expr_op);
-		if (expr_op == InvalidOid)
+		if (!OidIsValid(expr_op))
 			return NULL;
 		var_on_left = false;
 	}
@@ -3560,7 +3560,7 @@ expand_indexqual_rowcompare(PlannerInfo *root,
 		{
 			/* indexkey is on right, so commute the operator */
 			expr_op = get_commutator(expr_op);
-			if (expr_op == InvalidOid)
+			if (!OidIsValid(expr_op))
 				break;			/* operator is not usable */
 		}
 		if (bms_is_member(index->rel->relid, pull_varnos(root, constop)))
@@ -3878,7 +3878,7 @@ match_clause_to_ordering_op(IndexOptInfo *index,
 	{
 		/* Might match, but we need a commuted operator */
 		expr_op = get_commutator(expr_op);
-		if (expr_op == InvalidOid)
+		if (!OidIsValid(expr_op))
 			return NULL;
 		commuted = true;
 	}

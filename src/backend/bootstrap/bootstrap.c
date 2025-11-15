@@ -566,7 +566,7 @@ DefineAttr(char *name, char *type, int attnum, int nullness)
 		attrtypes[attnum]->attcompression = InvalidCompressionMethod;
 		attrtypes[attnum]->attcollation = TypInfo[typeoid].collation;
 		/* if an array type, assume 1-dimensional attribute */
-		if (TypInfo[typeoid].elem != InvalidOid &&
+		if (OidIsValid(TypInfo[typeoid].elem) &&
 			attrtypes[attnum]->attlen < 0)
 			attrtypes[attnum]->attndims = 1;
 		else

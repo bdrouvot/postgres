@@ -415,10 +415,10 @@ typeInheritsFrom(Oid subclassTypeId, Oid superclassTypeId)
 
 	/* We need to work with the associated relation OIDs */
 	subclassRelid = typeOrDomainTypeRelid(subclassTypeId);
-	if (subclassRelid == InvalidOid)
+	if (!OidIsValid(subclassRelid))
 		return false;			/* not a complex type or domain over one */
 	superclassRelid = typeidTypeRelid(superclassTypeId);
-	if (superclassRelid == InvalidOid)
+	if (!OidIsValid(superclassRelid))
 		return false;			/* not a complex type */
 
 	/* No point in searching if the superclass has no subclasses */

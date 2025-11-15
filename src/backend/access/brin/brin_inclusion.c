@@ -560,7 +560,7 @@ inclusion_get_procinfo(BrinDesc *bdesc, uint16 attno, uint16 procnum,
 	if (opaque->extra_proc_missing[basenum])
 		return NULL;
 
-	if (opaque->extra_procinfos[basenum].fn_oid == InvalidOid)
+	if (!OidIsValid(opaque->extra_procinfos[basenum].fn_oid))
 	{
 		if (RegProcedureIsValid(index_getprocid(bdesc->bd_index, attno,
 												procnum)))
@@ -629,7 +629,7 @@ inclusion_get_strategy_procinfo(BrinDesc *bdesc, uint16 attno, Oid subtype,
 		opaque->cached_subtype = subtype;
 	}
 
-	if (opaque->strategy_procinfos[strategynum - 1].fn_oid == InvalidOid)
+	if (!OidIsValid(opaque->strategy_procinfos[strategynum - 1].fn_oid))
 	{
 		Form_pg_attribute attr;
 		HeapTuple	tuple;

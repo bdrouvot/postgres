@@ -127,7 +127,7 @@ ENRMetadataGetTupDesc(EphemeralNamedRelationMetadata enrmd)
 	TupleDesc	tupdesc;
 
 	/* One, and only one, of these fields must be filled. */
-	Assert((enrmd->reliddesc == InvalidOid) != (enrmd->tupdesc == NULL));
+	Assert((!OidIsValid(enrmd->reliddesc)) != (enrmd->tupdesc == NULL));
 
 	if (enrmd->tupdesc != NULL)
 		tupdesc = enrmd->tupdesc;

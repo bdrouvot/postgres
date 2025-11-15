@@ -286,7 +286,7 @@ prepare_sql_fn_parse_info(HeapTuple procedureTuple,
 			if (IsPolymorphicType(argtype))
 			{
 				argtype = get_call_expr_argtype(call_expr, argnum);
-				if (argtype == InvalidOid)
+				if (!OidIsValid(argtype))
 					ereport(ERROR,
 							(errcode(ERRCODE_DATATYPE_MISMATCH),
 							 errmsg("could not determine actual type of argument declared %s",

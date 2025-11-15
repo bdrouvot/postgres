@@ -776,7 +776,7 @@ make_new_heap(Oid OIDOldHeap, Oid NewTableSpace, Oid NewAccessMethod,
 										  true,
 										  OIDOldHeap,
 										  NULL);
-	Assert(OIDNewHeap != InvalidOid);
+	Assert(OidIsValid(OIDNewHeap));
 
 	ReleaseSysCache(tuple);
 

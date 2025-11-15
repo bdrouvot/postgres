@@ -608,7 +608,7 @@ check_default_text_search_config(char **newval, void **extra, GucSource source)
 	 * cannot do the catalog accesses necessary to verify the config name.
 	 * Must accept it on faith.
 	 */
-	if (IsTransactionState() && MyDatabaseId != InvalidOid)
+	if (IsTransactionState() && OidIsValid(MyDatabaseId))
 	{
 		ErrorSaveContext escontext = {T_ErrorSaveContext};
 		List	   *namelist;

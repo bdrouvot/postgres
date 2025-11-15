@@ -3693,7 +3693,7 @@ add_tablespace_footer(printTableContent *const cont, char relkind,
 		 * We ignore the database default tablespace so that users not using
 		 * tablespaces don't need to know about them.
 		 */
-		if (tablespace != 0)
+		if (OidIsValid(tablespace))
 		{
 			PGresult   *result = NULL;
 			PQExpBufferData buf;

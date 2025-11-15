@@ -153,7 +153,7 @@ rangesel(PG_FUNCTION_ARGS)
 	{
 		/* we have other Op var, commute to make var Op other */
 		operator = get_commutator(operator);
-		if (!operator)
+		if (!OidIsValid(operator))
 		{
 			/* Use default selectivity (should we raise an error instead?) */
 			ReleaseVariableStats(vardata);

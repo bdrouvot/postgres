@@ -1013,13 +1013,13 @@ _bt_compare_scankey_args(IndexScanDesc scan, ScanKey op,
 	 * input type; this is a hack to simplify life for ScanKeyInit().
 	 */
 	lefttype = leftarg->sk_subtype;
-	if (lefttype == InvalidOid)
+	if (!OidIsValid(lefttype))
 		lefttype = opcintype;
 	righttype = rightarg->sk_subtype;
-	if (righttype == InvalidOid)
+	if (!OidIsValid(righttype))
 		righttype = opcintype;
 	optype = op->sk_subtype;
-	if (optype == InvalidOid)
+	if (!OidIsValid(optype))
 		optype = opcintype;
 
 	/*
@@ -1150,7 +1150,7 @@ _bt_saoparray_shrink(IndexScanDesc scan, ScanKey arraysk, ScanKey skey,
 	 * means the opclass input type; this is a hack to simplify life for
 	 * ScanKeyInit().
 	 */
-	if (skey->sk_subtype != opcintype && skey->sk_subtype != InvalidOid)
+	if (skey->sk_subtype != opcintype && OidIsValid(skey->sk_subtype))
 	{
 		RegProcedure cmp_proc;
 		Oid			arraysk_elemtype;
@@ -1163,7 +1163,7 @@ _bt_saoparray_shrink(IndexScanDesc scan, ScanKey arraysk, ScanKey skey,
 		 * as its tupdatum/lefthand argument (rhs arg is for array elements).
 		 */
 		arraysk_elemtype = arraysk->sk_subtype;
-		if (arraysk_elemtype == InvalidOid)
+		if (!OidIsValid(arraysk_elemtype))
 			arraysk_elemtype = rel->rd_opcintype[arraysk->sk_attno - 1];
 		cmp_proc = get_opfamily_proc(rel->rd_opfamily[arraysk->sk_attno - 1],
 									 skey->sk_subtype, arraysk_elemtype,
@@ -1421,7 +1421,7 @@ _bt_skiparray_strat_decrement(IndexScanDesc scan, ScanKey arraysk,
 	 * index attribute's input opclass type
 	 */
 	if (high_compare->sk_subtype != opcintype &&
-		high_compare->sk_subtype != InvalidOid)
+		OidIsValid(high_compare->sk_subtype))
 		return;
 
 	/* Decrement, handling underflow by marking the qual unsatisfiable */
@@ -1479,7 +1479,7 @@ _bt_skiparray_strat_increment(IndexScanDesc scan, ScanKey arraysk,
 	 * index attribute's input opclass type
 	 */
 	if (low_compare->sk_subtype != opcintype &&
-		low_compare->sk_subtype != InvalidOid)
+		OidIsValid(low_compare->sk_subtype))
 		return;
 
 	/* Increment, handling overflow by marking the qual unsatisfiable */
@@ -2053,7 +2053,7 @@ _bt_preprocess_array_keys(IndexScanDesc scan, int *new_numberOfKeys)
 		 * ScanKeyInit().
 		 */
 		elemtype = cur->sk_subtype;
-		if (elemtype == InvalidOid)
+		if (!OidIsValid(elemtype))
 			elemtype = rel->rd_opcintype[cur->sk_attno - 1];
 
 		/*
@@ -2266,7 +2266,7 @@ _bt_preprocess_array_keys_final(IndexScanDesc scan, int *keyDataMap)
 				continue;
 
 			elemtype = outkey->sk_subtype;
-			if (elemtype == InvalidOid)
+			if (!OidIsValid(elemtype))
 				elemtype = rel->rd_opcintype[outkey->sk_attno - 1];
 
 			_bt_setup_array_cmp(scan, outkey, elemtype,

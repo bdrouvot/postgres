@@ -1302,7 +1302,7 @@ GinBufferInit(Relation index)
 		 * up the index key type's default btree comparator.
 		 */
 		cmpFunc = index_getprocid(index, i + 1, GIN_COMPARE_PROC);
-		if (cmpFunc == InvalidOid)
+		if (!OidIsValid(cmpFunc))
 		{
 			TypeCacheEntry *typentry;
 

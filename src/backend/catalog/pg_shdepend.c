@@ -395,7 +395,7 @@ changeDependencyOnTablespace(Oid classId, Oid objectId, Oid newTablespaceId)
 	sdepRel = table_open(SharedDependRelationId, RowExclusiveLock);
 
 	if (newTablespaceId != DEFAULTTABLESPACE_OID &&
-		newTablespaceId != InvalidOid)
+		OidIsValid(newTablespaceId))
 		shdepChangeDep(sdepRel,
 					   classId, objectId, 0,
 					   TableSpaceRelationId, newTablespaceId,

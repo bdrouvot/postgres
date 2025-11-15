@@ -733,7 +733,7 @@ pg_analyze_and_rewrite_varparams(RawStmt *parsetree,
 	{
 		Oid			ptype = (*paramTypes)[i];
 
-		if (ptype == InvalidOid || ptype == UNKNOWNOID)
+		if (!OidIsValid(ptype) || ptype == UNKNOWNOID)
 			ereport(ERROR,
 					(errcode(ERRCODE_INDETERMINATE_DATATYPE),
 					 errmsg("could not determine data type of parameter $%d",

@@ -296,7 +296,7 @@ arraycontsel(PG_FUNCTION_ARGS)
 	 * we'd rather just return a default estimate.)
 	 */
 	element_typeid = get_base_element_type(((Const *) other)->consttype);
-	if (element_typeid != InvalidOid &&
+	if (OidIsValid(element_typeid) &&
 		element_typeid == get_base_element_type(vardata.vartype))
 	{
 		selec = calc_arraycontsel(&vardata, ((Const *) other)->constvalue,

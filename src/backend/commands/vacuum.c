@@ -2320,7 +2320,7 @@ vacuum_rel(Oid relid, RangeVar *relation, VacuumParams params,
 	 * the toaster always uses hardcoded index access and statistics are
 	 * totally unimportant for toast relations.
 	 */
-	if (toast_relid != InvalidOid)
+	if (OidIsValid(toast_relid))
 	{
 		/*
 		 * Force VACOPT_PROCESS_MAIN so vacuum_rel() processes it.  Likewise,

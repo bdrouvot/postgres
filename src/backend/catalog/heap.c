@@ -396,7 +396,7 @@ heap_create(const char *relname,
 	 * protected by the existence of a physical file; but for relations with
 	 * no files, add a pg_shdepend entry to account for that.
 	 */
-	if (!create_storage && reltablespace != InvalidOid)
+	if (!create_storage && OidIsValid(reltablespace))
 		recordDependencyOnTablespace(RelationRelationId, relid,
 									 reltablespace);
 
@@ -746,7 +746,7 @@ InsertPgAttributeTuples(Relation pg_attribute_rel,
 		memset(slot[slotCount]->tts_isnull, false,
 			   slot[slotCount]->tts_tupleDescriptor->natts * sizeof(bool));
 
-		if (new_rel_oid != InvalidOid)
+		if (OidIsValid(new_rel_oid))
 			slot[slotCount]->tts_values[Anum_pg_attribute_attrelid - 1] = ObjectIdGetDatum(new_rel_oid);
 		else
 			slot[slotCount]->tts_values[Anum_pg_attribute_attrelid - 1] = ObjectIdGetDatum(attrs->attrelid);
@@ -1024,7 +1024,7 @@ AddNewRelationTuple(Relation pg_class_desc,
 	new_rel_reltup->relispartition = false;
 
 	/* fill rd_att's type ID with something sane even if reltype is zero */
-	new_rel_desc->rd_att->tdtypeid = new_type_oid ? new_type_oid : RECORDOID;
+	new_rel_desc->rd_att->tdtypeid = OidIsValid(new_type_oid) ? new_type_oid : RECORDOID;
 	new_rel_desc->rd_att->tdtypmod = -1;
 
 	/* Now build and insert the tuple */
@@ -1173,7 +1173,7 @@ heap_create_with_catalog(const char *relname,
 	 * by catching it here we can emit a nicer error message.
 	 */
 	existing_relid = get_relname_relid(relname, relnamespace);
-	if (existing_relid != InvalidOid)
+	if (OidIsValid(existing_relid))
 		ereport(ERROR,
 				(errcode(ERRCODE_DUPLICATE_TABLE),
 				 errmsg("relation \"%s\" already exists", relname)));
@@ -1411,7 +1411,7 @@ heap_create_with_catalog(const char *relname,
 	else
 	{
 		/* Caller should not be expecting a type to be created. */
-		Assert(reltypeid == InvalidOid);
+		Assert(!OidIsValid(reltypeid));
 		Assert(typaddress == NULL);
 
 		new_type_oid = InvalidOid;
@@ -1477,7 +1477,7 @@ heap_create_with_catalog(const char *relname,
 		ObjectAddressSet(referenced, NamespaceRelationId, relnamespace);
 		add_exact_object_address(&referenced, addrs);
 
-		if (reloftypeid)
+		if (OidIsValid(reloftypeid))
 		{
 			ObjectAddressSet(referenced, TypeRelationId, reloftypeid);
 			add_exact_object_address(&referenced, addrs);

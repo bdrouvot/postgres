@@ -276,7 +276,7 @@ CreateStatistics(CreateStatsStmt *stmt, bool check_rights)
 
 			/* Disallow data types without a less-than operator */
 			type = lookup_type_cache(attForm->atttypid, TYPECACHE_LT_OPR);
-			if (type->lt_opr == InvalidOid)
+			if (!OidIsValid(type->lt_opr))
 				ereport(ERROR,
 						(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
 						 errmsg("column \"%s\" cannot be used in statistics because its type %s has no default btree operator class",
@@ -305,7 +305,7 @@ CreateStatistics(CreateStatsStmt *stmt, bool check_rights)
 
 			/* Disallow data types without a less-than operator */
 			type = lookup_type_cache(var->vartype, TYPECACHE_LT_OPR);
-			if (type->lt_opr == InvalidOid)
+			if (!OidIsValid(type->lt_opr))
 				ereport(ERROR,
 						(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
 						 errmsg("column \"%s\" cannot be used in statistics because its type %s has no default btree operator class",
@@ -355,7 +355,7 @@ CreateStatistics(CreateStatsStmt *stmt, bool check_rights)
 			{
 				atttype = exprType(expr);
 				type = lookup_type_cache(atttype, TYPECACHE_LT_OPR);
-				if (type->lt_opr == InvalidOid)
+				if (!OidIsValid(type->lt_opr))
 					ereport(ERROR,
 							(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
 							 errmsg("expression cannot be used in multivariate statistics because its type %s has no default btree operator class",

@@ -678,7 +678,7 @@ _LoadLOs(ArchiveHandle *AH, TocEntry *te)
 		if (strncmp(th->targetFile, "blob_", 5) == 0)
 		{
 			oid = atooid(&th->targetFile[5]);
-			if (oid != 0)
+			if (OidIsValid(oid))
 			{
 				pg_log_info("restoring large object with OID %u", oid);
 
@@ -899,7 +899,7 @@ _StartLO(ArchiveHandle *AH, TocEntry *te, Oid oid)
 	lclTocEntry *tctx = (lclTocEntry *) te->formatData;
 	char		fname[255];
 
-	if (oid == 0)
+	if (!OidIsValid(oid))
 		pg_fatal("invalid OID for large object (%u)", oid);
 
 	if (AH->compression_spec.algorithm != PG_COMPRESSION_NONE)

@@ -3242,8 +3242,8 @@ find_coercion_pathway(Oid targetTypeId, Oid sourceTypeId,
 			Oid			targetElem;
 			Oid			sourceElem;
 
-			if ((targetElem = get_element_type(targetTypeId)) != InvalidOid &&
-				(sourceElem = get_element_type(sourceTypeId)) != InvalidOid)
+			if (OidIsValid((targetElem = get_element_type(targetTypeId))) &&
+				OidIsValid((sourceElem = get_element_type(sourceTypeId))))
 			{
 				CoercionPathType elempathtype;
 				Oid			elemfuncid;
@@ -3383,7 +3383,7 @@ typeIsOfTypedTable(Oid reltypeId, Oid reloftypeId)
 	Oid			relid = typeOrDomainTypeRelid(reltypeId);
 	bool		result = false;
 
-	if (relid)
+	if (OidIsValid(relid))
 	{
 		HeapTuple	tp;
 		Form_pg_class reltup;

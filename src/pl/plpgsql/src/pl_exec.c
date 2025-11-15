@@ -3083,11 +3083,11 @@ exec_stmt_foreach_a(PLpgSQL_execstate *estate, PLpgSQL_stmt_foreach_a *stmt)
 	 * coerce values of different types.  But it seems worthwhile to complain
 	 * if the array-ness of the loop variable is not right.
 	 */
-	if (stmt->slice > 0 && loop_var_elem_type == InvalidOid)
+	if (stmt->slice > 0 && !OidIsValid(loop_var_elem_type))
 		ereport(ERROR,
 				(errcode(ERRCODE_DATATYPE_MISMATCH),
 				 errmsg("FOREACH ... SLICE loop variable must be of an array type")));
-	if (stmt->slice == 0 && loop_var_elem_type != InvalidOid)
+	if (stmt->slice == 0 && OidIsValid(loop_var_elem_type))
 		ereport(ERROR,
 				(errcode(ERRCODE_DATATYPE_MISMATCH),
 				 errmsg("FOREACH loop variable must not be of an array type")));

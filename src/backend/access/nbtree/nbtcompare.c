@@ -458,7 +458,7 @@ oid_decrement(Relation rel, Datum existing, bool *underflow)
 {
 	Oid			oexisting = DatumGetObjectId(existing);
 
-	if (oexisting == InvalidOid)
+	if (!OidIsValid(oexisting))
 	{
 		/* return value is undefined */
 		*underflow = true;

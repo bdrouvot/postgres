@@ -583,7 +583,7 @@ GetNewRelFileNumber(Oid reltablespace, Relation pg_class, char relpersistence)
 	}
 
 	/* This logic should match RelationInitPhysicalAddr */
-	rlocator.locator.spcOid = reltablespace ? reltablespace : MyDatabaseTableSpace;
+	rlocator.locator.spcOid = OidIsValid(reltablespace) ? reltablespace : MyDatabaseTableSpace;
 	rlocator.locator.dbOid =
 		(rlocator.locator.spcOid == GLOBALTABLESPACE_OID) ?
 		InvalidOid : MyDatabaseId;

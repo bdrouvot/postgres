@@ -479,7 +479,7 @@ overexplain_range_table(PlannedStmt *plannedstmt, ExplainState *es)
 		 * displayed only in verbose mode, and we emit nothing if there is no
 		 * relation OID.
 		 */
-		if (rte->relid != 0)
+		if (OidIsValid(rte->relid))
 		{
 			const char *relname;
 			const char *qualname;

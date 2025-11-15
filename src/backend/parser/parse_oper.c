@@ -266,12 +266,12 @@ binary_oper_exact(List *opname, Oid arg1, Oid arg2)
 	bool		was_unknown = false;
 
 	/* Unspecified type for one of the arguments? then use the other */
-	if ((arg1 == UNKNOWNOID) && (arg2 != InvalidOid))
+	if ((arg1 == UNKNOWNOID) && (OidIsValid(arg2)))
 	{
 		arg1 = arg2;
 		was_unknown = true;
 	}
-	else if ((arg2 == UNKNOWNOID) && (arg1 != InvalidOid))
+	else if ((arg2 == UNKNOWNOID) && (OidIsValid(arg1)))
 	{
 		arg2 = arg1;
 		was_unknown = true;
@@ -417,9 +417,9 @@ oper(ParseState *pstate, List *opname, Oid ltypeId, Oid rtypeId,
 			 */
 			Oid			inputOids[2];
 
-			if (rtypeId == InvalidOid)
+			if (!OidIsValid(rtypeId))
 				rtypeId = ltypeId;
-			else if (ltypeId == InvalidOid)
+			else if (!OidIsValid(ltypeId))
 				ltypeId = rtypeId;
 			inputOids[0] = ltypeId;
 			inputOids[1] = rtypeId;
@@ -641,7 +641,7 @@ op_error(ParseState *pstate, List *op,
 				(errcode(ERRCODE_UNDEFINED_FUNCTION),
 				 errmsg("operator does not exist: %s",
 						op_signature_string(op, arg1, arg2)),
-				 oper_lookup_failure_details(fgc_flags, (!arg1 || !arg2)),
+				 oper_lookup_failure_details(fgc_flags, (!OidIsValid(arg1) || !OidIsValid(arg2))),
 				 parser_errposition(pstate, location)));
 }
 

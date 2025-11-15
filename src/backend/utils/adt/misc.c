@@ -284,7 +284,7 @@ pg_tablespace_databases(PG_FUNCTION_ARGS)
 		bool		nulls[1];
 
 		/* this test skips . and .., but is awfully weak */
-		if (!datOid)
+		if (!OidIsValid(datOid))
 			continue;
 
 		/* if database subdir is empty, don't report tablespace as used */
@@ -593,7 +593,7 @@ pg_collation_for(PG_FUNCTION_ARGS)
 	Oid			collid;
 
 	typeid = get_fn_expr_argtype(fcinfo->flinfo, 0);
-	if (!typeid)
+	if (!OidIsValid(typeid))
 		PG_RETURN_NULL();
 	if (!type_is_collatable(typeid) && typeid != UNKNOWNOID)
 		ereport(ERROR,
@@ -602,7 +602,7 @@ pg_collation_for(PG_FUNCTION_ARGS)
 						format_type_be(typeid))));
 
 	collid = PG_GET_COLLATION();
-	if (!collid)
+	if (!OidIsValid(collid))
 		PG_RETURN_NULL();
 	PG_RETURN_TEXT_P(cstring_to_text(generate_collation_name(collid)));
 }
@@ -761,7 +761,7 @@ pg_input_is_valid_common(FunctionCallInfo fcinfo,
 	 * If the typname argument is constant, we only need to parse it the first
 	 * time through.
 	 */
-	if (my_extra->typoid == InvalidOid || !my_extra->typname_constant)
+	if (!OidIsValid(my_extra->typoid) || !my_extra->typname_constant)
 	{
 		char	   *typnamestr = text_to_cstring(typname);
 		Oid			typoid;

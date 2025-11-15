@@ -2342,11 +2342,11 @@ ReorderBufferProcessTXN(ReorderBuffer *rb, ReorderBufferTXN *txn,
 					 * whether the table should be logically logged without
 					 * mapping the relfilenumber to the oid.
 					 */
-					if (reloid == InvalidOid &&
+					if (!OidIsValid(reloid) &&
 						change->data.tp.newtuple == NULL &&
 						change->data.tp.oldtuple == NULL)
 						goto change_done;
-					else if (reloid == InvalidOid)
+					else if (!OidIsValid(reloid))
 						elog(ERROR, "could not map filenumber \"%s\" to relation OID",
 							 relpathperm(change->data.tp.rlocator,
 										 MAIN_FORKNUM).str);

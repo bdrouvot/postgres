@@ -3449,7 +3449,7 @@ BufferSync(int flags)
 		 * Grow array of per-tablespace status structs, every time a new
 		 * tablespace is found.
 		 */
-		if (last_tsid == InvalidOid || last_tsid != cur_tsid)
+		if (!OidIsValid(last_tsid) || last_tsid != cur_tsid)
 		{
 			Size		sz;
 

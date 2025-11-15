@@ -1763,7 +1763,7 @@ DetermineSlotInvalidationCause(uint32 possible_causes, ReplicationSlot *s,
 	{
 		/* invalid DB oid signals a shared relation */
 		if (SlotIsLogical(s) &&
-			(dboid == InvalidOid || dboid == s->data.database))
+			(!OidIsValid(dboid) || dboid == s->data.database))
 		{
 			TransactionId effective_xmin = s->effective_xmin;
 			TransactionId catalog_effective_xmin = s->effective_catalog_xmin;
@@ -2637,7 +2637,7 @@ RestoreSlotFromDisk(const char *name)
 	 * NB: Changing the requirements here also requires adapting
 	 * CheckSlotRequirements() and CheckLogicalDecodingRequirements().
 	 */
-	if (cp.slotdata.database != InvalidOid)
+	if (OidIsValid(cp.slotdata.database))
 	{
 		if (wal_level < WAL_LEVEL_LOGICAL)
 			ereport(FATAL,

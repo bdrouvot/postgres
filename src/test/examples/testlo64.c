@@ -54,7 +54,7 @@ importFile(PGconn *conn, char *filename)
 	 * create the large object
 	 */
 	lobjId = lo_creat(conn, INV_READ | INV_WRITE);
-	if (lobjId == 0)
+	if (!OidIsValid(lobjId))
 		fprintf(stderr, "cannot create large object");
 
 	lobj_fd = lo_open(conn, lobjId, INV_WRITE);
@@ -270,7 +270,7 @@ main(int argc, char **argv)
 	printf("importing file \"%s\" ...\n", in_filename);
 /*	lobjOid = importFile(conn, in_filename); */
 	lobjOid = lo_import(conn, in_filename);
-	if (lobjOid == 0)
+	if (!OidIsValid(lobjOid))
 		fprintf(stderr, "%s\n", PQerrorMessage(conn));
 	else
 	{

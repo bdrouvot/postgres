@@ -2972,7 +2972,8 @@ aclcheck_error_type(AclResult aclerr, Oid typeOid)
 {
 	Oid			element_type = get_element_type(typeOid);
 
-	aclcheck_error(aclerr, OBJECT_TYPE, format_type_be(element_type ? element_type : typeOid));
+	aclcheck_error(aclerr, OBJECT_TYPE,
+				   format_type_be(OidIsValid(element_type) ? element_type : typeOid));
 }
 
 

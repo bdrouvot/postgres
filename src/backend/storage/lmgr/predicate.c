@@ -2971,7 +2971,7 @@ DropAllPredicateLocksFromTable(Relation relation, bool transfer)
 		isIndex = true;
 		heapId = relation->rd_index->indrelid;
 	}
-	Assert(heapId != InvalidOid);
+	Assert(OidIsValid(heapId));
 	Assert(transfer || !isIndex);	/* index OID only makes sense with
 									 * transfer */
 

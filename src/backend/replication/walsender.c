@@ -324,7 +324,7 @@ InitWalSender(void)
 	 * databases.  This allows physical replication clients to send hot
 	 * standby feedback that will delay vacuum cleanup in all databases.
 	 */
-	if (MyDatabaseId == InvalidOid)
+	if (!OidIsValid(MyDatabaseId))
 	{
 		Assert(MyProc->xmin == InvalidTransactionId);
 		LWLockAcquire(ProcArrayLock, LW_EXCLUSIVE);
@@ -428,7 +428,7 @@ IdentifySystem(void)
 
 	snprintf(xloc, sizeof(xloc), "%X/%08X", LSN_FORMAT_ARGS(logptr));
 
-	if (MyDatabaseId != InvalidOid)
+	if (OidIsValid(MyDatabaseId))
 	{
 		MemoryContext cur = CurrentMemoryContext;
 
@@ -2062,7 +2062,7 @@ exec_replication_command(const char *cmd_string)
 		MemoryContextReset(cmd_context);
 
 		/* XXX this is a pretty random place to make this check */
-		if (MyDatabaseId == InvalidOid)
+		if (!OidIsValid(MyDatabaseId))
 			ereport(ERROR,
 					(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
 					 errmsg("cannot execute SQL commands in WAL sender for physical replication")));
@@ -3067,7 +3067,7 @@ InitWalSenderSlot(void)
 			 * StartLogicalReplication() and CREATE_REPLICATION_SLOT but it
 			 * seems better to set it on one place.
 			 */
-			if (MyDatabaseId == InvalidOid)
+			if (!OidIsValid(MyDatabaseId))
 				walsnd->kind = REPLICATION_KIND_PHYSICAL;
 			else
 				walsnd->kind = REPLICATION_KIND_LOGICAL;

@@ -1401,7 +1401,7 @@ _bt_first(IndexScanDesc scan, ScanDirection dir)
 		 * opclass input type; this hack simplifies life for ScanKeyInit().
 		 */
 		if (bkey->sk_subtype == rel->rd_opcintype[i] ||
-			bkey->sk_subtype == InvalidOid)
+			!OidIsValid(bkey->sk_subtype))
 		{
 			FmgrInfo   *procinfo;
 

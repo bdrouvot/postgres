@@ -213,7 +213,7 @@ AggregateCreate(const char *aggName,
 		else
 		{
 			/* special case with VARIADIC last arg */
-			Assert(variadicArgType != InvalidOid);
+			Assert(OidIsValid(variadicArgType));
 			nargs_transfn = 2;
 		}
 		fnArgs[0] = aggTransType;

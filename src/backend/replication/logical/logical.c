@@ -122,7 +122,7 @@ CheckLogicalDecodingRequirements(void)
 				(errcode(ERRCODE_OBJECT_NOT_IN_PREREQUISITE_STATE),
 				 errmsg("logical decoding requires \"wal_level\" >= \"logical\"")));
 
-	if (MyDatabaseId == InvalidOid)
+	if (!OidIsValid(MyDatabaseId))
 		ereport(ERROR,
 				(errcode(ERRCODE_OBJECT_NOT_IN_PREREQUISITE_STATE),
 				 errmsg("logical decoding requires a database connection")));

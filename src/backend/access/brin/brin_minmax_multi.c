@@ -303,7 +303,7 @@ AssertCheckRanges(Ranges *ranges, FmgrInfo *cmpFn, Oid colloid)
 	Assert(ranges->nsorted >= 0);
 	Assert(ranges->nvalues >= ranges->nsorted);
 	Assert(ranges->maxvalues >= 2 * ranges->nranges + ranges->nvalues);
-	Assert(ranges->typid != InvalidOid);
+	Assert(OidIsValid(ranges->typid));
 
 	/*
 	 * First the ranges - there are 2*nranges boundary values, and the values
@@ -2871,7 +2871,7 @@ minmax_multi_get_procinfo(BrinDesc *bdesc, uint16 attno, uint16 procnum)
 	 */
 	opaque = (MinmaxMultiOpaque *) bdesc->bd_info[attno - 1]->oi_opaque;
 
-	if (opaque->extra_procinfos[basenum].fn_oid == InvalidOid)
+	if (!OidIsValid(opaque->extra_procinfos[basenum].fn_oid))
 	{
 		if (RegProcedureIsValid(index_getprocid(bdesc->bd_index, attno,
 												procnum)))
@@ -2920,7 +2920,7 @@ minmax_multi_get_strategy_procinfo(BrinDesc *bdesc, uint16 attno, Oid subtype,
 		opaque->cached_subtype = subtype;
 	}
 
-	if (opaque->strategy_procinfos[strategynum - 1].fn_oid == InvalidOid)
+	if (!OidIsValid(opaque->strategy_procinfos[strategynum - 1].fn_oid))
 	{
 		Form_pg_attribute attr;
 		HeapTuple	tuple;

@@ -2155,7 +2155,7 @@ hash_inner_and_outer(PlannerInfo *root,
 			continue;
 
 		if (!restrictinfo->can_join ||
-			restrictinfo->hashjoinoperator == InvalidOid)
+			!OidIsValid(restrictinfo->hashjoinoperator))
 			continue;			/* not hashjoinable */
 
 		/*

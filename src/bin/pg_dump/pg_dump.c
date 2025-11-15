@@ -8120,7 +8120,7 @@ getIndexes(Archive *fout, TableInfo tblinfo[], int numTables)
 				NULL, NULL
 			};
 
-			if (indxinfo[j].parentidx == 0)
+			if (!OidIsValid(indxinfo->parentidx))
 				indexkind = RELKIND_INDEX;
 			else
 				indexkind = RELKIND_PARTITIONED_INDEX;
@@ -8397,7 +8397,7 @@ getConstraints(Archive *fout, TableInfo tblinfo[], int numTables)
 		{
 			Oid			indexOid = atooid(PQgetvalue(res, j, i_conindid));
 
-			if (indexOid != InvalidOid)
+			if (OidIsValid(indexOid))
 			{
 				for (int k = 0; k < reftable->numIndexes; k++)
 				{
@@ -10633,7 +10633,7 @@ getDefaultACLs(Archive *fout)
 		/* cheesy ... is it worth coming up with a better object name? */
 		daclinfo[i].dobj.name = pg_strdup(PQgetvalue(res, i, i_defaclobjtype));
 
-		if (nspid != InvalidOid)
+		if (OidIsValid(nspid))
 			daclinfo[i].dobj.namespace = findNamespace(nspid);
 		else
 			daclinfo[i].dobj.namespace = NULL;
@@ -14005,10 +14005,10 @@ dumpTransform(Archive *fout, const TransformInfo *transform)
 	appendPQExpBuffer(defqry, "CREATE TRANSFORM FOR %s LANGUAGE %s (",
 					  transformType, lanname);
 
-	if (!transform->trffromsql && !transform->trftosql)
+	if (!OidIsValid(transform->trffromsql) && !OidIsValid(transform->trftosql))
 		pg_log_warning("bogus transform definition, at least one of trffromsql and trftosql should be nonzero");
 
-	if (transform->trffromsql)
+	if (OidIsValid(transform->trffromsql))
 	{
 		if (fromsqlFuncInfo)
 		{
@@ -14026,9 +14026,9 @@ dumpTransform(Archive *fout, const TransformInfo *transform)
 			pg_log_warning("bogus value in pg_transform.trffromsql field");
 	}
 
-	if (transform->trftosql)
+	if (OidIsValid(transform->trftosql))
 	{
-		if (transform->trffromsql)
+		if (OidIsValid(transform->trffromsql))
 			appendPQExpBufferStr(defqry, ", ");
 
 		if (tosqlFuncInfo)
@@ -15738,7 +15738,7 @@ dumpTSParser(Archive *fout, const TSParserInfo *prsinfo)
 					  convertTSFunction(fout, prsinfo->prstoken));
 	appendPQExpBuffer(q, "    END = %s,\n",
 					  convertTSFunction(fout, prsinfo->prsend));
-	if (prsinfo->prsheadline != InvalidOid)
+	if (OidIsValid(prsinfo->prsheadline))
 		appendPQExpBuffer(q, "    HEADLINE = %s,\n",
 						  convertTSFunction(fout, prsinfo->prsheadline));
 	appendPQExpBuffer(q, "    LEXTYPES = %s );\n",
@@ -15876,7 +15876,7 @@ dumpTSTemplate(Archive *fout, const TSTemplateInfo *tmplinfo)
 	appendPQExpBuffer(q, "CREATE TEXT SEARCH TEMPLATE %s (\n",
 					  fmtQualifiedDumpable(tmplinfo));
 
-	if (tmplinfo->tmplinit != InvalidOid)
+	if (OidIsValid(tmplinfo->tmplinit))
 		appendPQExpBuffer(q, "    INIT = %s,\n",
 						  convertTSFunction(fout, tmplinfo->tmplinit));
 	appendPQExpBuffer(q, "    LEXIZE = %s );\n",
@@ -17788,7 +17788,7 @@ dumpTableSchema(Archive *fout, const TableInfo *tbinfo)
 			appendStringLiteralAH(q, qualrelname, fout);
 			appendPQExpBufferStr(q, "::pg_catalog.regclass;\n");
 
-			if (tbinfo->toast_oid)
+			if (OidIsValid(tbinfo->toast_oid))
 			{
 				/*
 				 * The toast table will have the same OID at restore, so we
@@ -18361,7 +18361,7 @@ dumpIndex(Archive *fout, const IndxInfo *indxinfo)
 		 * But that's fine, and even if you think it's not, the backend won't
 		 * let us do differently.)
 		 */
-		if (indxinfo->parentidx == 0)
+		if (!OidIsValid(indxinfo->parentidx))
 			appendPQExpBuffer(delq, "DROP INDEX %s;\n", qqindxname);
 
 		if (indxinfo->dobj.dump & DUMP_COMPONENT_DEFINITION)
@@ -20357,7 +20357,7 @@ getFormattedTypeName(Archive *fout, Oid oid, OidOptions opts)
 	PQExpBuffer query;
 	PGresult   *res;
 
-	if (oid == 0)
+	if (!OidIsValid(oid))
 	{
 		if ((opts & zeroAsStar) != 0)
 			return "*";

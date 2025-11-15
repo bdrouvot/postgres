@@ -1803,7 +1803,7 @@ ComputeXidHorizons(ComputeXidHorizonsResult *h)
 		 * machinery.
 		 */
 		if (proc->databaseId == MyDatabaseId ||
-			MyDatabaseId == InvalidOid ||
+			!OidIsValid(MyDatabaseId) ||
 			(statusFlags & PROC_AFFECTS_ALL_HORIZONS) ||
 			in_recovery)
 		{
@@ -3631,7 +3631,7 @@ CancelDBBackends(Oid databaseid, ProcSignalReason sigmode, bool conflictPending)
 		int			pgprocno = arrayP->pgprocnos[index];
 		PGPROC	   *proc = &allProcs[pgprocno];
 
-		if (databaseid == InvalidOid || proc->databaseId == databaseid)
+		if (!OidIsValid(databaseid) || proc->databaseId == databaseid)
 		{
 			VirtualTransactionId procvxid;
 			pid_t		pid;

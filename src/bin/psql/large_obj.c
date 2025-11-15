@@ -187,7 +187,7 @@ do_lo_import(const char *filename_arg, const char *comment_arg)
 	loid = lo_import(pset.db, filename_arg);
 	ResetCancelConn();
 
-	if (loid == InvalidOid)
+	if (!OidIsValid(loid))
 	{
 		pg_log_info("%s", PQerrorMessage(pset.db));
 		return fail_lo_xact("\\lo_import", own_transaction);

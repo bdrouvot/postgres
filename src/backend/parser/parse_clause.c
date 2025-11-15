@@ -3709,7 +3709,7 @@ targetIsInSortList(TargetEntry *tle, Oid sortop, List *sortList)
 		SortGroupClause *scl = (SortGroupClause *) lfirst(l);
 
 		if (scl->tleSortGroupRef == ref &&
-			(sortop == InvalidOid ||
+			(!OidIsValid(sortop) ||
 			 sortop == scl->sortop ||
 			 sortop == get_commutator(scl->sortop)))
 			return true;

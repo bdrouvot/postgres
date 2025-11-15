@@ -445,7 +445,7 @@ enum_first(PG_FUNCTION_ARGS)
 	 * examined at all; in particular it might be NULL.
 	 */
 	enumtypoid = get_fn_expr_argtype(fcinfo->flinfo, 0);
-	if (enumtypoid == InvalidOid)
+	if (!OidIsValid(enumtypoid))
 		ereport(ERROR,
 				(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
 				 errmsg("could not determine actual enum type")));
@@ -474,7 +474,7 @@ enum_last(PG_FUNCTION_ARGS)
 	 * examined at all; in particular it might be NULL.
 	 */
 	enumtypoid = get_fn_expr_argtype(fcinfo->flinfo, 0);
-	if (enumtypoid == InvalidOid)
+	if (!OidIsValid(enumtypoid))
 		ereport(ERROR,
 				(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
 				 errmsg("could not determine actual enum type")));
@@ -514,7 +514,7 @@ enum_range_bounds(PG_FUNCTION_ARGS)
 	 * both are of the same type.
 	 */
 	enumtypoid = get_fn_expr_argtype(fcinfo->flinfo, 0);
-	if (enumtypoid == InvalidOid)
+	if (!OidIsValid(enumtypoid))
 		ereport(ERROR,
 				(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
 				 errmsg("could not determine actual enum type")));
@@ -534,7 +534,7 @@ enum_range_all(PG_FUNCTION_ARGS)
 	 * examined at all; in particular it might be NULL.
 	 */
 	enumtypoid = get_fn_expr_argtype(fcinfo->flinfo, 0);
-	if (enumtypoid == InvalidOid)
+	if (!OidIsValid(enumtypoid))
 		ereport(ERROR,
 				(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
 				 errmsg("could not determine actual enum type")));

@@ -10425,12 +10425,12 @@ get_rule_expr(Node *node, deparse_context *context,
 
 				context->varprefix = save_varprefix;
 
-				if (iexpr->infercollid)
+				if (OidIsValid(iexpr->infercollid))
 					appendStringInfo(buf, " COLLATE %s",
 									 generate_collation_name(iexpr->infercollid));
 
 				/* Add the operator class name, if not default */
-				if (iexpr->inferopclass)
+				if (OidIsValid(iexpr->inferopclass))
 				{
 					Oid			inferopclass = iexpr->inferopclass;
 					Oid			inferopcinputtype = get_opclass_input_type(iexpr->inferopclass);

@@ -1270,7 +1270,7 @@ plperl_array_to_datum(SV *src, Oid typid, int32 typmod)
 	int			i;
 
 	elemtypid = get_element_type(typid);
-	if (!elemtypid)
+	if (!OidIsValid(elemtypid))
 		ereport(ERROR,
 				(errcode(ERRCODE_DATATYPE_MISMATCH),
 				 errmsg("cannot convert Perl array to non-array type %s",
@@ -1352,7 +1352,7 @@ plperl_sv_to_datum(SV *sv, Oid typid, int32 typmod,
 		/* must call typinput in case it wants to reject NULL */
 		return InputFunctionCall(finfo, NULL, typioparam, typmod);
 	}
-	else if ((funcid = get_transform_tosql(typid, current_call_data->prodesc->lang_oid, current_call_data->prodesc->trftypes)))
+	else if (OidIsValid((funcid = get_transform_tosql(typid, current_call_data->prodesc->lang_oid, current_call_data->prodesc->trftypes))))
 		return OidFunctionCall1(funcid, PointerGetDatum(sv));
 	else if (SvROK(sv))
 	{
@@ -1612,7 +1612,7 @@ make_array_ref(plperl_array_info *info, int first, int last)
 		{
 			Datum		itemvalue = info->elements[i];
 
-			if (info->transform_proc.fn_oid)
+			if (OidIsValid(info->transform_proc.fn_oid))
 				av_push(result, (SV *) DatumGetPointer(FunctionCall1(&info->transform_proc, itemvalue)));
 			else if (info->elem_is_rowtype)
 				/* Handle composite type elements */
@@ -2195,7 +2195,7 @@ plperl_call_perl_func(plperl_proc_desc *desc, FunctionCallInfo fcinfo)
 	EXTEND(sp, desc->nargs);
 
 	/* Get signature for true functions; inline blocks have no args. */
-	if (fcinfo->flinfo->fn_oid)
+	if (OidIsValid(fcinfo->flinfo->fn_oid))
 		get_func_signature(fcinfo->flinfo->fn_oid, &argtypes, &nargs);
 	Assert(nargs == desc->nargs);
 
@@ -2494,7 +2494,7 @@ plperl_func_handler(PG_FUNCTION_ARGS)
 		}
 		retval = (Datum) 0;
 	}
-	else if (prodesc->result_oid)
+	else if (OidIsValid(prodesc->result_oid))
 	{
 		retval = plperl_sv_to_datum(perlret,
 									prodesc->result_oid,
@@ -3378,7 +3378,7 @@ plperl_return_next_internal(SV *sv)
 
 		tuplestore_puttuple(current_call_data->tuple_store, tuple);
 	}
-	else if (prodesc->result_oid)
+	else if (OidIsValid(prodesc->result_oid))
 	{
 		Datum		ret[1];
 		bool		isNull[1];

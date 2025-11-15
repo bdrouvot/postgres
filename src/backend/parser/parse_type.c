@@ -357,7 +357,7 @@ typenameTypeMod(ParseState *pstate, const TypeName *typeName, Type typ)
 
 	typmodin = ((Form_pg_type) GETSTRUCT(typ))->typmodin;
 
-	if (typmodin == InvalidOid)
+	if (!OidIsValid(typmodin))
 		ereport(ERROR,
 				(errcode(ERRCODE_SYNTAX_ERROR),
 				 errmsg("type modifier is not allowed for type \"%s\"",

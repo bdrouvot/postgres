@@ -320,7 +320,7 @@ DefineAggregate(ParseState *pstate,
 		/* Parameter defaults are not currently allowed by the grammar */
 		Assert(parameterDefaults == NIL);
 		/* There shouldn't have been any OUT parameters, either */
-		Assert(requiredResultType == InvalidOid);
+		Assert(!OidIsValid(requiredResultType));
 	}
 
 	/*

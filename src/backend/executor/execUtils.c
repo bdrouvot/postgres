@@ -1495,5 +1495,5 @@ ExecGetResultRelCheckAsUser(ResultRelInfo *relInfo, EState *estate)
 		elog(ERROR, "no RTEPermissionInfo found for result relation with OID %u",
 			 RelationGetRelid(relInfo->ri_RelationDesc));
 
-	return perminfo->checkAsUser ? perminfo->checkAsUser : GetUserId();
+	return OidIsValid(perminfo->checkAsUser) ? perminfo->checkAsUser : GetUserId();
 }

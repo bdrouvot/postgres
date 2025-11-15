@@ -594,7 +594,7 @@ lookup_type_cache(Oid type_id, int flags)
 	 */
 	if ((flags & (TYPECACHE_EQ_OPR | TYPECACHE_EQ_OPR_FINFO)) &&
 		!(typentry->flags & TCFLAGS_CHECKED_EQ_OPR) &&
-		typentry->btree_opf == InvalidOid)
+		!OidIsValid(typentry->btree_opf))
 		flags |= TYPECACHE_HASH_OPFAMILY;
 
 	if ((flags & (TYPECACHE_HASH_PROC | TYPECACHE_HASH_PROC_FINFO |
@@ -634,13 +634,13 @@ lookup_type_cache(Oid type_id, int flags)
 	{
 		Oid			eq_opr = InvalidOid;
 
-		if (typentry->btree_opf != InvalidOid)
+		if (OidIsValid(typentry->btree_opf))
 			eq_opr = get_opfamily_member(typentry->btree_opf,
 										 typentry->btree_opintype,
 										 typentry->btree_opintype,
 										 BTEqualStrategyNumber);
-		if (eq_opr == InvalidOid &&
-			typentry->hash_opf != InvalidOid)
+		if (!OidIsValid(eq_opr) &&
+			OidIsValid(typentry->hash_opf))
 			eq_opr = get_opfamily_member(typentry->hash_opf,
 										 typentry->hash_opintype,
 										 typentry->hash_opintype,
@@ -681,7 +681,7 @@ lookup_type_cache(Oid type_id, int flags)
 	{
 		Oid			lt_opr = InvalidOid;
 
-		if (typentry->btree_opf != InvalidOid)
+		if (OidIsValid(typentry->btree_opf))
 			lt_opr = get_opfamily_member(typentry->btree_opf,
 										 typentry->btree_opintype,
 										 typentry->btree_opintype,
@@ -706,7 +706,7 @@ lookup_type_cache(Oid type_id, int flags)
 	{
 		Oid			gt_opr = InvalidOid;
 
-		if (typentry->btree_opf != InvalidOid)
+		if (OidIsValid(typentry->btree_opf))
 			gt_opr = get_opfamily_member(typentry->btree_opf,
 										 typentry->btree_opintype,
 										 typentry->btree_opintype,
@@ -731,7 +731,7 @@ lookup_type_cache(Oid type_id, int flags)
 	{
 		Oid			cmp_proc = InvalidOid;
 
-		if (typentry->btree_opf != InvalidOid)
+		if (OidIsValid(typentry->btree_opf))
 			cmp_proc = get_opfamily_proc(typentry->btree_opf,
 										 typentry->btree_opintype,
 										 typentry->btree_opintype,
@@ -764,7 +764,7 @@ lookup_type_cache(Oid type_id, int flags)
 		 * We insist that the eq_opr, if one has been determined, match the
 		 * hash opclass; else report there is no hash function.
 		 */
-		if (typentry->hash_opf != InvalidOid &&
+		if (OidIsValid(typentry->hash_opf) &&
 			(!OidIsValid(typentry->eq_opr) ||
 			 typentry->eq_opr == get_opfamily_member(typentry->hash_opf,
 													 typentry->hash_opintype,
@@ -813,7 +813,7 @@ lookup_type_cache(Oid type_id, int flags)
 		 * We insist that the eq_opr, if one has been determined, match the
 		 * hash opclass; else report there is no hash function.
 		 */
-		if (typentry->hash_opf != InvalidOid &&
+		if (OidIsValid(typentry->hash_opf) &&
 			(!OidIsValid(typentry->eq_opr) ||
 			 typentry->eq_opr == get_opfamily_member(typentry->hash_opf,
 													 typentry->hash_opintype,
@@ -866,33 +866,33 @@ lookup_type_cache(Oid type_id, int flags)
 	 * that would cause session-lifespan memory leaks.
 	 */
 	if ((flags & TYPECACHE_EQ_OPR_FINFO) &&
-		typentry->eq_opr_finfo.fn_oid == InvalidOid &&
-		typentry->eq_opr != InvalidOid)
+		!OidIsValid(typentry->eq_opr_finfo.fn_oid) &&
+		OidIsValid(typentry->eq_opr))
 	{
 		Oid			eq_opr_func;
 
 		eq_opr_func = get_opcode(typentry->eq_opr);
-		if (eq_opr_func != InvalidOid)
+		if (OidIsValid(eq_opr_func))
 			fmgr_info_cxt(eq_opr_func, &typentry->eq_opr_finfo,
 						  CacheMemoryContext);
 	}
 	if ((flags & TYPECACHE_CMP_PROC_FINFO) &&
-		typentry->cmp_proc_finfo.fn_oid == InvalidOid &&
-		typentry->cmp_proc != InvalidOid)
+		!OidIsValid(typentry->cmp_proc_finfo.fn_oid) &&
+		OidIsValid(typentry->cmp_proc))
 	{
 		fmgr_info_cxt(typentry->cmp_proc, &typentry->cmp_proc_finfo,
 					  CacheMemoryContext);
 	}
 	if ((flags & TYPECACHE_HASH_PROC_FINFO) &&
-		typentry->hash_proc_finfo.fn_oid == InvalidOid &&
-		typentry->hash_proc != InvalidOid)
+		!OidIsValid(typentry->hash_proc_finfo.fn_oid) &&
+		OidIsValid(typentry->hash_proc))
 	{
 		fmgr_info_cxt(typentry->hash_proc, &typentry->hash_proc_finfo,
 					  CacheMemoryContext);
 	}
 	if ((flags & TYPECACHE_HASH_EXTENDED_PROC_FINFO) &&
-		typentry->hash_extended_proc_finfo.fn_oid == InvalidOid &&
-		typentry->hash_extended_proc != InvalidOid)
+		!OidIsValid(typentry->hash_extended_proc_finfo.fn_oid) &&
+		OidIsValid(typentry->hash_extended_proc))
 	{
 		fmgr_info_cxt(typentry->hash_extended_proc,
 					  &typentry->hash_extended_proc_finfo,
@@ -938,7 +938,7 @@ lookup_type_cache(Oid type_id, int flags)
 	 * If requested, get information about a domain type
 	 */
 	if ((flags & TYPECACHE_DOMAIN_BASE_INFO) &&
-		typentry->domainBaseType == InvalidOid &&
+		!OidIsValid(typentry->domainBaseType) &&
 		typentry->typtype == TYPTYPE_DOMAIN)
 	{
 		typentry->domainBaseTypmod = -1;
@@ -1678,7 +1678,7 @@ cache_record_field_properties(TypeCacheEntry *typentry)
 		TypeCacheEntry *baseentry;
 
 		/* load up basetype info if we didn't already */
-		if (typentry->domainBaseType == InvalidOid)
+		if (!OidIsValid(typentry->domainBaseType))
 		{
 			typentry->domainBaseTypmod = -1;
 			typentry->domainBaseType =

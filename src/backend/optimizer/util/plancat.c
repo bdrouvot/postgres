@@ -822,7 +822,7 @@ infer_arbiter_indexes(PlannerInfo *root)
 	 * that already).
 	 */
 	if (onconflict->arbiterElems == NIL &&
-		onconflict->constraint == InvalidOid)
+		!OidIsValid(onconflict->constraint))
 		return NIL;
 
 	/*
@@ -869,11 +869,11 @@ infer_arbiter_indexes(PlannerInfo *root)
 	 * Lookup named constraint's index.  This is not immediately returned
 	 * because some additional sanity checks are required.
 	 */
-	if (onconflict->constraint != InvalidOid)
+	if (OidIsValid(onconflict->constraint))
 	{
 		indexOidFromConstraint = get_constraint_index(onconflict->constraint);
 
-		if (indexOidFromConstraint == InvalidOid)
+		if (!OidIsValid(indexOidFromConstraint))
 			ereport(ERROR,
 					(errcode(ERRCODE_WRONG_OBJECT_TYPE),
 					 errmsg("constraint in ON CONFLICT clause has no associated index")));
@@ -934,7 +934,7 @@ infer_arbiter_indexes(PlannerInfo *root)
 			table_close(relation, NoLock);
 			return results;
 		}
-		else if (indexOidFromConstraint != InvalidOid)
+		else if (OidIsValid(indexOidFromConstraint))
 		{
 			/* No point in further work for index in named constraint case */
 			goto next;
@@ -1003,8 +1003,8 @@ infer_arbiter_indexes(PlannerInfo *root)
 			 * Otherwise, check that element expression appears in cataloged
 			 * index definition.
 			 */
-			if (elem->infercollid != InvalidOid ||
-				elem->inferopclass != InvalidOid ||
+			if (OidIsValid(elem->infercollid) ||
+				OidIsValid(elem->inferopclass) ||
 				list_member(idxExprs, elem->expr))
 				continue;
 
@@ -1088,13 +1088,13 @@ infer_collation_opclass_match(InferenceElem *elem, Relation idxRel,
 	 * If inference specification element lacks collation/opclass, then no
 	 * need to check for exact match.
 	 */
-	if (elem->infercollid == InvalidOid && elem->inferopclass == InvalidOid)
+	if (!OidIsValid(elem->infercollid) && !OidIsValid(elem->inferopclass))
 		return true;
 
 	/*
 	 * Lookup opfamily and input type, for matching indexes
 	 */
-	if (elem->inferopclass)
+	if (OidIsValid(elem->inferopclass))
 	{
 		inferopfamily = get_opclass_family(elem->inferopclass);
 		inferopcinputtype = get_opclass_input_type(elem->inferopclass);
@@ -1110,14 +1110,14 @@ infer_collation_opclass_match(InferenceElem *elem, Relation idxRel,
 		if (attno != 0)
 			nplain++;
 
-		if (elem->inferopclass != InvalidOid &&
+		if (OidIsValid(elem->inferopclass) &&
 			(inferopfamily != opfamily || inferopcinputtype != opcinputtype))
 		{
 			/* Attribute needed to match opclass, but didn't */
 			continue;
 		}
 
-		if (elem->infercollid != InvalidOid &&
+		if (OidIsValid(elem->infercollid) &&
 			elem->infercollid != collation)
 		{
 			/* Attribute needed to match collation, but didn't */

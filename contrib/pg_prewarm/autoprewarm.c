@@ -398,7 +398,7 @@ apw_load_buffers(void)
 				 * Combine BlockInfoRecords for global objects with those of
 				 * the database.
 				 */
-				if (current_db != InvalidOid)
+				if (OidIsValid(current_db))
 					break;
 				current_db = blkinfo[j].database;
 			}
@@ -411,7 +411,7 @@ apw_load_buffers(void)
 		 * BlockInfoRecords belonging to global objects exist.  We can't
 		 * prewarm without a database connection, so just bail out.
 		 */
-		if (current_db == InvalidOid)
+		if (!OidIsValid(current_db))
 			break;
 
 		/* Configure stop point and database for next per-database worker. */
@@ -536,7 +536,7 @@ autoprewarm_database_main(Datum main_arg)
 		 * All blocks between prewarm_start_idx and prewarm_stop_idx should
 		 * belong either to global objects or the same database.
 		 */
-		Assert(blk.database == apw_state->database || blk.database == 0);
+		Assert(blk.database == apw_state->database || !OidIsValid(blk.database));
 
 		StartTransactionCommand();
 

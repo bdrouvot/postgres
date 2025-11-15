@@ -367,9 +367,7 @@ PLy_output_setup_func(PLyObToDatum *arg, MemoryContext arg_mcxt,
 							  typentry->typelem, typmod,
 							  proc);
 	}
-	else if ((trfuncid = get_transform_tosql(typeOid,
-											 proc->langid,
-											 proc->trftypes)))
+	else if (OidIsValid((trfuncid = get_transform_tosql(typeOid, proc->langid, proc->trftypes))))
 	{
 		arg->func = PLyObject_ToTransform;
 		fmgr_info_cxt(trfuncid, &arg->transform.typtransform, arg_mcxt);
@@ -482,9 +480,7 @@ PLy_input_setup_func(PLyDatumToOb *arg, MemoryContext arg_mcxt,
 							 typentry->typelem, typmod,
 							 proc);
 	}
-	else if ((trfuncid = get_transform_fromsql(typeOid,
-											   proc->langid,
-											   proc->trftypes)))
+	else if (OidIsValid((trfuncid = get_transform_fromsql(typeOid, proc->langid, proc->trftypes))))
 	{
 		arg->func = PLyObject_FromTransform;
 		fmgr_info_cxt(trfuncid, &arg->transform.typtransform, arg_mcxt);

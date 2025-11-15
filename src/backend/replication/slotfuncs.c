@@ -275,17 +275,17 @@ pg_get_replication_slots(PG_FUNCTION_ARGS)
 		i = 0;
 		values[i++] = NameGetDatum(&slot_contents.data.name);
 
-		if (slot_contents.data.database == InvalidOid)
+		if (!OidIsValid(slot_contents.data.database))
 			nulls[i++] = true;
 		else
 			values[i++] = NameGetDatum(&slot_contents.data.plugin);
 
-		if (slot_contents.data.database == InvalidOid)
+		if (!OidIsValid(slot_contents.data.database))
 			values[i++] = CStringGetTextDatum("physical");
 		else
 			values[i++] = CStringGetTextDatum("logical");
 
-		if (slot_contents.data.database == InvalidOid)
+		if (!OidIsValid(slot_contents.data.database))
 			nulls[i++] = true;
 		else
 			values[i++] = ObjectIdGetDatum(slot_contents.data.database);

@@ -1199,7 +1199,7 @@ transformAExprIn(ParseState *pstate, A_Expr *a)
 			array_type = get_array_type(scalar_type);
 		else
 			array_type = InvalidOid;
-		if (array_type != InvalidOid)
+		if (OidIsValid(array_type))
 		{
 			/*
 			 * OK: coerce all the right-hand non-Var inputs to the common type
@@ -2047,7 +2047,7 @@ transformArrayExpr(ParseState *pstate, A_ArrayExpr *a,
 									  element_type,
 									  typmod);
 			/* we certainly have an array here */
-			Assert(array_type == InvalidOid || array_type == exprType(newe));
+			Assert(!OidIsValid(array_type) || array_type == exprType(newe));
 			newa->multidims = true;
 		}
 		else
@@ -2752,7 +2752,7 @@ transformTypeCast(ParseState *pstate, TypeCast *tc)
 		expr = transformExprRecurse(pstate, arg);
 
 	inputType = exprType(expr);
-	if (inputType == InvalidOid)
+	if (!OidIsValid(inputType))
 		return expr;			/* do nothing if NULL input */
 
 	/*

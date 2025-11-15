@@ -525,7 +525,7 @@ generateSerialExtraStmts(CreateStmtContext *cxt, ColumnDef *column,
 	 * clause, the "redundant options" error will point to their occurrence,
 	 * not our synthetic one.
 	 */
-	if (seqtypid)
+	if (OidIsValid(seqtypid))
 		seqstmt->options = lcons(makeDefElem("as",
 											 (Node *) makeTypeNameFromOid(seqtypid, -1),
 											 -1),
@@ -3746,7 +3746,7 @@ transformAlterTableStmt(Oid relid, AlterTableStmt *stmt,
 
 					seq_relid = getIdentitySequence(rel, attnum, true);
 
-					if (seq_relid)
+					if (OidIsValid(seq_relid))
 					{
 						AlterSeqStmt *seqstmt;
 

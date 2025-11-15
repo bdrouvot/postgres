@@ -6270,7 +6270,7 @@ set_rel_width(PlannerInfo *root, RelOptInfo *rel)
 			}
 
 			/* Try to get column width from statistics */
-			if (reloid != InvalidOid && var->varattno > 0)
+			if (OidIsValid(reloid) && var->varattno > 0)
 			{
 				item_width = get_attavgwidth(reloid, var->varattno);
 				if (item_width > 0)
@@ -6333,7 +6333,7 @@ set_rel_width(PlannerInfo *root, RelOptInfo *rel)
 	{
 		int64		wholerow_width = MAXALIGN(SizeofHeapTupleHeader);
 
-		if (reloid != InvalidOid)
+		if (OidIsValid(reloid))
 		{
 			/* Real relation, so estimate true tuple width */
 			wholerow_width += get_relation_data_width(reloid,

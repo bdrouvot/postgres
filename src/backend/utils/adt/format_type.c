@@ -118,7 +118,7 @@ format_type_extended(Oid type_oid, int32 typemod, bits16 flags)
 	char	   *buf;
 	bool		with_typemod;
 
-	if (type_oid == InvalidOid)
+	if (!OidIsValid(type_oid))
 	{
 		if ((flags & FORMAT_TYPE_INVALID_AS_NULL) != 0)
 			return NULL;
@@ -375,7 +375,7 @@ printTypmod(const char *typname, int32 typmod, Oid typmodout)
 	/* Shouldn't be called if typmod is -1 */
 	Assert(typmod >= 0);
 
-	if (typmodout == InvalidOid)
+	if (!OidIsValid(typmodout))
 	{
 		/* Default behavior: just print the integer typmod with parens */
 		res = psprintf("%s(%d)", typname, (int) typmod);

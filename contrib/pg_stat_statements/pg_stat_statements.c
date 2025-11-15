@@ -2730,7 +2730,7 @@ entry_reset(Oid userid, Oid dbid, int64 queryid, bool minmax_only)
 
 	stats_reset = GetCurrentTimestamp();
 
-	if (userid != 0 && dbid != 0 && queryid != INT64CONST(0))
+	if (OidIsValid(userid) && OidIsValid(dbid) && queryid != INT64CONST(0))
 	{
 		/* If all the parameters are available, use the fast path. */
 		memset(&key, 0, sizeof(pgssHashKey));
@@ -2753,14 +2753,14 @@ entry_reset(Oid userid, Oid dbid, int64 queryid, bool minmax_only)
 
 		SINGLE_ENTRY_RESET(entry);
 	}
-	else if (userid != 0 || dbid != 0 || queryid != INT64CONST(0))
+	else if (OidIsValid(userid) || OidIsValid(dbid) || queryid != INT64CONST(0))
 	{
 		/* Reset entries corresponding to valid parameters. */
 		hash_seq_init(&hash_seq, pgss_hash);
 		while ((entry = hash_seq_search(&hash_seq)) != NULL)
 		{
-			if ((!userid || entry->key.userid == userid) &&
-				(!dbid || entry->key.dbid == dbid) &&
+			if ((!OidIsValid(userid) || entry->key.userid == userid) &&
+				(!OidIsValid(dbid) || entry->key.dbid == dbid) &&
 				(!queryid || entry->key.queryid == queryid))
 			{
 				SINGLE_ENTRY_RESET(entry);

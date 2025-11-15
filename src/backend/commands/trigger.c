@@ -2335,7 +2335,7 @@ ExecCallTriggerFunc(TriggerData *trigdata,
 	 * We cache fmgr lookup info, to avoid making the lookup again on each
 	 * call.
 	 */
-	if (finfo->fn_oid == InvalidOid)
+	if (!OidIsValid(finfo->fn_oid))
 		fmgr_info(trigdata->tg_trigger->tgfoid, finfo);
 
 	Assert(finfo->fn_oid == trigdata->tg_trigger->tgfoid);

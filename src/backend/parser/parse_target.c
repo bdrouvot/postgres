@@ -775,7 +775,7 @@ transformAssignmentIndirection(ParseState *pstate,
 			baseTypeId = getBaseTypeAndTypmod(targetTypeId, &baseTypeMod);
 
 			typrelid = typeidTypeRelid(baseTypeId);
-			if (!typrelid)
+			if (!OidIsValid(typrelid))
 				ereport(ERROR,
 						(errcode(ERRCODE_DATATYPE_MISMATCH),
 						 errmsg("cannot assign to field \"%s\" of column \"%s\" because its type %s is not a composite type",

@@ -1450,7 +1450,7 @@ scalarineqsel_wrapper(PG_FUNCTION_ARGS, bool isgt, bool iseq)
 	if (!varonleft)
 	{
 		operator = get_commutator(operator);
-		if (!operator)
+		if (!OidIsValid(operator))
 		{
 			/* Use default selectivity (should we raise an error instead?) */
 			ReleaseVariableStats(vardata);
@@ -2886,7 +2886,7 @@ neqjoinsel(PG_FUNCTION_ARGS)
 		 */
 		Oid			eqop = get_negator(operator);
 
-		if (eqop)
+		if (OidIsValid(eqop))
 		{
 			result =
 				DatumGetFloat8(DirectFunctionCall5Coll(eqjoinsel,
@@ -4338,7 +4338,7 @@ estimate_multivariate_ndistinct(PlannerInfo *root, RelOptInfo *rel,
 	}
 
 	/* No match? */
-	if (statOid == InvalidOid)
+	if (!OidIsValid(statOid))
 		return false;
 
 	Assert(nmatches_vars + nmatches_exprs > 1);
@@ -6116,7 +6116,7 @@ examine_indexcol_variable(PlannerInfo *root, IndexOptInfo *index,
 
 		Assert(rte->rtekind == RTE_RELATION);
 		relid = rte->relid;
-		Assert(relid != InvalidOid);
+		Assert(OidIsValid(relid));
 		colnum = index->indexkeys[indexcol];
 		vardata->rel = index->rel;
 

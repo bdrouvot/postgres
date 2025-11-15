@@ -1758,7 +1758,7 @@ OpenTemporaryFile(bool interXact)
 	 * here, but just in case it isn't, fall back to pg_default tablespace.
 	 */
 	if (file <= 0)
-		file = OpenTemporaryFileInTablespace(MyDatabaseTableSpace ?
+		file = OpenTemporaryFileInTablespace(OidIsValid(MyDatabaseTableSpace) ?
 											 MyDatabaseTableSpace :
 											 DEFAULTTABLESPACE_OID,
 											 true);
@@ -1784,7 +1784,7 @@ TempTablespacePath(char *path, Oid tablespace)
 	 *
 	 * If someone tries to specify pg_global, use pg_default instead.
 	 */
-	if (tablespace == InvalidOid ||
+	if (!OidIsValid(tablespace) ||
 		tablespace == DEFAULTTABLESPACE_OID ||
 		tablespace == GLOBALTABLESPACE_OID)
 		snprintf(path, MAXPGPATH, "base/%s", PG_TEMP_FILES_DIR);

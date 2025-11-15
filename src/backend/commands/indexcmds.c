@@ -1049,7 +1049,7 @@ DefineIndex(Oid tableId,
 						else if (exclusion)
 							idx_eqop = indexInfo->ii_ExclusionOps[j];
 
-						if (!idx_eqop)
+						if (!OidIsValid(idx_eqop))
 							ereport(ERROR,
 									errcode(ERRCODE_UNDEFINED_OBJECT),
 									errmsg("could not identify an equality operator for type %s", format_type_be(idx_opcintype)),
@@ -1441,12 +1441,12 @@ DefineIndex(Oid tableId,
 						 * is no such constraint, this index is no good, so
 						 * keep looking.
 						 */
-						if (createdConstraintId != InvalidOid)
+						if (OidIsValid(createdConstraintId))
 						{
 							cldConstrOid =
 								get_relation_idx_constraint_oid(childRelid,
 																cldidxid);
-							if (cldConstrOid == InvalidOid)
+							if (!OidIsValid(cldConstrOid))
 							{
 								index_close(cldidx, lockmode);
 								continue;
@@ -1455,7 +1455,7 @@ DefineIndex(Oid tableId,
 
 						/* Attach index to parent and we're done. */
 						IndexSetParentIndex(cldidx, indexRelationId);
-						if (createdConstraintId != InvalidOid)
+						if (OidIsValid(createdConstraintId))
 							ConstraintSetParentConstraint(cldConstrOid,
 														  createdConstraintId,
 														  childRelid);
@@ -4470,7 +4470,7 @@ IndexSetParentIndex(Relation partitionIdx, Oid parentOid)
 
 	if (!HeapTupleIsValid(tuple))
 	{
-		if (parentOid == InvalidOid)
+		if (!OidIsValid(parentOid))
 		{
 			/*
 			 * No pg_inherits row, and no parent wanted: nothing to do in this
@@ -4488,7 +4488,7 @@ IndexSetParentIndex(Relation partitionIdx, Oid parentOid)
 	{
 		Form_pg_inherits inhForm = (Form_pg_inherits) GETSTRUCT(tuple);
 
-		if (parentOid == InvalidOid)
+		if (!OidIsValid(parentOid))
 		{
 			/*
 			 * There exists a pg_inherits row, which we want to clear; do so.

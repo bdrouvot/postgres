@@ -1095,7 +1095,7 @@ check_default_tablespace(char **newval, void **extra, GucSource source)
 	 * cannot do the catalog accesses necessary to verify the name.  Must
 	 * accept the value on faith.
 	 */
-	if (IsTransactionState() && MyDatabaseId != InvalidOid)
+	if (IsTransactionState() && OidIsValid(MyDatabaseId))
 	{
 		if (**newval != '\0' &&
 			!OidIsValid(get_tablespace_oid(*newval, true)))
@@ -1219,7 +1219,7 @@ check_temp_tablespaces(char **newval, void **extra, GucSource source)
 	 * accept the value on faith. Fortunately, there's then also no need to
 	 * pass the data to fd.c.
 	 */
-	if (IsTransactionState() && MyDatabaseId != InvalidOid)
+	if (IsTransactionState() && OidIsValid(MyDatabaseId))
 	{
 		temp_tablespaces_extra *myextra;
 		Oid		   *tblSpcs;
@@ -1249,7 +1249,7 @@ check_temp_tablespaces(char **newval, void **extra, GucSource source)
 			 * nonexistent tablespace, only a NOTICE.  See comments in guc.h.
 			 */
 			curoid = get_tablespace_oid(curname, source <= PGC_S_TEST);
-			if (curoid == InvalidOid)
+			if (!OidIsValid(curoid))
 			{
 				if (source == PGC_S_TEST)
 					ereport(NOTICE,
@@ -1383,7 +1383,7 @@ PrepareTempTablespaces(void)
 
 		/* Else verify that name is a valid tablespace name */
 		curoid = get_tablespace_oid(curname, true);
-		if (curoid == InvalidOid)
+		if (!OidIsValid(curoid))
 		{
 			/* Skip any bad list elements */
 			continue;

@@ -1064,7 +1064,7 @@ match_network_subset(Node *leftop,
 	 * operator disallows equality.
 	 */
 	opr1oid = get_opfamily_member_for_cmptype(opfamily, datatype, datatype, is_eq ? COMPARE_GE : COMPARE_GT);
-	if (opr1oid == InvalidOid)
+	if (!OidIsValid(opr1oid))
 		return NIL;
 
 	opr1right = network_scan_first(rightopval);
@@ -1081,7 +1081,7 @@ match_network_subset(Node *leftop,
 	/* create clause "key <= network_scan_last( rightopval )" */
 
 	opr2oid = get_opfamily_member_for_cmptype(opfamily, datatype, datatype, COMPARE_LE);
-	if (opr2oid == InvalidOid)
+	if (!OidIsValid(opr2oid))
 		return NIL;
 
 	opr2right = network_scan_last(rightopval);

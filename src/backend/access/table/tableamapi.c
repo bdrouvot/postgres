@@ -120,7 +120,7 @@ check_default_table_access_method(char **newval, void **extra, GucSource source)
 	 * cannot do the catalog access necessary to verify the method.  Must
 	 * accept the value on faith.
 	 */
-	if (IsTransactionState() && MyDatabaseId != InvalidOid)
+	if (IsTransactionState() && OidIsValid(MyDatabaseId))
 	{
 		if (!OidIsValid(get_table_am_oid(*newval, true)))
 		{

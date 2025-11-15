@@ -2231,7 +2231,7 @@ get_rel_sync_entry(PGOutputData *data, Relation relation)
 															   ancestors,
 															   &level);
 
-					if (ancestor != InvalidOid)
+					if (OidIsValid(ancestor))
 					{
 						ancestor_published = true;
 						if (pub->pubviaroot)

@@ -69,7 +69,7 @@ logicalrep_relmap_invalidate_cb(Datum arg, Oid reloid)
 	if (LogicalRepRelMap == NULL)
 		return;
 
-	if (reloid != InvalidOid)
+	if (OidIsValid(reloid))
 	{
 		HASH_SEQ_STATUS status;
 
@@ -540,7 +540,7 @@ logicalrep_partmap_invalidate_cb(Datum arg, Oid reloid)
 	if (LogicalRepPartMap == NULL)
 		return;
 
-	if (reloid != InvalidOid)
+	if (OidIsValid(reloid))
 	{
 		HASH_SEQ_STATUS status;
 

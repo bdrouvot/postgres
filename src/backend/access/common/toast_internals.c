@@ -260,7 +260,7 @@ toast_save_datum(Relation rel, Datum value,
 				}
 			}
 		}
-		if (toast_pointer.va_valueid == InvalidOid)
+		if (!OidIsValid(toast_pointer.va_valueid))
 		{
 			/*
 			 * new value; must choose an OID that doesn't conflict in either

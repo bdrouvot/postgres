@@ -559,7 +559,7 @@ array_agg_transfn(PG_FUNCTION_ARGS)
 	ArrayBuildState *state;
 	Datum		elem;
 
-	if (arg1_typeid == InvalidOid)
+	if (!OidIsValid(arg1_typeid))
 		ereport(ERROR,
 				(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
 				 errmsg("could not determine input data type")));
@@ -936,7 +936,7 @@ array_agg_array_transfn(PG_FUNCTION_ARGS)
 	MemoryContext aggcontext;
 	ArrayBuildStateArr *state;
 
-	if (arg1_typeid == InvalidOid)
+	if (!OidIsValid(arg1_typeid))
 		ereport(ERROR,
 				(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
 				 errmsg("could not determine input data type")));

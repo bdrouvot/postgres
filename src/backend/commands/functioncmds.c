@@ -1160,7 +1160,7 @@ CreateFunction(ParseState *pstate, CreateFunctionStmt *stmt)
 			Oid			elt = get_base_element_type(typeid);
 			Oid			transformid;
 
-			typeid = elt ? elt : typeid;
+			typeid = OidIsValid(elt) ? elt : typeid;
 			transformid = get_transform_oid(typeid, languageOid, false);
 			trftypes_list = lappend_oid(trftypes_list, typeid);
 			trfoids_list = lappend_oid(trfoids_list, transformid);
@@ -1188,7 +1188,7 @@ CreateFunction(ParseState *pstate, CreateFunctionStmt *stmt)
 	if (stmt->is_procedure)
 	{
 		Assert(!stmt->returnType);
-		prorettype = requiredResultType ? requiredResultType : VOIDOID;
+		prorettype = OidIsValid(requiredResultType) ? requiredResultType : VOIDOID;
 		returnsSet = false;
 	}
 	else if (stmt->returnType)

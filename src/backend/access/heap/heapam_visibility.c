@@ -172,7 +172,7 @@ HeapTupleSatisfiesSelf(HeapTuple htup, Snapshot snapshot, Buffer buffer)
 	HeapTupleHeader tuple = htup->t_data;
 
 	Assert(ItemPointerIsValid(&htup->t_self));
-	Assert(htup->t_tableOid != InvalidOid);
+	Assert(OidIsValid(htup->t_tableOid));
 
 	if (!HeapTupleHeaderXminCommitted(tuple))
 	{
@@ -365,7 +365,7 @@ HeapTupleSatisfiesToast(HeapTuple htup, Snapshot snapshot,
 	HeapTupleHeader tuple = htup->t_data;
 
 	Assert(ItemPointerIsValid(&htup->t_self));
-	Assert(htup->t_tableOid != InvalidOid);
+	Assert(OidIsValid(htup->t_tableOid));
 
 	if (!HeapTupleHeaderXminCommitted(tuple))
 	{
@@ -461,7 +461,7 @@ HeapTupleSatisfiesUpdate(HeapTuple htup, CommandId curcid,
 	HeapTupleHeader tuple = htup->t_data;
 
 	Assert(ItemPointerIsValid(&htup->t_self));
-	Assert(htup->t_tableOid != InvalidOid);
+	Assert(OidIsValid(htup->t_tableOid));
 
 	if (!HeapTupleHeaderXminCommitted(tuple))
 	{
@@ -746,7 +746,7 @@ HeapTupleSatisfiesDirty(HeapTuple htup, Snapshot snapshot,
 	HeapTupleHeader tuple = htup->t_data;
 
 	Assert(ItemPointerIsValid(&htup->t_self));
-	Assert(htup->t_tableOid != InvalidOid);
+	Assert(OidIsValid(htup->t_tableOid));
 
 	snapshot->xmin = snapshot->xmax = InvalidTransactionId;
 	snapshot->speculativeToken = 0;
@@ -972,7 +972,7 @@ HeapTupleSatisfiesMVCC(HeapTuple htup, Snapshot snapshot,
 	Assert(snapshot->regd_count > 0 || snapshot->active_count > 0);
 
 	Assert(ItemPointerIsValid(&htup->t_self));
-	Assert(htup->t_tableOid != InvalidOid);
+	Assert(OidIsValid(htup->t_tableOid));
 
 	if (!HeapTupleHeaderXminCommitted(tuple))
 	{
@@ -1207,7 +1207,7 @@ HeapTupleSatisfiesVacuumHorizon(HeapTuple htup, Buffer buffer, TransactionId *de
 	HeapTupleHeader tuple = htup->t_data;
 
 	Assert(ItemPointerIsValid(&htup->t_self));
-	Assert(htup->t_tableOid != InvalidOid);
+	Assert(OidIsValid(htup->t_tableOid));
 	Assert(dead_after != NULL);
 
 	*dead_after = InvalidTransactionId;
@@ -1476,7 +1476,7 @@ HeapTupleIsSurelyDead(HeapTuple htup, GlobalVisState *vistest)
 	HeapTupleHeader tuple = htup->t_data;
 
 	Assert(ItemPointerIsValid(&htup->t_self));
-	Assert(htup->t_tableOid != InvalidOid);
+	Assert(OidIsValid(htup->t_tableOid));
 
 	/*
 	 * If the inserting transaction is marked invalid, then it aborted, and
@@ -1601,7 +1601,7 @@ HeapTupleSatisfiesHistoricMVCC(HeapTuple htup, Snapshot snapshot,
 	TransactionId xmax = HeapTupleHeaderGetRawXmax(tuple);
 
 	Assert(ItemPointerIsValid(&htup->t_self));
-	Assert(htup->t_tableOid != InvalidOid);
+	Assert(OidIsValid(htup->t_tableOid));
 
 	/* inserting transaction aborted */
 	if (HeapTupleHeaderXminInvalid(tuple))

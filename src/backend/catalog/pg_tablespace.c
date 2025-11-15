@@ -39,7 +39,7 @@ get_tablespace_location(Oid tablespaceOid)
 	 * "the database's default tablespace".  So, rather than throwing an error
 	 * for zero, we choose to assume that's what is meant.
 	 */
-	if (tablespaceOid == InvalidOid)
+	if (!OidIsValid(tablespaceOid))
 		tablespaceOid = MyDatabaseTableSpace;
 
 	/*

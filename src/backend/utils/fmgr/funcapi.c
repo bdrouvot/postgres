@@ -490,7 +490,7 @@ internal_get_result_type(Oid funcid,
 	{
 		Oid			newrettype = exprType(call_expr);
 
-		if (newrettype == InvalidOid)	/* this probably should not happen */
+		if (!OidIsValid(newrettype))	/* this probably should not happen */
 			ereport(ERROR,
 					(errcode(ERRCODE_DATATYPE_MISMATCH),
 					 errmsg("could not determine actual result type for function \"%s\" declared to return type %s",

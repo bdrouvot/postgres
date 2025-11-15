@@ -367,7 +367,7 @@ foreign_expr_walker(Node *node,
 				{
 					/* Var belongs to some other table */
 					collation = var->varcollid;
-					if (collation == InvalidOid ||
+					if (!OidIsValid(collation) ||
 						collation == DEFAULT_COLLATION_OID)
 					{
 						/*
@@ -472,7 +472,7 @@ foreign_expr_walker(Node *node,
 				 * non-collation-sensitive context.
 				 */
 				collation = c->constcollid;
-				if (collation == InvalidOid ||
+				if (!OidIsValid(collation) ||
 					collation == DEFAULT_COLLATION_OID)
 					state = FDW_COLLATE_NONE;
 				else
@@ -503,7 +503,7 @@ foreign_expr_walker(Node *node,
 				 * Collation rule is same as for Consts and non-foreign Vars.
 				 */
 				collation = p->paramcollid;
-				if (collation == InvalidOid ||
+				if (!OidIsValid(collation) ||
 					collation == DEFAULT_COLLATION_OID)
 					state = FDW_COLLATE_NONE;
 				else
@@ -543,7 +543,7 @@ foreign_expr_walker(Node *node,
 				 * function nodes.
 				 */
 				collation = sr->refcollid;
-				if (collation == InvalidOid)
+				if (!OidIsValid(collation))
 					state = FDW_COLLATE_NONE;
 				else if (inner_cxt.state == FDW_COLLATE_SAFE &&
 						 collation == inner_cxt.collation)
@@ -577,7 +577,7 @@ foreign_expr_walker(Node *node,
 				 * If function's input collation is not derived from a foreign
 				 * Var, it can't be sent to remote.
 				 */
-				if (fe->inputcollid == InvalidOid)
+				if (!OidIsValid(fe->inputcollid))
 					 /* OK, inputs are all noncollatable */ ;
 				else if (inner_cxt.state != FDW_COLLATE_SAFE ||
 						 fe->inputcollid != inner_cxt.collation)
@@ -590,7 +590,7 @@ foreign_expr_walker(Node *node,
 				 * node might not care.)
 				 */
 				collation = fe->funccollid;
-				if (collation == InvalidOid)
+				if (!OidIsValid(collation))
 					state = FDW_COLLATE_NONE;
 				else if (inner_cxt.state == FDW_COLLATE_SAFE &&
 						 collation == inner_cxt.collation)
@@ -625,7 +625,7 @@ foreign_expr_walker(Node *node,
 				 * If operator's input collation is not derived from a foreign
 				 * Var, it can't be sent to remote.
 				 */
-				if (oe->inputcollid == InvalidOid)
+				if (!OidIsValid(oe->inputcollid))
 					 /* OK, inputs are all noncollatable */ ;
 				else if (inner_cxt.state != FDW_COLLATE_SAFE ||
 						 oe->inputcollid != inner_cxt.collation)
@@ -633,7 +633,7 @@ foreign_expr_walker(Node *node,
 
 				/* Result-collation handling is same as for functions */
 				collation = oe->opcollid;
-				if (collation == InvalidOid)
+				if (!OidIsValid(collation))
 					state = FDW_COLLATE_NONE;
 				else if (inner_cxt.state == FDW_COLLATE_SAFE &&
 						 collation == inner_cxt.collation)
@@ -665,7 +665,7 @@ foreign_expr_walker(Node *node,
 				 * If operator's input collation is not derived from a foreign
 				 * Var, it can't be sent to remote.
 				 */
-				if (oe->inputcollid == InvalidOid)
+				if (!OidIsValid(oe->inputcollid))
 					 /* OK, inputs are all noncollatable */ ;
 				else if (inner_cxt.state != FDW_COLLATE_SAFE ||
 						 oe->inputcollid != inner_cxt.collation)
@@ -692,7 +692,7 @@ foreign_expr_walker(Node *node,
 				 * an input foreign Var (same logic as for a real function).
 				 */
 				collation = r->resultcollid;
-				if (collation == InvalidOid)
+				if (!OidIsValid(collation))
 					state = FDW_COLLATE_NONE;
 				else if (inner_cxt.state == FDW_COLLATE_SAFE &&
 						 collation == inner_cxt.collation)
@@ -720,7 +720,7 @@ foreign_expr_walker(Node *node,
 				 * function).
 				 */
 				collation = e->resultcollid;
-				if (collation == InvalidOid)
+				if (!OidIsValid(collation))
 					state = FDW_COLLATE_NONE;
 				else if (inner_cxt.state == FDW_COLLATE_SAFE &&
 						 collation == inner_cxt.collation)
@@ -846,7 +846,7 @@ foreign_expr_walker(Node *node,
 				 * the THEN and ELSE subexpressions.
 				 */
 				collation = ce->casecollid;
-				if (collation == InvalidOid)
+				if (!OidIsValid(collation))
 					state = FDW_COLLATE_NONE;
 				else if (inner_cxt.state == FDW_COLLATE_SAFE &&
 						 collation == inner_cxt.collation)
@@ -871,7 +871,7 @@ foreign_expr_walker(Node *node,
 				 * the CASE arg.
 				 */
 				collation = c->collation;
-				if (collation == InvalidOid)
+				if (!OidIsValid(collation))
 					state = FDW_COLLATE_NONE;
 				else if (case_arg_cxt->state == FDW_COLLATE_SAFE &&
 						 collation == case_arg_cxt->collation)
@@ -898,7 +898,7 @@ foreign_expr_walker(Node *node,
 				 * an input foreign Var (same logic as for a function).
 				 */
 				collation = a->array_collid;
-				if (collation == InvalidOid)
+				if (!OidIsValid(collation))
 					state = FDW_COLLATE_NONE;
 				else if (inner_cxt.state == FDW_COLLATE_SAFE &&
 						 collation == inner_cxt.collation)
@@ -1010,7 +1010,7 @@ foreign_expr_walker(Node *node,
 				 * If aggregate's input collation is not derived from a
 				 * foreign Var, it can't be sent to remote.
 				 */
-				if (agg->inputcollid == InvalidOid)
+				if (!OidIsValid(agg->inputcollid))
 					 /* OK, inputs are all noncollatable */ ;
 				else if (inner_cxt.state != FDW_COLLATE_SAFE ||
 						 agg->inputcollid != inner_cxt.collation)
@@ -1023,7 +1023,7 @@ foreign_expr_walker(Node *node,
 				 * node might not care.)
 				 */
 				collation = agg->aggcollid;
-				if (collation == InvalidOid)
+				if (!OidIsValid(collation))
 					state = FDW_COLLATE_NONE;
 				else if (inner_cxt.state == FDW_COLLATE_SAFE &&
 						 collation == inner_cxt.collation)

@@ -1105,7 +1105,7 @@ libpqrcv_exec(WalReceiverConn *conn, const char *query,
 	WalRcvExecResult *walres = palloc0(sizeof(WalRcvExecResult));
 	char	   *diag_sqlstate;
 
-	if (MyDatabaseId == InvalidOid)
+	if (!OidIsValid(MyDatabaseId))
 		ereport(ERROR,
 				(errcode(ERRCODE_OBJECT_NOT_IN_PREREQUISITE_STATE),
 				 errmsg("the query interface requires a database connection")));

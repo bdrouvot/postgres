@@ -371,7 +371,7 @@ _StartLO(ArchiveHandle *AH, TocEntry *te, Oid oid)
 {
 	lclContext *ctx = (lclContext *) AH->formatData;
 
-	if (oid == 0)
+	if (!OidIsValid(oid))
 		pg_fatal("invalid OID for large object");
 
 	WriteInt(AH, oid);
@@ -583,7 +583,7 @@ _LoadLOs(ArchiveHandle *AH, bool drop)
 	StartRestoreLOs(AH);
 
 	oid = ReadInt(AH);
-	while (oid != 0)
+	while (OidIsValid(oid))
 	{
 		StartRestoreLO(AH, oid, drop);
 		_PrintData(AH);
@@ -606,7 +606,7 @@ _skipLOs(ArchiveHandle *AH)
 	Oid			oid;
 
 	oid = ReadInt(AH);
-	while (oid != 0)
+	while (OidIsValid(oid))
 	{
 		_skipData(AH);
 		oid = ReadInt(AH);

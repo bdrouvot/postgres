@@ -4518,7 +4518,7 @@ build_generation_expression(Relation rel, int attrno)
 	 * expression.
 	 */
 	attcollid = att_tup->attcollation;
-	if (attcollid && attcollid != exprCollation(defexpr))
+	if (OidIsValid(attcollid) && attcollid != exprCollation(defexpr))
 	{
 		CollateExpr *ce = makeNode(CollateExpr);
 

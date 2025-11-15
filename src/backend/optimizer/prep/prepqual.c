@@ -95,7 +95,7 @@ negate_clause(Node *node)
 				OpExpr	   *opexpr = (OpExpr *) node;
 				Oid			negator = get_negator(opexpr->opno);
 
-				if (negator)
+				if (OidIsValid(negator))
 				{
 					OpExpr	   *newopexpr = makeNode(OpExpr);
 
@@ -120,7 +120,7 @@ negate_clause(Node *node)
 				ScalarArrayOpExpr *saopexpr = (ScalarArrayOpExpr *) node;
 				Oid			negator = get_negator(saopexpr->opno);
 
-				if (negator)
+				if (OidIsValid(negator))
 				{
 					ScalarArrayOpExpr *newopexpr = makeNode(ScalarArrayOpExpr);
 

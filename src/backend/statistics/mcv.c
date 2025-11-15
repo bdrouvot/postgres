@@ -359,7 +359,7 @@ build_mss(StatsBuildData *data)
 		TypeCacheEntry *type;
 
 		type = lookup_type_cache(colstat->attrtypid, TYPECACHE_LT_OPR);
-		if (type->lt_opr == InvalidOid) /* shouldn't happen */
+		if (!OidIsValid(type->lt_opr))	/* shouldn't happen */
 			elog(ERROR, "cache lookup failed for ordering operator for type %u",
 				 colstat->attrtypid);
 

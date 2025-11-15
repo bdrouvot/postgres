@@ -177,7 +177,7 @@ LexizeExec(LexizeData *ld, ParsedLex **correspondLexem)
 	TSDictionaryCacheEntry *dict;
 	TSLexeme   *res;
 
-	if (ld->curDictId == InvalidOid)
+	if (!OidIsValid(ld->curDictId))
 	{
 		/*
 		 * usual mode: dictionary wants only one word, but we should keep in

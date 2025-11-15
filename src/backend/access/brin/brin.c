@@ -692,7 +692,7 @@ bringetbitmap(IndexScanDesc scan, TIDBitmap *tbm)
 		 * general, so this should be negligible, and repeated repalloc calls
 		 * are not free either.
 		 */
-		if (consistentFn[keyattno - 1].fn_oid == InvalidOid)
+		if (!OidIsValid(consistentFn->fn_oid))
 		{
 			FmgrInfo   *tmp;
 

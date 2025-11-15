@@ -114,7 +114,7 @@ get_tablespace(Oid spcid)
 	 * Since spcid is always from a pg_class tuple, InvalidOid implies the
 	 * default.
 	 */
-	if (spcid == InvalidOid)
+	if (!OidIsValid(spcid))
 		spcid = MyDatabaseTableSpace;
 
 	/* Find existing cache entry, if any. */

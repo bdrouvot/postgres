@@ -402,7 +402,7 @@ flagInhIndexes(Archive *fout, TableInfo tblinfo[], int numTables)
 			IndxInfo   *parentidx;
 			IndexAttachInfo *attachinfo;
 
-			if (index->parentidx == 0)
+			if (!OidIsValid(index->parentidx))
 				continue;
 
 			parentidx = findIndexByOid(index->parentidx);

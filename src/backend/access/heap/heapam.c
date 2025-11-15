@@ -9076,7 +9076,7 @@ log_heap_new_cid(Relation relation, HeapTuple tup)
 	HeapTupleHeader hdr = tup->t_data;
 
 	Assert(ItemPointerIsValid(&tup->t_self));
-	Assert(tup->t_tableOid != InvalidOid);
+	Assert(OidIsValid(tup->t_tableOid));
 
 	xlrec.top_xid = GetTopTransactionId();
 	xlrec.target_locator = relation->rd_locator;

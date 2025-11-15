@@ -1241,12 +1241,12 @@ exprSetCollation(Node *expr, Oid collation)
 		case T_SQLValueFunction:
 			Assert((((SQLValueFunction *) expr)->type == NAMEOID) ?
 				   (collation == C_COLLATION_OID) :
-				   (collation == InvalidOid));
+				   (!OidIsValid(collation)));
 			break;
 		case T_XmlExpr:
 			Assert((((XmlExpr *) expr)->op == IS_XMLSERIALIZE) ?
 				   (collation == DEFAULT_COLLATION_OID) :
-				   (collation == InvalidOid));
+				   (!OidIsValid(collation)));
 			break;
 		case T_JsonValueExpr:
 			exprSetCollation((Node *) ((JsonValueExpr *) expr)->formatted_expr,
@@ -1867,7 +1867,7 @@ fix_opfuncids_walker(Node *node, void *context)
 void
 set_opfuncid(OpExpr *opexpr)
 {
-	if (opexpr->opfuncid == InvalidOid)
+	if (!OidIsValid(opexpr->opfuncid))
 		opexpr->opfuncid = get_opcode(opexpr->opno);
 }
 
@@ -1878,7 +1878,7 @@ set_opfuncid(OpExpr *opexpr)
 void
 set_sa_opfuncid(ScalarArrayOpExpr *opexpr)
 {
-	if (opexpr->opfuncid == InvalidOid)
+	if (!OidIsValid(opexpr->opfuncid))
 		opexpr->opfuncid = get_opcode(opexpr->opno);
 }
 

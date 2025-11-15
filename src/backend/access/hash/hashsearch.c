@@ -338,7 +338,7 @@ _hash_first(IndexScanDesc scan, ScanDirection dir)
 	 * opclass input type; this is a hack to simplify life for ScanKeyInit().
 	 */
 	if (cur->sk_subtype == rel->rd_opcintype[0] ||
-		cur->sk_subtype == InvalidOid)
+		!OidIsValid(cur->sk_subtype))
 		hashkey = _hash_datum2hashkey(rel, cur->sk_argument);
 	else
 		hashkey = _hash_datum2hashkey_type(rel, cur->sk_argument,

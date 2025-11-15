@@ -529,28 +529,28 @@ DefineType(ParseState *pstate, List *names, List *parameters)
 	 * findTypeInputFunction et al, where they could be shared by AlterType.
 	 */
 #ifdef NOT_USED
-	if (inputOid && !object_ownercheck(ProcedureRelationId, inputOid, GetUserId()))
+	if (OidIsValid(inputOid) && !object_ownercheck(ProcedureRelationId, inputOid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_FUNCTION,
 					   NameListToString(inputName));
-	if (outputOid && !object_ownercheck(ProcedureRelationId, outputOid, GetUserId()))
+	if (OidIsValid(outputOid) && !object_ownercheck(ProcedureRelationId, outputOid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_FUNCTION,
 					   NameListToString(outputName));
-	if (receiveOid && !object_ownercheck(ProcedureRelationId, receiveOid, GetUserId()))
+	if (OidIsValid(receiveOid) && !object_ownercheck(ProcedureRelationId, receiveOid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_FUNCTION,
 					   NameListToString(receiveName));
-	if (sendOid && !object_ownercheck(ProcedureRelationId, sendOid, GetUserId()))
+	if (OidIsValid(sendOid) && !object_ownercheck(ProcedureRelationId, sendOid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_FUNCTION,
 					   NameListToString(sendName));
-	if (typmodinOid && !object_ownercheck(ProcedureRelationId, typmodinOid, GetUserId()))
+	if (OidIsValid(typmodinOid) && !object_ownercheck(ProcedureRelationId, typmodinOid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_FUNCTION,
 					   NameListToString(typmodinName));
-	if (typmodoutOid && !object_ownercheck(ProcedureRelationId, typmodoutOid, GetUserId()))
+	if (OidIsValid(typmodoutOid) && !object_ownercheck(ProcedureRelationId, typmodoutOid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_FUNCTION,
 					   NameListToString(typmodoutName));
-	if (analyzeOid && !object_ownercheck(ProcedureRelationId, analyzeOid, GetUserId()))
+	if (OidIsValid(analyzeOid) && !object_ownercheck(ProcedureRelationId, analyzeOid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_FUNCTION,
 					   NameListToString(analyzeName));
-	if (subscriptOid && !object_ownercheck(ProcedureRelationId, subscriptOid, GetUserId()))
+	if (OidIsValid(subscriptOid) && !object_ownercheck(ProcedureRelationId, subscriptOid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_FUNCTION,
 					   NameListToString(subscriptName));
 #endif
@@ -1592,7 +1592,7 @@ DefineRange(ParseState *pstate, CreateRangeStmt *stmt)
 				   0,			/* Array dimensions of typbasetype */
 				   false,		/* Type NOT NULL */
 				   InvalidOid); /* type's collation (ranges never have one) */
-	Assert(typoid == InvalidOid || typoid == address.objectId);
+	Assert(!OidIsValid(typoid) || typoid == address.objectId);
 	typoid = address.objectId;
 
 	/* Create the multirange that goes with it */

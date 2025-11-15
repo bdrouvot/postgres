@@ -139,7 +139,7 @@ _StartLO(ArchiveHandle *AH, TocEntry *te, Oid oid)
 {
 	bool		old_lo_style = (AH->version < K_VERS_1_12);
 
-	if (oid == 0)
+	if (!OidIsValid(oid))
 		pg_fatal("invalid OID for large object");
 
 	/* With an old archive we must do drop and create logic here */

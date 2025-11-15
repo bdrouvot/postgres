@@ -647,7 +647,7 @@ RegisterRelcacheInvalidation(InvalidationInfo *info, Oid dbId, Oid relId)
 	 * invalidations for a specific database always invalidate the shared file
 	 * as well.  Also zap when we are invalidating whole relcache.
 	 */
-	if (relId == InvalidOid || RelationIdIsInInitFile(relId))
+	if (!OidIsValid(relId) || RelationIdIsInInitFile(relId))
 		info->RelcacheInitFileInval = true;
 }
 
@@ -824,7 +824,7 @@ LocalExecuteInvalidationMessage(SharedInvalidationMessage *msg)
 {
 	if (msg->id >= 0)
 	{
-		if (msg->cc.dbId == MyDatabaseId || msg->cc.dbId == InvalidOid)
+		if (msg->cc.dbId == MyDatabaseId || !OidIsValid(msg->cc.dbId))
 		{
 			InvalidateCatalogSnapshot();
 
@@ -835,7 +835,7 @@ LocalExecuteInvalidationMessage(SharedInvalidationMessage *msg)
 	}
 	else if (msg->id == SHAREDINVALCATALOG_ID)
 	{
-		if (msg->cat.dbId == MyDatabaseId || msg->cat.dbId == InvalidOid)
+		if (msg->cat.dbId == MyDatabaseId || !OidIsValid(msg->cat.dbId))
 		{
 			InvalidateCatalogSnapshot();
 
@@ -846,11 +846,11 @@ LocalExecuteInvalidationMessage(SharedInvalidationMessage *msg)
 	}
 	else if (msg->id == SHAREDINVALRELCACHE_ID)
 	{
-		if (msg->rc.dbId == MyDatabaseId || msg->rc.dbId == InvalidOid)
+		if (msg->rc.dbId == MyDatabaseId || !OidIsValid(msg->rc.dbId))
 		{
 			int			i;
 
-			if (msg->rc.relId == InvalidOid)
+			if (!OidIsValid(msg->rc.relId))
 				RelationCacheInvalidate(false);
 			else
 				RelationCacheInvalidateEntry(msg->rc.relId);
@@ -878,7 +878,7 @@ LocalExecuteInvalidationMessage(SharedInvalidationMessage *msg)
 	else if (msg->id == SHAREDINVALRELMAP_ID)
 	{
 		/* We only care about our own database and shared catalogs */
-		if (msg->rm.dbId == InvalidOid)
+		if (!OidIsValid(msg->rm.dbId))
 			RelationMapInvalidate(true);
 		else if (msg->rm.dbId == MyDatabaseId)
 			RelationMapInvalidate(false);
@@ -886,7 +886,7 @@ LocalExecuteInvalidationMessage(SharedInvalidationMessage *msg)
 	else if (msg->id == SHAREDINVALSNAPSHOT_ID)
 	{
 		/* We only care about our own database and shared catalogs */
-		if (msg->sn.dbId == InvalidOid)
+		if (!OidIsValid(msg->sn.dbId))
 			InvalidateCatalogSnapshot();
 		else if (msg->sn.dbId == MyDatabaseId)
 			InvalidateCatalogSnapshot();

@@ -726,7 +726,7 @@ bloom_get_procinfo(BrinDesc *bdesc, uint16 attno, uint16 procnum)
 	 */
 	opaque = (BloomOpaque *) bdesc->bd_info[attno - 1]->oi_opaque;
 
-	if (opaque->extra_procinfos[basenum].fn_oid == InvalidOid)
+	if (!OidIsValid(opaque->extra_procinfos[basenum].fn_oid))
 	{
 		if (RegProcedureIsValid(index_getprocid(bdesc->bd_index, attno,
 												procnum)))

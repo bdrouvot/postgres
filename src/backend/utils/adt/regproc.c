@@ -555,7 +555,7 @@ regoperout(PG_FUNCTION_ARGS)
 	char	   *result;
 	HeapTuple	opertup;
 
-	if (oprid == InvalidOid)
+	if (!OidIsValid(oprid))
 	{
 		result = pstrdup("0");
 		PG_RETURN_CSTRING(result);
@@ -849,7 +849,7 @@ regoperatorout(PG_FUNCTION_ARGS)
 	Oid			oprid = PG_GETARG_OID(0);
 	char	   *result;
 
-	if (oprid == InvalidOid)
+	if (!OidIsValid(oprid))
 		result = pstrdup("0");
 	else
 		result = format_operator(oprid);
@@ -954,7 +954,7 @@ regclassout(PG_FUNCTION_ARGS)
 	char	   *result;
 	HeapTuple	classtup;
 
-	if (classid == InvalidOid)
+	if (!OidIsValid(classid))
 	{
 		result = pstrdup("-");
 		PG_RETURN_CSTRING(result);
@@ -1097,7 +1097,7 @@ regcollationout(PG_FUNCTION_ARGS)
 	char	   *result;
 	HeapTuple	collationtup;
 
-	if (collationid == InvalidOid)
+	if (!OidIsValid(collationid))
 	{
 		result = pstrdup("-");
 		PG_RETURN_CSTRING(result);
@@ -1258,7 +1258,7 @@ regtypeout(PG_FUNCTION_ARGS)
 	char	   *result;
 	HeapTuple	typetup;
 
-	if (typid == InvalidOid)
+	if (!OidIsValid(typid))
 	{
 		result = pstrdup("-");
 		PG_RETURN_CSTRING(result);
@@ -1370,7 +1370,7 @@ regconfigout(PG_FUNCTION_ARGS)
 	char	   *result;
 	HeapTuple	cfgtup;
 
-	if (cfgid == InvalidOid)
+	if (!OidIsValid(cfgid))
 	{
 		result = pstrdup("-");
 		PG_RETURN_CSTRING(result);
@@ -1480,7 +1480,7 @@ regdictionaryout(PG_FUNCTION_ARGS)
 	char	   *result;
 	HeapTuple	dicttup;
 
-	if (dictid == InvalidOid)
+	if (!OidIsValid(dictid))
 	{
 		result = pstrdup("-");
 		PG_RETURN_CSTRING(result);
@@ -1611,7 +1611,7 @@ regroleout(PG_FUNCTION_ARGS)
 	Oid			roleoid = PG_GETARG_OID(0);
 	char	   *result;
 
-	if (roleoid == InvalidOid)
+	if (!OidIsValid(roleoid))
 	{
 		result = pstrdup("-");
 		PG_RETURN_CSTRING(result);
@@ -1728,7 +1728,7 @@ regnamespaceout(PG_FUNCTION_ARGS)
 	Oid			nspid = PG_GETARG_OID(0);
 	char	   *result;
 
-	if (nspid == InvalidOid)
+	if (!OidIsValid(nspid))
 	{
 		result = pstrdup("-");
 		PG_RETURN_CSTRING(result);
@@ -1845,7 +1845,7 @@ regdatabaseout(PG_FUNCTION_ARGS)
 	Oid			dboid = PG_GETARG_OID(0);
 	char	   *result;
 
-	if (dboid == InvalidOid)
+	if (!OidIsValid(dboid))
 	{
 		result = pstrdup("-");
 		PG_RETURN_CSTRING(result);

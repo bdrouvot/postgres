@@ -112,7 +112,7 @@ GetDatabasePath(Oid dbOid, Oid spcOid)
 	if (spcOid == GLOBALTABLESPACE_OID)
 	{
 		/* Shared system relations live in {datadir}/global */
-		Assert(dbOid == 0);
+		Assert(!OidIsValid(dbOid));
 		return pstrdup("global");
 	}
 	else if (spcOid == DEFAULTTABLESPACE_OID)
@@ -148,7 +148,7 @@ GetRelationPath(Oid dbOid, Oid spcOid, RelFileNumber relNumber,
 	if (spcOid == GLOBALTABLESPACE_OID)
 	{
 		/* Shared system relations live in {datadir}/global */
-		Assert(dbOid == 0);
+		Assert(!OidIsValid(dbOid));
 		Assert(procNumber == INVALID_PROC_NUMBER);
 		if (forkNumber != MAIN_FORKNUM)
 			sprintf(rp.str, "global/%u_%s",

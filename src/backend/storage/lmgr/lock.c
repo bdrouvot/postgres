@@ -268,7 +268,7 @@ int			FastPathLockGroupsPerBackend = 0;
 	((locktag)->locktag_lockmethodid == DEFAULT_LOCKMETHOD && \
 	(locktag)->locktag_type == LOCKTAG_RELATION && \
 	(locktag)->locktag_field1 == MyDatabaseId && \
-	MyDatabaseId != InvalidOid && \
+	OidIsValid(MyDatabaseId) && \
 	(mode) < ShareUpdateExclusiveLock)
 #define ConflictsWithRelationFastPath(locktag, mode) \
 	((locktag)->locktag_lockmethodid == DEFAULT_LOCKMETHOD && \

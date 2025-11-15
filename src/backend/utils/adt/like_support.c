@@ -405,7 +405,7 @@ match_pattern_prefix(Node *leftop,
 	 *
 	 * expr_coll is not set for a non-collation-aware data type such as bytea.
 	 */
-	if (expr_coll && !get_collation_isdeterministic(expr_coll))
+	if (OidIsValid(expr_coll) && !get_collation_isdeterministic(expr_coll))
 		return NIL;
 
 	/*

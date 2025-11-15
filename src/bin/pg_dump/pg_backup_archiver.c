@@ -1518,7 +1518,7 @@ StartRestoreLO(ArchiveHandle *AH, Oid oid, bool drop)
 		if (old_lo_style)
 		{
 			loOid = lo_create(AH->connection, oid);
-			if (loOid == 0 || loOid != oid)
+			if (!OidIsValid(loOid) || loOid != oid)
 				pg_fatal("could not create large object %u: %s",
 						 oid, PQerrorMessage(AH->connection));
 		}

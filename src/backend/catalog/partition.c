@@ -160,7 +160,7 @@ get_partition_ancestors_worker(Relation inhRel, Oid relid, List **ancestors)
 	 * when the partition is being detached.
 	 */
 	parentOid = get_partition_parent_worker(inhRel, relid, &detach_pending);
-	if (parentOid == InvalidOid || detach_pending)
+	if (!OidIsValid(parentOid) || detach_pending)
 		return;
 
 	*ancestors = lappend_oid(*ancestors, parentOid);

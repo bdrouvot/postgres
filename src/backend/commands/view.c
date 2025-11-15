@@ -245,7 +245,7 @@ DefineVirtualRelation(RangeVar *relation, List *tlist, bool replace,
 		 */
 		address = DefineRelation(createStmt, RELKIND_VIEW, InvalidOid, NULL,
 								 NULL);
-		Assert(address.objectId != InvalidOid);
+		Assert(OidIsValid(address.objectId));
 
 		/* Make the new view relation visible */
 		CommandCounterIncrement();

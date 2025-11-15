@@ -606,7 +606,7 @@ add_json(Datum val, bool is_null, StringInfo result,
 	JsonTypeCategory tcategory;
 	Oid			outfuncoid;
 
-	if (val_type == InvalidOid)
+	if (!OidIsValid(val_type))
 		ereport(ERROR,
 				(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
 				 errmsg("could not determine input data type")));
@@ -744,7 +744,7 @@ to_json(PG_FUNCTION_ARGS)
 	JsonTypeCategory tcategory;
 	Oid			outfuncoid;
 
-	if (val_type == InvalidOid)
+	if (!OidIsValid(val_type))
 		ereport(ERROR,
 				(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
 				 errmsg("could not determine input data type")));
@@ -795,7 +795,7 @@ json_agg_transfn_worker(FunctionCallInfo fcinfo, bool absent_on_null)
 	{
 		Oid			arg_type = get_fn_expr_argtype(fcinfo->flinfo, 1);
 
-		if (arg_type == InvalidOid)
+		if (!OidIsValid(arg_type))
 			ereport(ERROR,
 					(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
 					 errmsg("could not determine input data type")));
@@ -1039,7 +1039,7 @@ json_object_agg_transfn_worker(FunctionCallInfo fcinfo,
 
 		arg_type = get_fn_expr_argtype(fcinfo->flinfo, 1);
 
-		if (arg_type == InvalidOid)
+		if (!OidIsValid(arg_type))
 			ereport(ERROR,
 					(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
 					 errmsg("could not determine data type for argument %d", 1)));
@@ -1049,7 +1049,7 @@ json_object_agg_transfn_worker(FunctionCallInfo fcinfo,
 
 		arg_type = get_fn_expr_argtype(fcinfo->flinfo, 2);
 
-		if (arg_type == InvalidOid)
+		if (!OidIsValid(arg_type))
 			ereport(ERROR,
 					(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
 					 errmsg("could not determine data type for argument %d", 2)));

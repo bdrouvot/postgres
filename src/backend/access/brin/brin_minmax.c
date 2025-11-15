@@ -282,7 +282,7 @@ minmax_get_strategy_procinfo(BrinDesc *bdesc, uint16 attno, Oid subtype,
 		opaque->cached_subtype = subtype;
 	}
 
-	if (opaque->strategy_procinfos[strategynum - 1].fn_oid == InvalidOid)
+	if (!OidIsValid(opaque->strategy_procinfos[strategynum - 1].fn_oid))
 	{
 		Form_pg_attribute attr;
 		HeapTuple	tuple;

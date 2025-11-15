@@ -1129,7 +1129,7 @@ get_object_address(ObjectType objtype, Node *object,
 				/* no default, to let compiler warn about missing case */
 		}
 
-		if (!address.classId)
+		if (!OidIsValid(address.classId))
 			elog(ERROR, "unrecognized object type: %d", (int) objtype);
 
 		/*
@@ -2038,7 +2038,7 @@ get_object_address_defacl(List *object, bool missing_ok)
 	if (schema)
 	{
 		schemaid = get_namespace_oid(schema, true);
-		if (schemaid == InvalidOid)
+		if (!OidIsValid(schemaid))
 			goto not_found;
 	}
 	else

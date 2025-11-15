@@ -211,7 +211,7 @@ DefineSequence(ParseState *pstate, CreateSeqStmt *seq)
 
 	address = DefineRelation(stmt, RELKIND_SEQUENCE, seq->ownerId, NULL, NULL);
 	seqoid = address.objectId;
-	Assert(seqoid != InvalidOid);
+	Assert(OidIsValid(seqoid));
 
 	rel = sequence_open(seqoid, AccessExclusiveLock);
 	tupDesc = RelationGetDescr(rel);
@@ -462,7 +462,7 @@ AlterSequence(ParseState *pstate, AlterSeqStmt *stmt)
 									 stmt->missing_ok ? RVR_MISSING_OK : 0,
 									 RangeVarCallbackOwnsRelation,
 									 NULL);
-	if (relid == InvalidOid)
+	if (!OidIsValid(relid))
 	{
 		ereport(NOTICE,
 				(errmsg("relation \"%s\" does not exist, skipping",

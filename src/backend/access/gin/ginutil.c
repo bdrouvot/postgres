@@ -182,8 +182,8 @@ initGinState(GinState *state, Relation index)
 						   CurrentMemoryContext);
 		}
 
-		if (state->consistentFn[i].fn_oid == InvalidOid &&
-			state->triConsistentFn[i].fn_oid == InvalidOid)
+		if (!OidIsValid(state->consistentFn[i].fn_oid) &&
+			!OidIsValid(state->triConsistentFn[i].fn_oid))
 		{
 			elog(ERROR, "missing GIN support function (%d or %d) for attribute %d of index \"%s\"",
 				 GIN_CONSISTENT_PROC, GIN_TRICONSISTENT_PROC,

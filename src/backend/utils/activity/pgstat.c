@@ -1156,7 +1156,7 @@ pgstat_build_snapshot(void)
 		 * relations).
 		 */
 		if (p->key.dboid != MyDatabaseId &&
-			p->key.dboid != InvalidOid &&
+			OidIsValid(p->key.dboid) &&
 			!kind_info->accessed_across_databases)
 			continue;
 

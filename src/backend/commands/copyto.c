@@ -844,7 +844,7 @@ BeginCopyTo(ParseState *pstate,
 		 * the relation again, we double-check here to make sure it found the
 		 * same one that we have locked.
 		 */
-		if (queryRelId != InvalidOid)
+		if (OidIsValid(queryRelId))
 		{
 			/*
 			 * Note that with RLS involved there may be multiple relations,

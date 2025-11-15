@@ -387,7 +387,7 @@ ndistinct_for_combination(double totalrows, StatsBuildData *data,
 		collid = colstat->attrcollid;
 
 		type = lookup_type_cache(typid, TYPECACHE_LT_OPR);
-		if (type->lt_opr == InvalidOid) /* shouldn't happen */
+		if (!OidIsValid(type->lt_opr))	/* shouldn't happen */
 			elog(ERROR, "cache lookup failed for ordering operator for type %u",
 				 typid);
 

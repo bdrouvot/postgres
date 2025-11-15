@@ -380,14 +380,14 @@ pg_stat_get_activity(PG_FUNCTION_ARGS)
 			continue;
 
 		/* Values available to all callers */
-		if (beentry->st_databaseid != InvalidOid)
+		if (OidIsValid(beentry->st_databaseid))
 			values[0] = ObjectIdGetDatum(beentry->st_databaseid);
 		else
 			nulls[0] = true;
 
 		values[1] = Int32GetDatum(beentry->st_procpid);
 
-		if (beentry->st_userid != InvalidOid)
+		if (OidIsValid(beentry->st_userid))
 			values[2] = ObjectIdGetDatum(beentry->st_userid);
 		else
 			nulls[2] = true;

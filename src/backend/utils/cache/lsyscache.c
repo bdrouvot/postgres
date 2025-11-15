@@ -3416,7 +3416,7 @@ get_attstatsslot(AttStatsSlot *sslot, HeapTuple statstuple,
 	for (i = 0; i < STATISTIC_NUM_SLOTS; i++)
 	{
 		if ((&stats->stakind1)[i] == reqkind &&
-			(reqop == InvalidOid || (&stats->staop1)[i] == reqop))
+			(!OidIsValid(reqop) || (&stats->staop1)[i] == reqop))
 			break;
 	}
 	if (i >= STATISTIC_NUM_SLOTS)

@@ -139,7 +139,7 @@ lo_truncate(PGconn *conn, int fd, size_t len)
 		return -1;
 
 	/* Must check this on-the-fly because it's not there pre-8.3 */
-	if (conn->lobjfuncs->fn_lo_truncate == 0)
+	if (!OidIsValid(conn->lobjfuncs->fn_lo_truncate))
 	{
 		libpq_append_conn_error(conn, "cannot determine OID of function %s",
 								"lo_truncate");
@@ -202,7 +202,7 @@ lo_truncate64(PGconn *conn, int fd, int64_t len)
 	if (lo_initialize(conn) < 0)
 		return -1;
 
-	if (conn->lobjfuncs->fn_lo_truncate64 == 0)
+	if (!OidIsValid(conn->lobjfuncs->fn_lo_truncate64))
 	{
 		libpq_append_conn_error(conn, "cannot determine OID of function %s",
 								"lo_truncate64");
@@ -392,7 +392,7 @@ lo_lseek64(PGconn *conn, int fd, int64_t offset, int whence)
 	if (lo_initialize(conn) < 0)
 		return -1;
 
-	if (conn->lobjfuncs->fn_lo_lseek64 == 0)
+	if (!OidIsValid(conn->lobjfuncs->fn_lo_lseek64))
 	{
 		libpq_append_conn_error(conn, "cannot determine OID of function %s",
 								"lo_lseek64");
@@ -482,7 +482,7 @@ lo_create(PGconn *conn, Oid lobjId)
 		return InvalidOid;
 
 	/* Must check this on-the-fly because it's not there pre-8.1 */
-	if (conn->lobjfuncs->fn_lo_create == 0)
+	if (!OidIsValid(conn->lobjfuncs->fn_lo_create))
 	{
 		libpq_append_conn_error(conn, "cannot determine OID of function %s",
 								"lo_create");
@@ -555,7 +555,7 @@ lo_tell64(PGconn *conn, int fd)
 	if (lo_initialize(conn) < 0)
 		return -1;
 
-	if (conn->lobjfuncs->fn_lo_tell64 == 0)
+	if (!OidIsValid(conn->lobjfuncs->fn_lo_tell64))
 	{
 		libpq_append_conn_error(conn, "cannot determine OID of function %s",
 								"lo_tell64");
@@ -674,12 +674,12 @@ lo_import_internal(PGconn *conn, const char *filename, Oid oid)
 	/*
 	 * create an inversion object
 	 */
-	if (oid == InvalidOid)
+	if (!OidIsValid(oid))
 		lobjOid = lo_creat(conn, INV_READ | INV_WRITE);
 	else
 		lobjOid = lo_create(conn, oid);
 
-	if (lobjOid == InvalidOid)
+	if (!OidIsValid(lobjOid))
 	{
 		/* we assume lo_create() already set a suitable error message */
 		(void) close(fd);
@@ -951,56 +951,56 @@ lo_initialize(PGconn *conn)
 	 * (ones that have been added later than the stone age are instead checked
 	 * only if used)
 	 */
-	if (lobjfuncs->fn_lo_open == 0)
+	if (!OidIsValid(lobjfuncs->fn_lo_open))
 	{
 		libpq_append_conn_error(conn, "cannot determine OID of function %s",
 								"lo_open");
 		free(lobjfuncs);
 		return -1;
 	}
-	if (lobjfuncs->fn_lo_close == 0)
+	if (!OidIsValid(lobjfuncs->fn_lo_close))
 	{
 		libpq_append_conn_error(conn, "cannot determine OID of function %s",
 								"lo_close");
 		free(lobjfuncs);
 		return -1;
 	}
-	if (lobjfuncs->fn_lo_creat == 0)
+	if (!OidIsValid(lobjfuncs->fn_lo_creat))
 	{
 		libpq_append_conn_error(conn, "cannot determine OID of function %s",
 								"lo_creat");
 		free(lobjfuncs);
 		return -1;
 	}
-	if (lobjfuncs->fn_lo_unlink == 0)
+	if (!OidIsValid(lobjfuncs->fn_lo_unlink))
 	{
 		libpq_append_conn_error(conn, "cannot determine OID of function %s",
 								"lo_unlink");
 		free(lobjfuncs);
 		return -1;
 	}
-	if (lobjfuncs->fn_lo_lseek == 0)
+	if (!OidIsValid(lobjfuncs->fn_lo_lseek))
 	{
 		libpq_append_conn_error(conn, "cannot determine OID of function %s",
 								"lo_lseek");
 		free(lobjfuncs);
 		return -1;
 	}
-	if (lobjfuncs->fn_lo_tell == 0)
+	if (!OidIsValid(lobjfuncs->fn_lo_tell))
 	{
 		libpq_append_conn_error(conn, "cannot determine OID of function %s",
 								"lo_tell");
 		free(lobjfuncs);
 		return -1;
 	}
-	if (lobjfuncs->fn_lo_read == 0)
+	if (!OidIsValid(lobjfuncs->fn_lo_read))
 	{
 		libpq_append_conn_error(conn, "cannot determine OID of function %s",
 								"loread");
 		free(lobjfuncs);
 		return -1;
 	}
-	if (lobjfuncs->fn_lo_write == 0)
+	if (!OidIsValid(lobjfuncs->fn_lo_write))
 	{
 		libpq_append_conn_error(conn, "cannot determine OID of function %s",
 								"lowrite");

@@ -77,7 +77,7 @@ PLy_procedure_get(Oid fn_oid, Oid fn_rel, PLyTrigType is_trigger)
 	PLyProcedure *volatile proc = NULL;
 	bool		found = false;
 
-	if (is_trigger == PLPY_TRIGGER && fn_rel == InvalidOid)
+	if (is_trigger == PLPY_TRIGGER && !OidIsValid(fn_rel))
 		use_cache = false;
 	else
 		use_cache = true;

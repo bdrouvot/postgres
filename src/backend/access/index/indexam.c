@@ -937,7 +937,7 @@ index_getprocinfo(Relation irel,
 	locinfo += procindex;
 
 	/* Initialize the lookup info if first time through */
-	if (locinfo->fn_oid == InvalidOid)
+	if (!OidIsValid(locinfo->fn_oid))
 	{
 		RegProcedure *loc = irel->rd_support;
 		RegProcedure procId;

@@ -236,7 +236,7 @@ main(int argc, char *argv[])
 					pg_log_error_hint("Try \"%s --help\" for more information.", progname);
 					exit(1);
 				}
-				if (set_oid == 0)
+				if (!OidIsValid(set_oid))
 					pg_fatal("OID (-o) must not be 0");
 				break;
 
@@ -456,7 +456,7 @@ main(int argc, char *argv[])
 	if (set_newest_commit_ts_xid != 0)
 		ControlFile.checkPointCopy.newestCommitTsXid = set_newest_commit_ts_xid;
 
-	if (set_oid != 0)
+	if (OidIsValid(set_oid))
 		ControlFile.checkPointCopy.nextOid = set_oid;
 
 	if (mxid_given)
@@ -829,7 +829,7 @@ PrintNewControlValues(void)
 			   ControlFile.checkPointCopy.nextMultiOffset);
 	}
 
-	if (set_oid != 0)
+	if (OidIsValid(set_oid))
 	{
 		printf(_("NextOID:                              %u\n"),
 			   ControlFile.checkPointCopy.nextOid);
