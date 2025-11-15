@@ -157,7 +157,7 @@ variable_paramref_hook(ParseState *pstate, ParamRef *pref)
 	pptype = &(*parstate->paramTypes)[paramno - 1];
 
 	/* If not seen before, initialize to UNKNOWN type */
-	if (*pptype == InvalidOid)
+	if (!OidIsValid(*pptype))
 		*pptype = UNKNOWNOID;
 
 	/*

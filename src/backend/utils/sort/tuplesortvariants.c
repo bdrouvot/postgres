@@ -222,7 +222,7 @@ tuplesort_begin_heap(TupleDesc tupDesc,
 		SortSupport sortKey = base->sortKeys + i;
 
 		Assert(attNums[i] != 0);
-		Assert(sortOperators[i] != 0);
+		Assert(OidIsValid(sortOperators[i]));
 
 		sortKey->ssup_cxt = CurrentMemoryContext;
 		sortKey->ssup_collation = sortCollations[i];

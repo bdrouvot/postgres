@@ -13669,7 +13669,7 @@ dumpFunc(Archive *fout, const FuncInfo *finfo)
 
 		appendPQExpBufferStr(q, " TRANSFORM ");
 		parseOidArray(protrftypes, typeids, FUNC_MAX_ARGS);
-		for (i = 0; typeids[i]; i++)
+		for (i = 0; OidIsValid(typeids[i]); i++)
 		{
 			if (i != 0)
 				appendPQExpBufferStr(q, ", ");
