@@ -4292,7 +4292,7 @@ RenameRelationInternal(Oid myrelid, const char *newrelname, bool is_internal, bo
 	otid = reltup->t_self;
 	relform = (Form_pg_class) GETSTRUCT(reltup);
 
-	if (get_relname_relid(newrelname, namespaceId) != InvalidOid)
+	if (OidIsValid(get_relname_relid(newrelname, namespaceId)))
 		ereport(ERROR,
 				(errcode(ERRCODE_DUPLICATE_TABLE),
 				 errmsg("relation \"%s\" already exists",
@@ -19074,8 +19074,7 @@ AlterRelationNamespaceInternal(Relation classRel, Oid relOid,
 		ItemPointerData otid = classTup->t_self;
 
 		/* check for duplicate name (more friendly than unique-index failure) */
-		if (get_relname_relid(NameStr(classForm->relname),
-							  newNspOid) != InvalidOid)
+		if (OidIsValid(get_relname_relid(NameStr(classForm->relname), newNspOid)))
 			ereport(ERROR,
 					(errcode(ERRCODE_DUPLICATE_TABLE),
 					 errmsg("relation \"%s\" already exists in schema \"%s\"",

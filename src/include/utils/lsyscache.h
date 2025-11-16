@@ -211,9 +211,9 @@ extern char *get_publication_name(Oid pubid, bool missing_ok);
 extern Oid	get_subscription_oid(const char *subname, bool missing_ok);
 extern char *get_subscription_name(Oid subid, bool missing_ok);
 
-#define type_is_array(typid)  (get_element_type(typid) != InvalidOid)
+#define type_is_array(typid)  (OidIsValid(get_element_type(typid)))
 /* type_is_array_domain accepts both plain arrays and domains over arrays */
-#define type_is_array_domain(typid)  (get_base_element_type(typid) != InvalidOid)
+#define type_is_array_domain(typid)  (OidIsValid(get_base_element_type(typid)))
 
 #define TypeIsToastable(typid)	(get_typstorage(typid) != TYPSTORAGE_PLAIN)
 

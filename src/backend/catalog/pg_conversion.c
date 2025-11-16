@@ -69,9 +69,7 @@ ConversionCreate(const char *conname, Oid connamespace,
 		 * make sure there is no existing default <for encoding><to encoding>
 		 * pair in this name space
 		 */
-		if (FindDefaultConversion(connamespace,
-								  conforencoding,
-								  contoencoding))
+		if (OidIsValid(FindDefaultConversion(connamespace, conforencoding, contoencoding)))
 			ereport(ERROR,
 					(errcode(ERRCODE_DUPLICATE_OBJECT),
 					 errmsg("default conversion for %s to %s already exists",

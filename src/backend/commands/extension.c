@@ -1981,7 +1981,7 @@ CreateExtension(ParseState *pstate, CreateExtensionStmt *stmt)
 	 * in case of race conditions; but this is a friendlier error message, and
 	 * besides we need a check to support IF NOT EXISTS.
 	 */
-	if (get_extension_oid(stmt->extname, true) != InvalidOid)
+	if (OidIsValid(get_extension_oid(stmt->extname, true)))
 	{
 		if (stmt->if_not_exists)
 		{

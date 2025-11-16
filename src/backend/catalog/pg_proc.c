@@ -765,7 +765,7 @@ fmgr_internal_validator(PG_FUNCTION_ARGS)
 	tmp = SysCacheGetAttrNotNull(PROCOID, tuple, Anum_pg_proc_prosrc);
 	prosrc = TextDatumGetCString(tmp);
 
-	if (fmgr_internal_function(prosrc) == InvalidOid)
+	if (!OidIsValid(fmgr_internal_function(prosrc)))
 		ereport(ERROR,
 				(errcode(ERRCODE_UNDEFINED_FUNCTION),
 				 errmsg("there is no built-in function named \"%s\"",

@@ -884,7 +884,7 @@ index_create(Relation heapRelation,
 	 * catalogs' unique indexes anyway, but we prefer to give a friendlier
 	 * error message.
 	 */
-	if (get_relname_relid(indexRelationName, namespaceId))
+	if (OidIsValid(get_relname_relid(indexRelationName, namespaceId)))
 	{
 		if ((flags & INDEX_CREATE_IF_NOT_EXISTS) != 0)
 		{
