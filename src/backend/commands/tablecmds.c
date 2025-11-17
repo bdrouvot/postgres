@@ -19223,7 +19223,7 @@ AlterSeqNamespaces(Relation classRel, Relation rel,
 		 * ever re-instate that, we'll need to move the pg_type entry to the
 		 * new namespace, too (using AlterTypeNamespaceInternal).
 		 */
-		Assert(RelationGetForm(seqRel)->reltype == InvalidOid);
+		Assert(!OidIsValid(RelationGetForm(seqRel)->reltype));
 
 		/* Now we can close it.  Keep the lock till end of transaction. */
 		relation_close(seqRel, NoLock);

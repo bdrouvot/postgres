@@ -40,7 +40,7 @@
 
 /* XXX see PartCollMatchesExprColl */
 #define IndexCollMatchesExprColl(idxcollation, exprcollation) \
-	((idxcollation) == InvalidOid || (idxcollation) == (exprcollation))
+	(!OidIsValid(idxcollation) || (idxcollation) == (exprcollation))
 
 /* Whether we are looking for plain indexscan, bitmap scan, or either */
 typedef enum

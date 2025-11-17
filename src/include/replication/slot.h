@@ -251,8 +251,8 @@ typedef struct ReplicationSlot
 
 } ReplicationSlot;
 
-#define SlotIsPhysical(slot) ((slot)->data.database == InvalidOid)
-#define SlotIsLogical(slot) ((slot)->data.database != InvalidOid)
+#define SlotIsPhysical(slot) (!OidIsValid((slot)->data.database))
+#define SlotIsLogical(slot) (OidIsValid((slot)->data.database))
 
 /*
  * Shared memory control area for all of replication slots.

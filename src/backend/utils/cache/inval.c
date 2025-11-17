@@ -481,7 +481,7 @@ AddRelcacheInvalidationMessage(InvalidationMsgsGroup *group,
 	ProcessMessageSubGroup(group, RelCacheMsgs,
 						   if (msg->rc.id == SHAREDINVALRELCACHE_ID &&
 							   (msg->rc.relId == relId ||
-								msg->rc.relId == InvalidOid))
+								!OidIsValid(msg->rc.relId)))
 						   return);
 
 	/* OK, add the item */
@@ -511,7 +511,7 @@ AddRelsyncInvalidationMessage(InvalidationMsgsGroup *group,
 	ProcessMessageSubGroup(group, RelCacheMsgs,
 						   if (msg->rc.id == SHAREDINVALRELSYNC_ID &&
 							   (msg->rc.relId == relId ||
-								msg->rc.relId == InvalidOid))
+								!OidIsValid(msg->rc.relId)))
 						   return);
 
 	/* OK, add the item */

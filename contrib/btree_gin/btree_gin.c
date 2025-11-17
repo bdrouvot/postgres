@@ -857,7 +857,7 @@ GIN_SUPPORT(numeric, leftmostvalue_numeric, numeric_rhs_is_varlena, NULL, numeri
  * routines it needs it, so we can't use DirectFunctionCall2.
  */
 
-#define ENUM_IS_LEFTMOST(x) ((x) == InvalidOid)
+#define ENUM_IS_LEFTMOST(x) !OidIsValid(x)
 
 PG_FUNCTION_INFO_V1(gin_enum_cmp);
 

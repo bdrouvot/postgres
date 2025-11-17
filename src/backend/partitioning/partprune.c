@@ -1782,7 +1782,7 @@ gen_prune_steps_from_opexps(GeneratePruningStepsContext *context,
  * See also IndexCollMatchesExprColl.
  */
 #define PartCollMatchesExprColl(partcoll, exprcoll) \
-	((partcoll) == InvalidOid || (partcoll) == (exprcoll))
+	(!OidIsValid(partcoll) || (partcoll) == (exprcoll))
 
 /*
  * match_clause_to_partition_key
