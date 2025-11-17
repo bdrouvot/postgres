@@ -223,7 +223,7 @@ SendRowDescriptionMessage(StringInfo buf, TupleDesc typeinfo,
 		else
 		{
 			/* No info available, so send zeroes */
-			resorigtbl = 0;
+			resorigtbl = InvalidOid;
 			resorigcol = 0;
 		}
 

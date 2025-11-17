@@ -1072,7 +1072,7 @@ execute_extension_script(Oid extensionOid, ExtensionControlFile *control,
 {
 	bool		switch_to_superuser = false;
 	char	   *filename;
-	Oid			save_userid = 0;
+	Oid			save_userid = InvalidOid;
 	int			save_sec_context = 0;
 	int			save_nestlevel;
 	StringInfoData pathbuf;

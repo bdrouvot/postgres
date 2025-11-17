@@ -355,8 +355,8 @@ flagInhTables(Archive *fout, TableInfo *tblinfo, int numTables,
 
 			attachinfo = (TableAttachInfo *) palloc(sizeof(TableAttachInfo));
 			attachinfo->dobj.objType = DO_TABLE_ATTACH;
-			attachinfo->dobj.catId.tableoid = 0;
-			attachinfo->dobj.catId.oid = 0;
+			attachinfo->dobj.catId.tableoid = InvalidOid;
+			attachinfo->dobj.catId.oid = InvalidOid;
 			AssignDumpId(&attachinfo->dobj);
 			attachinfo->dobj.name = pg_strdup(tblinfo[i].dobj.name);
 			attachinfo->dobj.namespace = tblinfo[i].dobj.namespace;
@@ -412,8 +412,8 @@ flagInhIndexes(Archive *fout, TableInfo tblinfo[], int numTables)
 			attachinfo = pg_malloc_object(IndexAttachInfo);
 
 			attachinfo->dobj.objType = DO_INDEX_ATTACH;
-			attachinfo->dobj.catId.tableoid = 0;
-			attachinfo->dobj.catId.oid = 0;
+			attachinfo->dobj.catId.tableoid = InvalidOid;
+			attachinfo->dobj.catId.oid = InvalidOid;
 			AssignDumpId(&attachinfo->dobj);
 			attachinfo->dobj.name = pg_strdup(index->dobj.name);
 			attachinfo->dobj.namespace = index->indextable->dobj.namespace;
@@ -608,8 +608,8 @@ flagInhAttrs(Archive *fout, DumpOptions *dopt, TableInfo *tblinfo, int numTables
 
 				attrDef = pg_malloc_object(AttrDefInfo);
 				attrDef->dobj.objType = DO_ATTRDEF;
-				attrDef->dobj.catId.tableoid = 0;
-				attrDef->dobj.catId.oid = 0;
+				attrDef->dobj.catId.tableoid = InvalidOid;
+				attrDef->dobj.catId.oid = InvalidOid;
 				AssignDumpId(&attrDef->dobj);
 				attrDef->dobj.name = pg_strdup(tbinfo->dobj.name);
 				attrDef->dobj.namespace = tbinfo->dobj.namespace;

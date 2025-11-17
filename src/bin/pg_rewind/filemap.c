@@ -619,7 +619,7 @@ getFileContentType(const char *path)
 	if (nmatch == 1 || nmatch == 2)
 	{
 		rlocator.spcOid = GLOBALTABLESPACE_OID;
-		rlocator.dbOid = 0;
+		rlocator.dbOid = InvalidOid;
 		result = FILE_CONTENT_TYPE_RELATION;
 	}
 	else

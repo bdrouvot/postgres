@@ -153,7 +153,7 @@ RelidByRelfilenumber(Oid reltablespace, RelFileNumber relfilenumber)
 
 	/* pg_class will show 0 when the value is actually MyDatabaseTableSpace */
 	if (reltablespace == MyDatabaseTableSpace)
-		reltablespace = 0;
+		reltablespace = InvalidOid;
 
 	MemSet(&key, 0, sizeof(key));
 	key.reltablespace = reltablespace;

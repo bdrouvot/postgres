@@ -3070,7 +3070,7 @@ makeTableDataInfo(DumpOptions *dopt, TableInfo *tbinfo)
 	 * Note: use tableoid 0 so that this object won't be mistaken for
 	 * something that pg_depend entries apply to.
 	 */
-	tdinfo->dobj.catId.tableoid = 0;
+	tdinfo->dobj.catId.tableoid = InvalidOid;
 	tdinfo->dobj.catId.oid = tbinfo->dobj.catId.oid;
 	AssignDumpId(&tdinfo->dobj);
 	tdinfo->dobj.name = tbinfo->dobj.name;
@@ -4297,7 +4297,7 @@ getPolicies(Archive *fout, TableInfo tblinfo[], int numTables)
 			 */
 			polinfo = pg_malloc(sizeof(PolicyInfo));
 			polinfo->dobj.objType = DO_POLICY;
-			polinfo->dobj.catId.tableoid = 0;
+			polinfo->dobj.catId.tableoid = InvalidOid;
 			polinfo->dobj.catId.oid = tbinfo->dobj.catId.oid;
 			AssignDumpId(&polinfo->dobj);
 			polinfo->dobj.namespace = tbinfo->dobj.namespace;
@@ -7110,8 +7110,8 @@ getRelationStatistics(Archive *fout, DumpableObject *rel, int32 relpages,
 		DumpableObject *dobj = &info->dobj;
 
 		dobj->objType = DO_REL_STATS;
-		dobj->catId.tableoid = 0;
-		dobj->catId.oid = 0;
+		dobj->catId.tableoid = InvalidOid;
+		dobj->catId.oid = InvalidOid;
 		AssignDumpId(dobj);
 		dobj->dependencies = (DumpId *) pg_malloc(sizeof(DumpId));
 		dobj->dependencies[0] = rel->dumpId;

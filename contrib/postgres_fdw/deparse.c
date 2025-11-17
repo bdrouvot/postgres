@@ -2727,7 +2727,7 @@ deparseColumnRef(StringInfo buf, int varno, int varattno, RangeTblEntry *rte,
 		 * careful; the table could be beneath an outer join, in which case it
 		 * must go to NULL whenever the rest of the row does.
 		 */
-		Oid			fetchval = 0;
+		Oid			fetchval = InvalidOid;
 
 		if (varattno == TableOidAttributeNumber)
 			fetchval = rte->relid;
