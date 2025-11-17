@@ -2366,7 +2366,7 @@ ReorderBufferProcessTXN(ReorderBuffer *rb, ReorderBufferTXN *txn,
 					 * Ignore temporary heaps created during DDL unless the
 					 * plugin has asked for them.
 					 */
-					if (relation->rd_rel->relrewrite && !rb->output_rewrites)
+					if (OidIsValid(relation->rd_rel->relrewrite) && !rb->output_rewrites)
 						goto change_done;
 
 					/*

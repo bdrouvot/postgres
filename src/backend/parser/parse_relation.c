@@ -2541,7 +2541,7 @@ addRangeTableEntryForENR(ParseState *pstate,
 		else
 		{
 			/* Let's just make sure we can tell this isn't dropped */
-			if (att->atttypid == InvalidOid)
+			if (!OidIsValid(att->atttypid))
 				elog(ERROR, "atttypid is invalid for non-dropped column in \"%s\"",
 					 rv->relname);
 			rte->coltypes = lappend_oid(rte->coltypes, att->atttypid);

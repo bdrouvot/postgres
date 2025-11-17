@@ -760,7 +760,7 @@ format_operator_extended(Oid operator_oid, bits16 flags)
 
 		appendStringInfo(&buf, "%s(", oprname);
 
-		if (operform->oprleft)
+		if (OidIsValid(operform->oprleft))
 			appendStringInfo(&buf, "%s,",
 							 (flags & FORMAT_OPERATOR_FORCE_QUALIFY) != 0 ?
 							 format_type_be_qualified(operform->oprleft) :
@@ -768,7 +768,7 @@ format_operator_extended(Oid operator_oid, bits16 flags)
 		else
 			appendStringInfoString(&buf, "NONE,");
 
-		if (operform->oprright)
+		if (OidIsValid(operform->oprright))
 			appendStringInfo(&buf, "%s)",
 							 (flags & FORMAT_OPERATOR_FORCE_QUALIFY) != 0 ?
 							 format_type_be_qualified(operform->oprright) :
@@ -830,10 +830,10 @@ format_operator_parts(Oid operator_oid, List **objnames, List **objargs,
 	*objnames = list_make2(get_namespace_name_or_temp(oprForm->oprnamespace),
 						   pstrdup(NameStr(oprForm->oprname)));
 	*objargs = NIL;
-	if (oprForm->oprleft)
+	if (OidIsValid(oprForm->oprleft))
 		*objargs = lappend(*objargs,
 						   format_type_be_qualified(oprForm->oprleft));
-	if (oprForm->oprright)
+	if (OidIsValid(oprForm->oprright))
 		*objargs = lappend(*objargs,
 						   format_type_be_qualified(oprForm->oprright));
 

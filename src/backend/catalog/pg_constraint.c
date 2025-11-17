@@ -1127,7 +1127,7 @@ ConstraintSetParentConstraint(Oid childConstrId,
 	{
 		/* don't allow setting parent for a constraint that already has one */
 		Assert(constrForm->coninhcount == 0);
-		if (constrForm->conparentid != InvalidOid)
+		if (OidIsValid(constrForm->conparentid))
 			elog(ERROR, "constraint %u already has a parent constraint",
 				 childConstrId);
 

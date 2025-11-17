@@ -535,7 +535,7 @@ RelationBuildTupleDesc(Relation relation)
 
 	/* fill rd_att's type ID fields (compare heap.c's AddNewRelationTuple) */
 	relation->rd_att->tdtypeid =
-		relation->rd_rel->reltype ? relation->rd_rel->reltype : RECORDOID;
+		OidIsValid(relation->rd_rel->reltype) ? relation->rd_rel->reltype : RECORDOID;
 	relation->rd_att->tdtypmod = -1;	/* just to be sure */
 
 	constr = (TupleConstr *) MemoryContextAllocZero(CacheMemoryContext,
@@ -1236,7 +1236,7 @@ retry:
 		 */
 	}
 	else
-		Assert(relation->rd_rel->relam == InvalidOid);
+		Assert(!OidIsValid(relation->rd_rel->relam));
 
 	/* extract reloptions if any */
 	RelationParseRelOptions(relation, pg_class_tuple);
@@ -1344,7 +1344,7 @@ RelationInitPhysicalAddr(Relation relation)
 	if (!RELKIND_HAS_STORAGE(relation->rd_rel->relkind))
 		return;
 
-	if (relation->rd_rel->reltablespace)
+	if (OidIsValid(relation->rd_rel->reltablespace))
 		relation->rd_locator.spcOid = relation->rd_rel->reltablespace;
 	else
 		relation->rd_locator.spcOid = MyDatabaseTableSpace;
@@ -1353,7 +1353,7 @@ RelationInitPhysicalAddr(Relation relation)
 	else
 		relation->rd_locator.dbOid = MyDatabaseId;
 
-	if (relation->rd_rel->relfilenode)
+	if (OidIsValid(relation->rd_rel->relfilenode))
 	{
 		/*
 		 * Even if we are using a decoding snapshot that doesn't represent the
@@ -1478,7 +1478,7 @@ RelationInitIndexAccessInfo(Relation relation)
 	/*
 	 * Look up the index's access method, save the OID of its handler function
 	 */
-	Assert(relation->rd_rel->relam != InvalidOid);
+	Assert(OidIsValid(relation->rd_rel->relam));
 	tuple = SearchSysCache1(AMOID, ObjectIdGetDatum(relation->rd_rel->relam));
 	if (!HeapTupleIsValid(tuple))
 		elog(ERROR, "cache lookup failed for access method %u",
@@ -1838,7 +1838,7 @@ RelationInitTableAccessMethod(Relation relation)
 		 * seem prudent to show that in the catalog. So just overwrite it
 		 * here.
 		 */
-		Assert(relation->rd_rel->relam == InvalidOid);
+		Assert(!OidIsValid(relation->rd_rel->relam));
 		relation->rd_amhandler = F_HEAP_TABLEAM_HANDLER;
 	}
 	else if (IsCatalogRelation(relation))
@@ -1855,7 +1855,7 @@ RelationInitTableAccessMethod(Relation relation)
 		 * Look up the table access method, save the OID of its handler
 		 * function.
 		 */
-		Assert(relation->rd_rel->relam != InvalidOid);
+		Assert(OidIsValid(relation->rd_rel->relam));
 		tuple = SearchSysCache1(AMOID,
 								ObjectIdGetDatum(relation->rd_rel->relam));
 		if (!HeapTupleIsValid(tuple))
@@ -4259,7 +4259,7 @@ RelationCacheInitializePhase3(void)
 		/*
 		 * If it's a faked-up entry, read the real pg_class tuple.
 		 */
-		if (relation->rd_rel->relowner == InvalidOid)
+		if (!OidIsValid(relation->rd_rel->relowner))
 		{
 			HeapTuple	htup;
 			Form_pg_class relp;
@@ -4296,7 +4296,7 @@ RelationCacheInitializePhase3(void)
 			ReleaseSysCache(htup);
 
 			/* relowner had better be OK now, else we'll loop forever */
-			if (relation->rd_rel->relowner == InvalidOid)
+			if (!OidIsValid(relation->rd_rel->relowner))
 				elog(ERROR, "invalid relowner in pg_class entry for \"%s\"",
 					 RelationGetRelationName(relation));
 
@@ -6252,7 +6252,7 @@ load_relcache_init_file(bool shared)
 		rel->rd_att = CreateTemplateTupleDesc(relform->relnatts);
 		rel->rd_att->tdrefcount = 1;	/* mark as refcounted */
 
-		rel->rd_att->tdtypeid = relform->reltype ? relform->reltype : RECORDOID;
+		rel->rd_att->tdtypeid = OidIsValid(relform->reltype) ? relform->reltype : RECORDOID;
 		rel->rd_att->tdtypmod = -1; /* just to be sure */
 
 		/* next read all the attribute tuple form data entries */

@@ -874,7 +874,7 @@ copy_table_data(Relation NewHeap, Relation OldHeap, Relation OldIndex, bool verb
 	 * We don't need to open the toast relation here, just lock it.  The lock
 	 * will be held till end of transaction.
 	 */
-	if (OldHeap->rd_rel->reltoastrelid)
+	if (OidIsValid(OldHeap->rd_rel->reltoastrelid))
 		LockRelationOid(OldHeap->rd_rel->reltoastrelid, AccessExclusiveLock);
 
 	/*
@@ -884,7 +884,7 @@ copy_table_data(Relation NewHeap, Relation OldHeap, Relation OldIndex, bool verb
 	 * swap by links.  This is okay because swap by content is only essential
 	 * for system catalogs, and we don't support schema changes for them.
 	 */
-	if (OldHeap->rd_rel->reltoastrelid && NewHeap->rd_rel->reltoastrelid)
+	if (OidIsValid(OldHeap->rd_rel->reltoastrelid) && OidIsValid(NewHeap->rd_rel->reltoastrelid))
 	{
 		*pSwapToastByContent = true;
 
@@ -1158,7 +1158,7 @@ swap_relation_files(Oid r1, Oid r2, bool target_is_pg_class,
 			elog(ERROR, "cannot change access method of mapped relation \"%s\"",
 				 NameStr(relform1->relname));
 		if (!swap_toast_by_content &&
-			(relform1->reltoastrelid || relform2->reltoastrelid))
+			(OidIsValid(relform1->reltoastrelid) || OidIsValid(relform2->reltoastrelid)))
 			elog(ERROR, "cannot swap toast by links for mapped relation \"%s\"",
 				 NameStr(relform1->relname));
 
@@ -1310,11 +1310,11 @@ swap_relation_files(Oid r1, Oid r2, bool target_is_pg_class,
 	 * If we have toast tables associated with the relations being swapped,
 	 * deal with them too.
 	 */
-	if (relform1->reltoastrelid || relform2->reltoastrelid)
+	if (OidIsValid(relform1->reltoastrelid) || OidIsValid(relform2->reltoastrelid))
 	{
 		if (swap_toast_by_content)
 		{
-			if (relform1->reltoastrelid && relform2->reltoastrelid)
+			if (OidIsValid(relform1->reltoastrelid) && OidIsValid(relform2->reltoastrelid))
 			{
 				/* Recursively swap the contents of the toast tables */
 				swap_relation_files(relform1->reltoastrelid,
@@ -1359,7 +1359,7 @@ swap_relation_files(Oid r1, Oid r2, bool target_is_pg_class,
 				elog(ERROR, "cannot swap toast files by links for system catalogs");
 
 			/* Delete old dependencies */
-			if (relform1->reltoastrelid)
+			if (OidIsValid(relform1->reltoastrelid))
 			{
 				count = deleteDependencyRecordsFor(RelationRelationId,
 												   relform1->reltoastrelid,
@@ -1368,7 +1368,7 @@ swap_relation_files(Oid r1, Oid r2, bool target_is_pg_class,
 					elog(ERROR, "expected one dependency record for TOAST table, found %ld",
 						 count);
 			}
-			if (relform2->reltoastrelid)
+			if (OidIsValid(relform2->reltoastrelid))
 			{
 				count = deleteDependencyRecordsFor(RelationRelationId,
 												   relform2->reltoastrelid,
@@ -1384,7 +1384,7 @@ swap_relation_files(Oid r1, Oid r2, bool target_is_pg_class,
 			toastobject.classId = RelationRelationId;
 			toastobject.objectSubId = 0;
 
-			if (relform1->reltoastrelid)
+			if (OidIsValid(relform1->reltoastrelid))
 			{
 				baseobject.objectId = r1;
 				toastobject.objectId = relform1->reltoastrelid;
@@ -1392,7 +1392,7 @@ swap_relation_files(Oid r1, Oid r2, bool target_is_pg_class,
 								   DEPENDENCY_INTERNAL);
 			}
 
-			if (relform2->reltoastrelid)
+			if (OidIsValid(relform2->reltoastrelid))
 			{
 				baseobject.objectId = r2;
 				toastobject.objectId = relform2->reltoastrelid;

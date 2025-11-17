@@ -752,7 +752,7 @@ checkSharedDependencies(Oid classId, Oid objectId,
 		 * number of them later.
 		 */
 		if (sdepForm->dbid == MyDatabaseId ||
-			sdepForm->dbid == InvalidOid)
+			!OidIsValid(sdepForm->dbid))
 		{
 			if (numobjects >= allocedobjects)
 			{
@@ -1403,7 +1403,7 @@ shdepDropOwned(List *roleids, DropBehavior behavior)
 			 * database
 			 */
 			if (sdepForm->dbid != MyDatabaseId &&
-				sdepForm->dbid != InvalidOid)
+				OidIsValid(sdepForm->dbid))
 				continue;
 
 			switch (sdepForm->deptype)
@@ -1589,7 +1589,7 @@ shdepReassignOwned(List *roleids, Oid newrole)
 			 * database
 			 */
 			if (sdepForm->dbid != MyDatabaseId &&
-				sdepForm->dbid != InvalidOid)
+				OidIsValid(sdepForm->dbid))
 				continue;
 
 			/*

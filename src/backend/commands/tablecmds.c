@@ -3788,7 +3788,7 @@ renameatt_check(Oid myrelid, Form_pg_class classform, bool recursing)
 {
 	char		relkind = classform->relkind;
 
-	if (classform->reloftype && !recursing)
+	if (OidIsValid(classform->reloftype) && !recursing)
 		ereport(ERROR,
 				(errcode(ERRCODE_WRONG_OBJECT_TYPE),
 				 errmsg("cannot rename column of typed table")));
@@ -4118,7 +4118,7 @@ rename_constraint_internal(Oid myrelid,
 							oldconname)));
 	}
 
-	if (con->conindid
+	if (OidIsValid(con->conindid)
 		&& (con->contype == CONSTRAINT_PRIMARY
 			|| con->contype == CONSTRAINT_UNIQUE
 			|| con->contype == CONSTRAINT_EXCLUSION))
@@ -7186,7 +7186,7 @@ ATPrepAddColumn(List **wqueue, Relation rel, bool recurse, bool recursing,
 				bool is_view, AlterTableCmd *cmd, LOCKMODE lockmode,
 				AlterTableUtilityContext *context)
 {
-	if (rel->rd_rel->reloftype && !recursing)
+	if (OidIsValid(rel->rd_rel->reloftype) && !recursing)
 		ereport(ERROR,
 				(errcode(ERRCODE_WRONG_OBJECT_TYPE),
 				 errmsg("cannot add column to typed table")));
@@ -9249,7 +9249,7 @@ ATPrepDropColumn(List **wqueue, Relation rel, bool recurse, bool recursing,
 				 AlterTableCmd *cmd, LOCKMODE lockmode,
 				 AlterTableUtilityContext *context)
 {
-	if (rel->rd_rel->reloftype && !recursing)
+	if (OidIsValid(rel->rd_rel->reloftype) && !recursing)
 		ereport(ERROR,
 				(errcode(ERRCODE_WRONG_OBJECT_TYPE),
 				 errmsg("cannot drop column from typed table")));
@@ -14385,7 +14385,7 @@ ATPrepAlterColumnType(List **wqueue,
 
 	pstate->p_sourcetext = context->queryString;
 
-	if (rel->rd_rel->reloftype && !recursing)
+	if (OidIsValid(rel->rd_rel->reloftype) && !recursing)
 		ereport(ERROR,
 				(errcode(ERRCODE_WRONG_OBJECT_TYPE),
 				 errmsg("cannot alter column type of typed table"),
@@ -16280,7 +16280,7 @@ ATExecChangeOwner(Oid relationOid, Oid newOwnerId, bool recursing, LOCKMODE lock
 		}
 
 		/* If it has a toast table, recurse to change its ownership */
-		if (tuple_class->reltoastrelid != InvalidOid)
+		if (OidIsValid(tuple_class->reltoastrelid))
 			ATExecChangeOwner(tuple_class->reltoastrelid, newOwnerId,
 							  true, lockmode);
 
@@ -17230,7 +17230,7 @@ ATExecEnableDisableRule(Relation rel, const char *rulename,
 static void
 ATPrepAddInherit(Relation child_rel)
 {
-	if (child_rel->rd_rel->reloftype)
+	if (OidIsValid(child_rel->rd_rel->reloftype))
 		ereport(ERROR,
 				(errcode(ERRCODE_WRONG_OBJECT_TYPE),
 				 errmsg("cannot change inheritance of typed table")));
@@ -18307,7 +18307,7 @@ ATExecAddOf(Relation rel, const TypeName *ofTypename, LOCKMODE lockmode)
 	}
 
 	/* If the table was already typed, drop the existing dependency. */
-	if (rel->rd_rel->reloftype)
+	if (OidIsValid(rel->rd_rel->reloftype))
 		drop_parent_dependency(relid, TypeRelationId, rel->rd_rel->reloftype,
 							   DEPENDENCY_NORMAL);
 

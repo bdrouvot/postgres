@@ -2489,7 +2489,7 @@ pg_get_constraintdef_worker(Oid constraintId, bool fullCommand,
 				expr = stringToNode(conbin);
 
 				/* Set up deparsing context for Var nodes in constraint */
-				if (conForm->conrelid != InvalidOid)
+				if (OidIsValid(conForm->conrelid))
 				{
 					/* relation constraint */
 					context = deparse_context_for(get_relation_name(conForm->conrelid),
@@ -2523,7 +2523,7 @@ pg_get_constraintdef_worker(Oid constraintId, bool fullCommand,
 			}
 		case CONSTRAINT_NOTNULL:
 			{
-				if (conForm->conrelid)
+				if (OidIsValid(conForm->conrelid))
 				{
 					AttrNumber	attnum;
 
@@ -2535,7 +2535,7 @@ pg_get_constraintdef_worker(Oid constraintId, bool fullCommand,
 					if (((Form_pg_constraint) GETSTRUCT(tup))->connoinherit)
 						appendStringInfoString(&buf, " NO INHERIT");
 				}
-				else if (conForm->contypid)
+				else if (OidIsValid(conForm->contypid))
 				{
 					/* conkey is null for domain not-null constraints */
 					appendStringInfoString(&buf, "NOT NULL");
