@@ -2140,8 +2140,8 @@ PlanCacheRelCallback(Datum arg, Oid relid)
 		/*
 		 * Check the dependency list for the rewritten querytree.
 		 */
-		if ((!OidIsValid(relid)) ? plansource->relationOids != NIL :
-			list_member_oid(plansource->relationOids, relid))
+		if (OidIsValid(relid) ? list_member_oid(plansource->relationOids, relid) :
+			plansource->relationOids != NIL)
 		{
 			/* Invalidate the querytree and generic plan */
 			plansource->is_valid = false;
@@ -2163,8 +2163,8 @@ PlanCacheRelCallback(Datum arg, Oid relid)
 
 				if (plannedstmt->commandType == CMD_UTILITY)
 					continue;	/* Ignore utility statements */
-				if ((!OidIsValid(relid)) ? plannedstmt->relationOids != NIL :
-					list_member_oid(plannedstmt->relationOids, relid))
+				if (OidIsValid(relid) ? list_member_oid(plannedstmt->relationOids, relid) :
+					plannedstmt->relationOids != NIL)
 				{
 					/* Invalidate the generic plan only */
 					plansource->gplan->is_valid = false;
@@ -2186,8 +2186,8 @@ PlanCacheRelCallback(Datum arg, Oid relid)
 		if (!cexpr->is_valid)
 			continue;
 
-		if ((!OidIsValid(relid)) ? cexpr->relationOids != NIL :
-			list_member_oid(cexpr->relationOids, relid))
+		if (OidIsValid(relid) ? list_member_oid(cexpr->relationOids, relid) :
+			cexpr->relationOids != NIL)
 		{
 			cexpr->is_valid = false;
 		}

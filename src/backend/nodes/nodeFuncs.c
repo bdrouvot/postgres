@@ -1241,12 +1241,12 @@ exprSetCollation(Node *expr, Oid collation)
 		case T_SQLValueFunction:
 			Assert((((SQLValueFunction *) expr)->type == NAMEOID) ?
 				   (collation == C_COLLATION_OID) :
-				   (!OidIsValid(collation)));
+				   !OidIsValid(collation));
 			break;
 		case T_XmlExpr:
 			Assert((((XmlExpr *) expr)->op == IS_XMLSERIALIZE) ?
 				   (collation == DEFAULT_COLLATION_OID) :
-				   (!OidIsValid(collation)));
+				   !OidIsValid(collation));
 			break;
 		case T_JsonValueExpr:
 			exprSetCollation((Node *) ((JsonValueExpr *) expr)->formatted_expr,

@@ -17112,8 +17112,8 @@ AlterTableMoveAll(AlterTableMoveAllStmt *stmt)
 		ereport(NOTICE,
 				(errcode(ERRCODE_NO_DATA_FOUND),
 				 errmsg("no matching relations in tablespace \"%s\" found",
-						!OidIsValid(orig_tablespaceoid) ? "(database default)" :
-						get_tablespace_name(orig_tablespaceoid))));
+						OidIsValid(orig_tablespaceoid) ? get_tablespace_name(orig_tablespaceoid) :
+						"(database default)")));
 
 	/* Everything is locked, loop through and move all of the relations. */
 	foreach(l, relations)
