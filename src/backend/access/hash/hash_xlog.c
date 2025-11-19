@@ -389,7 +389,7 @@ hash_xlog_split_allocate_page(XLogReaderState *record)
 
 			/* extract low and high masks. */
 			memcpy(&lowmask, data, sizeof(uint32));
-			highmask = (uint32 *) ((char *) data + sizeof(uint32));
+			highmask = (uint32 *) (data + sizeof(uint32));
 
 			/* update metapage */
 			metap->hashm_lowmask = lowmask;
@@ -405,7 +405,7 @@ hash_xlog_split_allocate_page(XLogReaderState *record)
 
 			/* extract information of overflow pages. */
 			memcpy(&ovflpoint, data, sizeof(uint32));
-			ovflpages = (uint32 *) ((char *) data + sizeof(uint32));
+			ovflpages = (uint32 *) (data + sizeof(uint32));
 
 			/* update metapage */
 			metap->hashm_spares[ovflpoint] = *ovflpages;
@@ -591,7 +591,7 @@ hash_xlog_move_page_contents(XLogReaderState *record)
 			OffsetNumber *unend;
 
 			unused = (OffsetNumber *) ptr;
-			unend = (OffsetNumber *) ((char *) ptr + len);
+			unend = (OffsetNumber *) (ptr + len);
 
 			if ((unend - unused) > 0)
 				PageIndexMultiDelete(page, unused, unend - unused);
@@ -902,7 +902,7 @@ hash_xlog_delete(XLogReaderState *record)
 			OffsetNumber *unend;
 
 			unused = (OffsetNumber *) ptr;
-			unend = (OffsetNumber *) ((char *) ptr + len);
+			unend = (OffsetNumber *) (ptr + len);
 
 			if ((unend - unused) > 0)
 				PageIndexMultiDelete(page, unused, unend - unused);

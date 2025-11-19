@@ -428,7 +428,7 @@ transformStmt(ParseState *pstate, Node *parseTree)
 			 */
 			result = makeNode(Query);
 			result->commandType = CMD_UTILITY;
-			result->utilityStmt = (Node *) parseTree;
+			result->utilityStmt = parseTree;
 			break;
 	}
 
