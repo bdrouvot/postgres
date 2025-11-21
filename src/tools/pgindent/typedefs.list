@@ -340,6 +340,8 @@ BufferAccessStrategy
 BufferAccessStrategyType
 BufferCacheNumaContext
 BufferCacheNumaRec
+BufferCacheOsPagesContext
+BufferCacheOsPagesRec
 BufferCachePagesContext
 BufferCachePagesRec
 BufferDesc

@@ -26,7 +26,7 @@
 #define NUM_BUFFERCACHE_EVICT_RELATION_ELEM 3
 #define NUM_BUFFERCACHE_EVICT_ALL_ELEM 3
 
-#define NUM_BUFFERCACHE_NUMA_ELEM	3
+#define NUM_BUFFERCACHE_OS_PAGES_ELEM	3
 
 /*
  * Get the maximum buffer cache entries needed.
@@ -73,14 +73,16 @@ typedef struct
 } BufferCachePagesContext;
 
 /*
- * Record structure holding the to be exposed cache data.
+ * Record structure holding the to be exposed cache data for OS pages.
+ * This structure is used by pg_buffercache_os_pages() which takes a
+ * boolean parameter to control whether NUMA information is included.
  */
 typedef struct
 {
 	uint32		bufferid;
 	int64		page_num;
 	int32		numa_node;
-} BufferCacheNumaRec;
+} BufferCacheOsPagesRec;
 
 /*
  * Function context for data persisting over repeated calls.
@@ -89,8 +91,8 @@ typedef struct
 {
 	TupleDesc	tupdesc;
 	bool		include_numa;
-	BufferCacheNumaRec *record;
-} BufferCacheNumaContext;
+	BufferCacheOsPagesRec *record;
+} BufferCacheOsPagesContext;
 
 
 /*
@@ -98,6 +100,7 @@ typedef struct
  * relation node/tablespace/database/blocknum and dirty indicator.
  */
 PG_FUNCTION_INFO_V1(pg_buffercache_pages);
+PG_FUNCTION_INFO_V1(pg_buffercache_os_pages);
 PG_FUNCTION_INFO_V1(pg_buffercache_numa_pages);
 PG_FUNCTION_INFO_V1(pg_buffercache_summary);
 PG_FUNCTION_INFO_V1(pg_buffercache_usage_counts);
@@ -319,8 +322,8 @@ pg_buffercache_pages(PG_FUNCTION_ARGS)
 }
 
 /*
- * Internal function to inquire about OS pages mappings for shared buffers,
- * with optional NUMA information.
+ * Inquire about OS pages mappings for shared buffers, with optional NUMA
+ * information.
  *
  * When 'include_numa' is:
  *  - false: Returns buffer to OS page mappings quickly, with numa_node as NULL.
@@ -337,12 +340,12 @@ pg_buffercache_pages(PG_FUNCTION_ARGS)
  * to touch memory pages, so that the inquiry about NUMA memory node doesn't
  * return -2 (which indicates unmapped/unallocated pages).
  */
-static Datum
-pg_buffercache_numa_pages_internal(PG_FUNCTION_ARGS, bool include_numa)
+Datum
+pg_buffercache_os_pages(PG_FUNCTION_ARGS)
 {
 	FuncCallContext *funcctx;
 	MemoryContext oldcontext;
-	BufferCacheNumaContext *fctx;	/* User function context. */
+	BufferCacheOsPagesContext *fctx;	/* User function context. */
 	TupleDesc	tupledesc;
 	TupleDesc	expected_tupledesc;
 	HeapTuple	tuple;
@@ -350,6 +353,7 @@ pg_buffercache_numa_pages_internal(PG_FUNCTION_ARGS, bool include_numa)
 
 	if (SRF_IS_FIRSTCALL())
 	{
+		bool		include_numa;
 		int			i,
 					idx;
 		Size		os_page_size;
@@ -358,6 +362,9 @@ pg_buffercache_numa_pages_internal(PG_FUNCTION_ARGS, bool include_numa)
 		int			max_entries;
 		char	   *startptr,
 				   *endptr;
+
+		/* Get the boolean parameter that controls NUMA behavior */
+		include_numa = PG_GETARG_BOOL(0);
 
 		/* If NUMA information is requested, initialize NUMA support. */
 		if (include_numa && pg_numa_init() == -1)
@@ -446,12 +453,12 @@ pg_buffercache_numa_pages_internal(PG_FUNCTION_ARGS, bool include_numa)
 		oldcontext = MemoryContextSwitchTo(funcctx->multi_call_memory_ctx);
 
 		/* Create a user function context for cross-call persistence */
-		fctx = (BufferCacheNumaContext *) palloc(sizeof(BufferCacheNumaContext));
+		fctx = (BufferCacheOsPagesContext *) palloc(sizeof(BufferCacheOsPagesContext));
 
 		if (get_call_result_type(fcinfo, NULL, &expected_tupledesc) != TYPEFUNC_COMPOSITE)
 			elog(ERROR, "return type must be a row type");
 
-		if (expected_tupledesc->natts != NUM_BUFFERCACHE_NUMA_ELEM)
+		if (expected_tupledesc->natts != NUM_BUFFERCACHE_OS_PAGES_ELEM)
 			elog(ERROR, "incorrect number of output arguments");
 
 		/* Construct a tuple descriptor for the result rows. */
@@ -475,10 +482,10 @@ pg_buffercache_numa_pages_internal(PG_FUNCTION_ARGS, bool include_numa)
 		 */
 		max_entries = GET_MAX_BUFFER_ENTRIES(NBuffers, os_page_size);
 
-		/* Allocate entries for BufferCachePagesRec records. */
-		fctx->record = (BufferCacheNumaRec *)
+		/* Allocate entries for BufferCacheOsPagesRec records. */
+		fctx->record = (BufferCacheOsPagesRec *)
 			MemoryContextAllocHuge(CurrentMemoryContext,
-								   sizeof(BufferCacheNumaRec) * max_entries);
+								   sizeof(BufferCacheOsPagesRec) * max_entries);
 
 		/* Return to original context when allocating transient memory */
 		MemoryContextSwitchTo(oldcontext);
@@ -553,8 +560,8 @@ pg_buffercache_numa_pages_internal(PG_FUNCTION_ARGS, bool include_numa)
 	if (funcctx->call_cntr < funcctx->max_calls)
 	{
 		uint32		i = funcctx->call_cntr;
-		Datum		values[NUM_BUFFERCACHE_NUMA_ELEM];
-		bool		nulls[NUM_BUFFERCACHE_NUMA_ELEM];
+		Datum		values[NUM_BUFFERCACHE_OS_PAGES_ELEM];
+		bool		nulls[NUM_BUFFERCACHE_OS_PAGES_ELEM];
 
 		values[0] = Int32GetDatum(fctx->record[i].bufferid);
 		nulls[0] = false;
@@ -583,11 +590,25 @@ pg_buffercache_numa_pages_internal(PG_FUNCTION_ARGS, bool include_numa)
 		SRF_RETURN_DONE(funcctx);
 }
 
-/* Entry point for extension. */
+/* Backward compatibility wrapper. */
 Datum
 pg_buffercache_numa_pages(PG_FUNCTION_ARGS)
 {
-	return pg_buffercache_numa_pages_internal(fcinfo, true);
+	LOCAL_FCINFO(newfcinfo, 1);
+	Datum		result;
+
+	/* Initialize the new fcinfo structure. */
+	InitFunctionCallInfoData(*newfcinfo, fcinfo->flinfo, 1, fcinfo->fncollation,
+							 NULL, NULL);
+
+	/* Set the include_numa parameter to true. */
+	newfcinfo->args[0].value = BoolGetDatum(true);
+	newfcinfo->args[0].isnull = false;
+
+	/* Call pg_buffercache_os_pages with include_numa=true */
+	result = pg_buffercache_os_pages(newfcinfo);
+
+	return result;
 }
 
 Datum
