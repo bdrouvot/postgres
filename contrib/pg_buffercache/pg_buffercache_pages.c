@@ -88,6 +88,7 @@ typedef struct
 typedef struct
 {
 	TupleDesc	tupdesc;
+	bool		include_numa;
 	BufferCacheNumaRec *record;
 } BufferCacheNumaContext;
 
@@ -318,22 +319,26 @@ pg_buffercache_pages(PG_FUNCTION_ARGS)
 }
 
 /*
- * Inquire about NUMA memory mappings for shared buffers.
+ * Internal function to inquire about OS pages mappings for shared buffers,
+ * with optional NUMA information.
  *
- * Returns NUMA node ID for each memory page used by the buffer. Buffers may
- * be smaller or larger than OS memory pages. For each buffer we return one
- * entry for each memory page used by the buffer (if the buffer is smaller,
- * it only uses a part of one memory page).
+ * When 'include_numa' is:
+ *  - false: Returns buffer to OS page mappings quickly, with numa_node as NULL.
+ *  - true:  Initializes NUMA and returns numa_node values.
+ *
+ * Buffers may be smaller or larger than OS memory pages. For each buffer we
+ * return one entry for each memory page used by the buffer (if the buffer is
+ * smaller, it only uses a part of one memory page).
  *
  * We expect both sizes (for buffers and memory pages) to be a power-of-2, so
  * one is always a multiple of the other.
  *
- * In order to get reliable results we also need to touch memory pages, so
- * that the inquiry about NUMA memory node doesn't return -2 (which indicates
- * unmapped/unallocated pages).
+ * When 'include_numa' is true, in order to get reliable results we also need
+ * to touch memory pages, so that the inquiry about NUMA memory node doesn't
+ * return -2 (which indicates unmapped/unallocated pages).
  */
-Datum
-pg_buffercache_numa_pages(PG_FUNCTION_ARGS)
+static Datum
+pg_buffercache_numa_pages_internal(PG_FUNCTION_ARGS, bool include_numa)
 {
 	FuncCallContext *funcctx;
 	MemoryContext oldcontext;
@@ -348,14 +353,14 @@ pg_buffercache_numa_pages(PG_FUNCTION_ARGS)
 		int			i,
 					idx;
 		Size		os_page_size;
-		void	  **os_page_ptrs;
-		int		   *os_page_status;
-		uint64		os_page_count;
+		int		   *os_page_status = NULL;
+		uint64		os_page_count = 0;
 		int			max_entries;
 		char	   *startptr,
 				   *endptr;
 
-		if (pg_numa_init() == -1)
+		/* If NUMA information is requested, initialize NUMA support. */
+		if (include_numa && pg_numa_init() == -1)
 			elog(ERROR, "libnuma initialization failed or NUMA is not supported on this platform");
 
 		/*
@@ -383,50 +388,55 @@ pg_buffercache_numa_pages(PG_FUNCTION_ARGS)
 		 */
 		Assert((os_page_size % BLCKSZ == 0) || (BLCKSZ % os_page_size == 0));
 
-		/*
-		 * How many addresses we are going to query? Simply get the page for
-		 * the first buffer, and first page after the last buffer, and count
-		 * the pages from that.
-		 */
-		startptr = (char *) TYPEALIGN_DOWN(os_page_size,
-										   BufferGetBlock(1));
-		endptr = (char *) TYPEALIGN(os_page_size,
-									(char *) BufferGetBlock(NBuffers) + BLCKSZ);
-		os_page_count = (endptr - startptr) / os_page_size;
-
-		/* Used to determine the NUMA node for all OS pages at once */
-		os_page_ptrs = palloc0(sizeof(void *) * os_page_count);
-		os_page_status = palloc(sizeof(uint64) * os_page_count);
-
-		/*
-		 * Fill pointers for all the memory pages. This loop stores into
-		 * os_page_ptrs[] and touches (if needed) addresses as input to one
-		 * big move_pages(2) inquiry system call.
-		 */
-		idx = 0;
-		for (char *ptr = startptr; ptr < endptr; ptr += os_page_size)
+		if (include_numa)
 		{
-			os_page_ptrs[idx++] = ptr;
+			void	  **os_page_ptrs = NULL;
 
-			/* Only need to touch memory once per backend process lifetime */
-			if (firstNumaTouch)
-				pg_numa_touch_mem_if_required(ptr);
+			/*
+			 * How many addresses we are going to query? Simply get the page
+			 * for the first buffer, and first page after the last buffer, and
+			 * count the pages from that.
+			 */
+			startptr = (char *) TYPEALIGN_DOWN(os_page_size,
+											   BufferGetBlock(1));
+			endptr = (char *) TYPEALIGN(os_page_size,
+										(char *) BufferGetBlock(NBuffers) + BLCKSZ);
+			os_page_count = (endptr - startptr) / os_page_size;
+
+			/* Used to determine the NUMA node for all OS pages at once */
+			os_page_ptrs = palloc0(sizeof(void *) * os_page_count);
+			os_page_status = palloc(sizeof(uint64) * os_page_count);
+
+			/*
+			 * Fill pointers for all the memory pages. This loop stores into
+			 * os_page_ptrs[] and touches (if needed) addresses as input to
+			 * one big move_pages(2) inquiry system call.
+			 */
+			idx = 0;
+			for (char *ptr = startptr; ptr < endptr; ptr += os_page_size)
+			{
+				os_page_ptrs[idx++] = ptr;
+
+				/* Only need to touch memory once per backend process lifetime */
+				if (firstNumaTouch)
+					pg_numa_touch_mem_if_required(ptr);
+			}
+
+			Assert(idx == os_page_count);
+
+			elog(DEBUG1, "NUMA: NBuffers=%d os_page_count=" UINT64_FORMAT " "
+				 "os_page_size=%zu", NBuffers, os_page_count, os_page_size);
+
+			/*
+			 * If we ever get 0xff back from kernel inquiry, then we probably
+			 * have bug in our buffers to OS page mapping code here.
+			 */
+			memset(os_page_status, 0xff, sizeof(int) * os_page_count);
+
+			/* Query NUMA status for all the pointers */
+			if (pg_numa_query_pages(0, os_page_count, os_page_ptrs, os_page_status) == -1)
+				elog(ERROR, "failed NUMA pages inquiry: %m");
 		}
-
-		Assert(idx == os_page_count);
-
-		elog(DEBUG1, "NUMA: NBuffers=%d os_page_count=" UINT64_FORMAT " "
-			 "os_page_size=%zu", NBuffers, os_page_count, os_page_size);
-
-		/*
-		 * If we ever get 0xff back from kernel inquiry, then we probably have
-		 * bug in our buffers to OS page mapping code here.
-		 */
-		memset(os_page_status, 0xff, sizeof(int) * os_page_count);
-
-		/* Query NUMA status for all the pointers */
-		if (pg_numa_query_pages(0, os_page_count, os_page_ptrs, os_page_status) == -1)
-			elog(ERROR, "failed NUMA pages inquiry: %m");
 
 		/* Initialize the multi-call context, load entries about buffers */
 
@@ -454,6 +464,7 @@ pg_buffercache_numa_pages(PG_FUNCTION_ARGS)
 						   INT4OID, -1, 0);
 
 		fctx->tupdesc = BlessTupleDesc(tupledesc);
+		fctx->include_numa = include_numa;
 
 		/*
 		 * Each buffer needs at least one entry, but it might be offset in
@@ -472,7 +483,7 @@ pg_buffercache_numa_pages(PG_FUNCTION_ARGS)
 		/* Return to original context when allocating transient memory */
 		MemoryContextSwitchTo(oldcontext);
 
-		if (firstNumaTouch)
+		if (include_numa && firstNumaTouch)
 			elog(DEBUG1, "NUMA: page-faulting the buffercache for proper NUMA readouts");
 
 		/*
@@ -512,7 +523,7 @@ pg_buffercache_numa_pages(PG_FUNCTION_ARGS)
 			{
 				fctx->record[idx].bufferid = bufferid;
 				fctx->record[idx].page_num = page_num;
-				fctx->record[idx].numa_node = os_page_status[page_num];
+				fctx->record[idx].numa_node = include_numa ? os_page_status[page_num] : -1;
 
 				/* advance to the next entry/page */
 				++idx;
@@ -520,14 +531,18 @@ pg_buffercache_numa_pages(PG_FUNCTION_ARGS)
 			}
 		}
 
-		Assert((idx >= os_page_count) && (idx <= max_entries));
+		Assert(idx <= max_entries);
+
+		if (include_numa)
+			Assert(idx >= os_page_count);
 
 		/* Set max calls and remember the user function context. */
 		funcctx->max_calls = idx;
 		funcctx->user_fctx = fctx;
 
-		/* Remember this backend touched the pages */
-		firstNumaTouch = false;
+		/* Remember this backend touched the pages (only relevant for NUMA) */
+		if (include_numa)
+			firstNumaTouch = false;
 	}
 
 	funcctx = SRF_PERCALL_SETUP();
@@ -547,8 +562,16 @@ pg_buffercache_numa_pages(PG_FUNCTION_ARGS)
 		values[1] = Int64GetDatum(fctx->record[i].page_num);
 		nulls[1] = false;
 
-		values[2] = Int32GetDatum(fctx->record[i].numa_node);
-		nulls[2] = false;
+		if (fctx->include_numa)
+		{
+			values[2] = Int32GetDatum(fctx->record[i].numa_node);
+			nulls[2] = false;
+		}
+		else
+		{
+			values[2] = (Datum) 0;
+			nulls[2] = true;
+		}
 
 		/* Build and return the tuple. */
 		tuple = heap_form_tuple(fctx->tupdesc, values, nulls);
@@ -558,6 +581,13 @@ pg_buffercache_numa_pages(PG_FUNCTION_ARGS)
 	}
 	else
 		SRF_RETURN_DONE(funcctx);
+}
+
+/* Entry point for extension. */
+Datum
+pg_buffercache_numa_pages(PG_FUNCTION_ARGS)
+{
+	return pg_buffercache_numa_pages_internal(fcinfo, true);
 }
 
 Datum
