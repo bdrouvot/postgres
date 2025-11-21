@@ -28,6 +28,12 @@
 
 #define NUM_BUFFERCACHE_NUMA_ELEM	3
 
+/*
+ * Get the maximum buffer cache entries needed.
+ */
+#define GET_MAX_BUFFER_ENTRIES(nbuffers, os_page_size) \
+	((nbuffers) * (Max(1, BLCKSZ / (os_page_size)) + 1))
+
 PG_MODULE_MAGIC_EXT(
 					.name = "pg_buffercache",
 					.version = PG_VERSION
@@ -101,6 +107,34 @@ PG_FUNCTION_INFO_V1(pg_buffercache_evict_all);
 
 /* Only need to touch memory once per backend process lifetime */
 static bool firstNumaTouch = true;
+
+/*
+ * Helper function to get buffer page boundaries.
+ *
+ * Given a buffer pointer and OS page size, calculates the start/end
+ * pointers and first page number.
+ */
+static void
+get_buffer_page_boundaries(char *buffptr, Size os_page_size, char *startptr,
+						   char **startptr_buff, char **endptr_buff,
+						   int32 *page_num)
+{
+	char	   *start_ptr;
+	char	   *end_ptr;
+
+	/* start of the first page of this buffer */
+	start_ptr = (char *) TYPEALIGN_DOWN(os_page_size, buffptr);
+
+	/* end of the buffer (no need to align to memory page) */
+	end_ptr = buffptr + BLCKSZ;
+
+	Assert(start_ptr < end_ptr);
+
+	/* calculate ID of the first page for this buffer */
+	*page_num = (start_ptr - startptr) / os_page_size;
+	*startptr_buff = start_ptr;
+	*endptr_buff = end_ptr;
+}
 
 
 Datum
@@ -317,7 +351,6 @@ pg_buffercache_numa_pages(PG_FUNCTION_ARGS)
 		void	  **os_page_ptrs;
 		int		   *os_page_status;
 		uint64		os_page_count;
-		int			pages_per_buffer;
 		int			max_entries;
 		char	   *startptr,
 				   *endptr;
@@ -429,8 +462,7 @@ pg_buffercache_numa_pages(PG_FUNCTION_ARGS)
 		 * number as we're walking buffers. That way we can do it in one pass,
 		 * without reallocating memory.
 		 */
-		pages_per_buffer = Max(1, BLCKSZ / os_page_size) + 1;
-		max_entries = NBuffers * pages_per_buffer;
+		max_entries = GET_MAX_BUFFER_ENTRIES(NBuffers, os_page_size);
 
 		/* Allocate entries for BufferCachePagesRec records. */
 		fctx->record = (BufferCacheNumaRec *)
@@ -471,16 +503,9 @@ pg_buffercache_numa_pages(PG_FUNCTION_ARGS)
 			bufferid = BufferDescriptorGetBuffer(bufHdr);
 			UnlockBufHdr(bufHdr);
 
-			/* start of the first page of this buffer */
-			startptr_buff = (char *) TYPEALIGN_DOWN(os_page_size, buffptr);
-
-			/* end of the buffer (no need to align to memory page) */
-			endptr_buff = buffptr + BLCKSZ;
-
-			Assert(startptr_buff < endptr_buff);
-
-			/* calculate ID of the first page for this buffer */
-			page_num = (startptr_buff - startptr) / os_page_size;
+			/* Get page boundaries for this buffer. */
+			get_buffer_page_boundaries(buffptr, os_page_size, startptr,
+									   &startptr_buff, &endptr_buff, &page_num);
 
 			/* Add an entry for each OS page overlapping with this buffer. */
 			for (char *ptr = startptr_buff; ptr < endptr_buff; ptr += os_page_size)
