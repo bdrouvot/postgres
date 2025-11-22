@@ -87,8 +87,7 @@ struct SharedTuplestoreAccessor
 
 	/* State for writing. */
 	SharedTuplestoreChunk *write_chunk; /* Buffer for writing. */
-	BufFile    *write_file;		/* The current file to write to. */
-	BlockNumber write_page;		/* The next page to write to. */
+	BufFile    *write_file;		/* The current file to write to. */		/* The next page to write to. */
 	char	   *write_pointer;	/* Current write pointer within chunk. */
 	char	   *write_end;		/* One past the end of the current chunk. */
 };
