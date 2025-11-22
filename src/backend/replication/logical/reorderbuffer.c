@@ -4156,6 +4156,7 @@ ReorderBufferSerializeChange(ReorderBuffer *rb, ReorderBufferTXN *txn,
 					data += sizeof(HeapTupleData);
 
 					memcpy(data, newtup->t_data, newlen);
+					/* not needed, but in case we add more branches */
 					data += newlen;
 				}
 				break;
@@ -4186,7 +4187,6 @@ ReorderBufferSerializeChange(ReorderBuffer *rb, ReorderBufferTXN *txn,
 				data += sizeof(Size);
 				memcpy(data, change->data.msg.message,
 					   change->data.msg.message_size);
-				data += change->data.msg.message_size;
 
 				break;
 			}
@@ -4204,7 +4204,6 @@ ReorderBufferSerializeChange(ReorderBuffer *rb, ReorderBufferTXN *txn,
 				/* might have been reallocated above */
 				ondisk = (ReorderBufferDiskChange *) rb->outbuf;
 				memcpy(data, change->data.inval.invalidations, inval_size);
-				data += inval_size;
 
 				break;
 			}
@@ -4239,6 +4238,7 @@ ReorderBufferSerializeChange(ReorderBuffer *rb, ReorderBufferTXN *txn,
 				{
 					memcpy(data, snap->subxip,
 						   sizeof(TransactionId) * snap->subxcnt);
+					/* not needed, but in case we add more branches */
 					data += sizeof(TransactionId) * snap->subxcnt;
 				}
 				break;
@@ -4260,7 +4260,6 @@ ReorderBufferSerializeChange(ReorderBuffer *rb, ReorderBufferTXN *txn,
 				ondisk = (ReorderBufferDiskChange *) rb->outbuf;
 
 				memcpy(data, change->data.truncate.relids, size);
-				data += size;
 
 				break;
 			}
@@ -4753,7 +4752,6 @@ ReorderBufferRestoreChange(ReorderBuffer *rb, ReorderBufferTXN *txn,
 
 				/* restore tuple data itself */
 				memcpy(change->data.tp.newtuple->t_data, data, tuplelen);
-				data += tuplelen;
 			}
 
 			break;
@@ -4777,7 +4775,6 @@ ReorderBufferRestoreChange(ReorderBuffer *rb, ReorderBufferTXN *txn,
 															  change->data.msg.message_size);
 				memcpy(change->data.msg.message, data,
 					   change->data.msg.message_size);
-				data += change->data.msg.message_size;
 
 				break;
 			}
