@@ -444,7 +444,6 @@ static void adjust_foreign_grouping_path_cost(PlannerInfo *root,
 											  double retrieved_rows,
 											  double width,
 											  double limit_tuples,
-											  int *p_disabled_nodes,
 											  Cost *p_startup_cost,
 											  Cost *p_run_cost);
 static bool ec_member_matches_foreign(PlannerInfo *root, RelOptInfo *rel,
@@ -464,8 +463,7 @@ static PgFdwModifyState *create_foreign_modify(EState *estate,
 											   int values_end,
 											   bool has_returning,
 											   List *retrieved_attrs);
-static TupleTableSlot **execute_foreign_modify(EState *estate,
-											   ResultRelInfo *resultRelInfo,
+static TupleTableSlot **execute_foreign_modify(ResultRelInfo *resultRelInfo,
 											   CmdType operation,
 											   TupleTableSlot **slots,
 											   TupleTableSlot **planSlots,
@@ -1984,7 +1982,7 @@ postgresExecForeignInsert(EState *estate,
 	 */
 	if (fmstate->aux_fmstate)
 		resultRelInfo->ri_FdwState = fmstate->aux_fmstate;
-	rslot = execute_foreign_modify(estate, resultRelInfo, CMD_INSERT,
+	rslot = execute_foreign_modify(resultRelInfo, CMD_INSERT,
 								   &slot, &planSlot, &numSlots);
 	/* Revert that change */
 	if (fmstate->aux_fmstate)
@@ -2013,7 +2011,7 @@ postgresExecForeignBatchInsert(EState *estate,
 	 */
 	if (fmstate->aux_fmstate)
 		resultRelInfo->ri_FdwState = fmstate->aux_fmstate;
-	rslot = execute_foreign_modify(estate, resultRelInfo, CMD_INSERT,
+	rslot = execute_foreign_modify(resultRelInfo, CMD_INSERT,
 								   slots, planSlots, numSlots);
 	/* Revert that change */
 	if (fmstate->aux_fmstate)
@@ -2106,7 +2104,7 @@ postgresExecForeignUpdate(EState *estate,
 	TupleTableSlot **rslot;
 	int			numSlots = 1;
 
-	rslot = execute_foreign_modify(estate, resultRelInfo, CMD_UPDATE,
+	rslot = execute_foreign_modify(resultRelInfo, CMD_UPDATE,
 								   &slot, &planSlot, &numSlots);
 
 	return rslot ? rslot[0] : NULL;
@@ -2125,7 +2123,7 @@ postgresExecForeignDelete(EState *estate,
 	TupleTableSlot **rslot;
 	int			numSlots = 1;
 
-	rslot = execute_foreign_modify(estate, resultRelInfo, CMD_DELETE,
+	rslot = execute_foreign_modify(resultRelInfo, CMD_DELETE,
 								   &slot, &planSlot, &numSlots);
 
 	return rslot ? rslot[0] : NULL;
@@ -2385,10 +2383,7 @@ postgresRecheckForeignScan(ForeignScanState *node, TupleTableSlot *slot)
  * error condition, we just abandon trying to do the update directly.
  */
 static ForeignScan *
-find_modifytable_subplan(PlannerInfo *root,
-						 ModifyTable *plan,
-						 Index rtindex,
-						 int subplan_index)
+find_modifytable_subplan(ModifyTable *plan, Index rtindex, int subplan_index)
 {
 	Plan	   *subplan = outerPlan(plan);
 
@@ -2477,7 +2472,7 @@ postgresPlanDirectModify(PlannerInfo *root,
 	/*
 	 * Try to locate the ForeignScan subplan that's scanning resultRelation.
 	 */
-	fscan = find_modifytable_subplan(root, plan, resultRelation, subplan_index);
+	fscan = find_modifytable_subplan(plan, resultRelation, subplan_index);
 	if (!fscan)
 		return false;
 
@@ -3495,7 +3490,6 @@ estimate_path_cost_size(PlannerInfo *root,
 				adjust_foreign_grouping_path_cost(root, pathkeys,
 												  retrieved_rows, width,
 												  fpextra->limit_tuples,
-												  &disabled_nodes,
 												  &startup_cost, &run_cost);
 			}
 			else
@@ -3642,7 +3636,6 @@ adjust_foreign_grouping_path_cost(PlannerInfo *root,
 								  double retrieved_rows,
 								  double width,
 								  double limit_tuples,
-								  int *p_disabled_nodes,
 								  Cost *p_startup_cost,
 								  Cost *p_run_cost)
 {
@@ -4074,8 +4067,7 @@ create_foreign_modify(EState *estate,
  *		postgresExecForeignDelete.)
  */
 static TupleTableSlot **
-execute_foreign_modify(EState *estate,
-					   ResultRelInfo *resultRelInfo,
+execute_foreign_modify(ResultRelInfo *resultRelInfo,
 					   CmdType operation,
 					   TupleTableSlot **slots,
 					   TupleTableSlot **planSlots,
@@ -5657,7 +5649,7 @@ postgresImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
  * outer rel.
  */
 static bool
-semijoin_target_ok(PlannerInfo *root, RelOptInfo *joinrel, RelOptInfo *outerrel, RelOptInfo *innerrel)
+semijoin_target_ok(RelOptInfo *joinrel, RelOptInfo *outerrel, RelOptInfo *innerrel)
 {
 	List	   *vars;
 	ListCell   *lc;
@@ -5719,7 +5711,7 @@ foreign_join_ok(PlannerInfo *root, RelOptInfo *joinrel, JoinType jointype,
 	/*
 	 * We can't push down semi-join if its reltarget is not safe
 	 */
-	if ((jointype == JOIN_SEMI) && !semijoin_target_ok(root, joinrel, outerrel, innerrel))
+	if ((jointype == JOIN_SEMI) && !semijoin_target_ok(joinrel, outerrel, innerrel))
 		return false;
 
 	/*
