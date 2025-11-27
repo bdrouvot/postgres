@@ -166,7 +166,7 @@ gbt_var_node_cp_len(const GBT_VARKEY *node, const gbtree_vinfo *tinfo)
  * returns true, if query matches prefix ( common prefix )
  */
 static bool
-gbt_bytea_pf_match(const bytea *pf, const bytea *query, const gbtree_vinfo *tinfo)
+gbt_bytea_pf_match(const bytea *pf, const bytea *query)
 {
 	bool		out = false;
 	int32		qlen = VARSIZE(query) - VARHDRSZ;
@@ -191,8 +191,8 @@ static bool
 gbt_var_node_pf_match(const GBT_VARKEY_R *node, const bytea *query, const gbtree_vinfo *tinfo)
 {
 	return (tinfo->trnc &&
-			(gbt_bytea_pf_match(node->lower, query, tinfo) ||
-			 gbt_bytea_pf_match(node->upper, query, tinfo)));
+			(gbt_bytea_pf_match(node->lower, query) ||
+			 gbt_bytea_pf_match(node->upper, query)));
 }
 
 
@@ -399,9 +399,9 @@ gbt_var_penalty(float *res, const GISTENTRY *o, const GISTENTRY *n,
 	if ((VARSIZE(ok.lower) - VARHDRSZ) == 0 && (VARSIZE(ok.upper) - VARHDRSZ) == 0)
 		*res = 0.0;
 	else if (!((tinfo->f_cmp(nk.lower, ok.lower, collation, flinfo) >= 0 ||
-				gbt_bytea_pf_match(ok.lower, nk.lower, tinfo)) &&
+				gbt_bytea_pf_match(ok.lower, nk.lower)) &&
 			   (tinfo->f_cmp(nk.upper, ok.upper, collation, flinfo) <= 0 ||
-				gbt_bytea_pf_match(ok.upper, nk.upper, tinfo))))
+				gbt_bytea_pf_match(ok.upper, nk.upper))))
 	{
 		Datum		d = PointerGetDatum(0);
 		double		dres;
