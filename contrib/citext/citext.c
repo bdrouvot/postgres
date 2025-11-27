@@ -77,8 +77,8 @@ internal_citext_pattern_cmp(text *left, text *right, Oid collid)
 				rlen;
 	int32		result;
 
-	lcstr = str_tolower(VARDATA_ANY(left), VARSIZE_ANY_EXHDR(left), DEFAULT_COLLATION_OID);
-	rcstr = str_tolower(VARDATA_ANY(right), VARSIZE_ANY_EXHDR(right), DEFAULT_COLLATION_OID);
+	lcstr = str_tolower(VARDATA_ANY(left), VARSIZE_ANY_EXHDR(left), collid);
+	rcstr = str_tolower(VARDATA_ANY(right), VARSIZE_ANY_EXHDR(right), collid);
 
 	llen = strlen(lcstr);
 	rlen = strlen(rcstr);
