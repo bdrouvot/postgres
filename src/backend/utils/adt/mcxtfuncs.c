@@ -188,8 +188,7 @@ pg_get_backend_memory_contexts(PG_FUNCTION_ARGS)
 	HASHCTL		ctl;
 	HTAB	   *context_id_lookup;
 
-	ctl.keysize = sizeof(MemoryContext);
-	ctl.entrysize = sizeof(MemoryContextId);
+	HASH_ELEM_INIT(ctl, MemoryContextId, context);
 	ctl.hcxt = CurrentMemoryContext;
 
 	context_id_lookup = hash_create("pg_get_backend_memory_contexts",

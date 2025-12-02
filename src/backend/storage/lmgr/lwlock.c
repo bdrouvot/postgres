@@ -305,8 +305,7 @@ init_lwlock_stats(void)
 											 ALLOCSET_DEFAULT_SIZES);
 	MemoryContextAllowInCriticalSection(lwlock_stats_cxt, true);
 
-	ctl.keysize = sizeof(lwlock_stats_key);
-	ctl.entrysize = sizeof(lwlock_stats);
+	HASH_ELEM_INIT(ctl, lwlock_stats, key);
 	ctl.hcxt = lwlock_stats_cxt;
 	lwlock_stats_htab = hash_create("lwlock stats", 16384, &ctl,
 									HASH_ELEM | HASH_BLOBS | HASH_CONTEXT);

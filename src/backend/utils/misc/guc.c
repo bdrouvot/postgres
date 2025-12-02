@@ -894,8 +894,7 @@ build_guc_variables(void)
 	 */
 	size_vars = num_vars + num_vars / 4;
 
-	hash_ctl.keysize = sizeof(char *);
-	hash_ctl.entrysize = sizeof(GUCHashEntry);
+	HASH_ELEM_INIT(hash_ctl, GUCHashEntry, gucname);
 	hash_ctl.hash = guc_name_hash;
 	hash_ctl.match = guc_name_match;
 	hash_ctl.hcxt = GUCMemoryContext;

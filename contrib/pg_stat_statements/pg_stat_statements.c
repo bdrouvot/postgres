@@ -557,8 +557,7 @@ pgss_shmem_startup(void)
 		pgss->stats.stats_reset = GetCurrentTimestamp();
 	}
 
-	info.keysize = sizeof(pgssHashKey);
-	info.entrysize = sizeof(pgssEntry);
+	HASH_ELEM_INIT(info, pgssEntry, key);
 	pgss_hash = ShmemInitHash("pg_stat_statements hash",
 							  pgss_max, pgss_max,
 							  &info,

@@ -697,8 +697,7 @@ get_relation_notnullatts(PlannerInfo *root, Relation relation)
 		HTAB	   *hashtab;
 		HASHCTL		hash_ctl;
 
-		hash_ctl.keysize = sizeof(Oid);
-		hash_ctl.entrysize = sizeof(NotnullHashEntry);
+		HASH_ELEM_INIT(hash_ctl, NotnullHashEntry, relid);
 		hash_ctl.hcxt = CurrentMemoryContext;
 
 		hashtab = hash_create("Relation NOT NULL attnums",

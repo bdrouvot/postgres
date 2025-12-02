@@ -129,8 +129,7 @@ injection_point_cache_add(const char *name,
 	{
 		HASHCTL		hash_ctl;
 
-		hash_ctl.keysize = sizeof(char[INJ_NAME_MAXLEN]);
-		hash_ctl.entrysize = sizeof(InjectionPointCacheEntry);
+		HASH_ELEM_INIT(hash_ctl, InjectionPointCacheEntry, name);
 		hash_ctl.hcxt = TopMemoryContext;
 
 		InjectionPointCache = hash_create("InjectionPoint cache hash",

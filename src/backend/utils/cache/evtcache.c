@@ -113,8 +113,7 @@ BuildEventTriggerCache(void)
 	EventTriggerCacheState = ETCS_REBUILD_STARTED;
 
 	/* Create new hash table. */
-	ctl.keysize = sizeof(EventTriggerEvent);
-	ctl.entrysize = sizeof(EventTriggerCacheEntry);
+	HASH_ELEM_INIT(ctl, EventTriggerCacheEntry, event);
 	ctl.hcxt = EventTriggerCacheContext;
 	cache = hash_create("EventTriggerCacheHash", 32, &ctl,
 						HASH_ELEM | HASH_BLOBS | HASH_CONTEXT);

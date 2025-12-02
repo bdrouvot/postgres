@@ -779,8 +779,7 @@ InitLocalBuffers(void)
 	}
 
 	/* Create the lookup hash table */
-	info.keysize = sizeof(BufferTag);
-	info.entrysize = sizeof(LocalBufferLookupEnt);
+	HASH_ELEM_INIT(info, LocalBufferLookupEnt, key);
 
 	LocalBufHash = hash_create("Local Buffer Lookup Table",
 							   nbufs,

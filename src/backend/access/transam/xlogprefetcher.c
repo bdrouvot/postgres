@@ -367,8 +367,7 @@ XLogPrefetcherAllocate(XLogReaderState *reader)
 	prefetcher = palloc0(sizeof(XLogPrefetcher));
 	prefetcher->reader = reader;
 
-	ctl.keysize = sizeof(RelFileLocator);
-	ctl.entrysize = sizeof(XLogPrefetcherFilter);
+	HASH_ELEM_INIT(ctl, XLogPrefetcherFilter, rlocator);
 	prefetcher->filter_table = hash_create("XLogPrefetcherFilterTable", 1024,
 										   &ctl, HASH_ELEM | HASH_BLOBS);
 	dlist_init(&prefetcher->filter_queue);

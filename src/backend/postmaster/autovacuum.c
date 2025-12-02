@@ -937,8 +937,7 @@ rebuild_database_list(Oid newdb)
 	 * score, and finally put the array elements into the new doubly linked
 	 * list.
 	 */
-	hctl.keysize = sizeof(Oid);
-	hctl.entrysize = sizeof(avl_dbase);
+	HASH_ELEM_INIT(hctl, avl_dbase, adl_datid);
 	hctl.hcxt = tmpcxt;
 	dbhash = hash_create("autovacuum db hash", 20, &hctl,	/* magic number here
 															 * FIXME */
@@ -1977,8 +1976,7 @@ do_autovacuum(void)
 	pg_class_desc = CreateTupleDescCopy(RelationGetDescr(classRel));
 
 	/* create hash table for toast <-> main relid mapping */
-	ctl.keysize = sizeof(Oid);
-	ctl.entrysize = sizeof(av_relation);
+	HASH_ELEM_INIT(ctl, av_relation, ar_toastrelid);
 
 	table_toast_map = hash_create("TOAST to main relid map",
 								  100,

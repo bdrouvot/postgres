@@ -133,8 +133,7 @@ log_invalid_page(RelFileLocator locator, ForkNumber forkno, BlockNumber blkno,
 		/* create hash table when first needed */
 		HASHCTL		ctl;
 
-		ctl.keysize = sizeof(xl_invalid_page_key);
-		ctl.entrysize = sizeof(xl_invalid_page);
+		HASH_ELEM_INIT(ctl, xl_invalid_page, key);
 
 		invalid_page_tab = hash_create("XLOG invalid-page table",
 									   100,

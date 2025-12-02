@@ -673,8 +673,7 @@ find_rendezvous_variable(const char *varName)
 	{
 		HASHCTL		ctl;
 
-		ctl.keysize = NAMEDATALEN;
-		ctl.entrysize = sizeof(rendezvousHashEntry);
+		HASH_ELEM_INIT(ctl, rendezvousHashEntry, varName);
 		rendezvousHash = hash_create("Rendezvous variable hash",
 									 16,
 									 &ctl,

@@ -549,8 +549,7 @@ record_C_func(HeapTuple procedureTuple,
 	{
 		HASHCTL		hash_ctl;
 
-		hash_ctl.keysize = sizeof(Oid);
-		hash_ctl.entrysize = sizeof(CFuncHashTabEntry);
+		HASH_ELEM_INIT(hash_ctl, CFuncHashTabEntry, fn_oid);
 		CFuncHash = hash_create("CFuncHash",
 								100,
 								&hash_ctl,

@@ -63,8 +63,7 @@ cfunc_hashtable_init(void)
 	/* don't allow double-initialization */
 	Assert(cfunc_hashtable == NULL);
 
-	ctl.keysize = sizeof(CachedFunctionHashKey);
-	ctl.entrysize = sizeof(CachedFunctionHashEntry);
+	HASH_ELEM_INIT(ctl, CachedFunctionHashEntry, key);
 	ctl.hash = cfunc_hash;
 	ctl.match = cfunc_match;
 	cfunc_hashtable = hash_create("Cached function hash",

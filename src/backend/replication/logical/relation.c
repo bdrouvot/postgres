@@ -619,8 +619,7 @@ logicalrep_partmap_init(void)
 								  ALLOCSET_DEFAULT_SIZES);
 
 	/* Initialize the relation hash table. */
-	ctl.keysize = sizeof(Oid);	/* partition OID */
-	ctl.entrysize = sizeof(LogicalRepPartMapEntry);
+	HASH_ELEM_INIT(ctl, LogicalRepPartMapEntry, partoid);
 	ctl.hcxt = LogicalRepPartMapContext;
 
 	LogicalRepPartMap = hash_create("logicalrep partition map cache", 64, &ctl,

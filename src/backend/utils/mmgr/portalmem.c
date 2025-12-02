@@ -111,8 +111,8 @@ EnablePortalManager(void)
 											 "TopPortalContext",
 											 ALLOCSET_DEFAULT_SIZES);
 
-	ctl.keysize = MAX_PORTALNAME_LEN;
-	ctl.entrysize = sizeof(PortalHashEnt);
+	HASH_ELEM_INIT(ctl, PortalHashEnt, portalname);
+
 
 	/*
 	 * use PORTALS_PER_USER as a guess of how many hash table entries to

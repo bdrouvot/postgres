@@ -269,8 +269,7 @@ init_uncommitted_enum_types(void)
 {
 	HASHCTL		hash_ctl;
 
-	hash_ctl.keysize = sizeof(Oid);
-	hash_ctl.entrysize = sizeof(Oid);
+	HASH_ELEM_INIT_FULL(hash_ctl, Oid);
 	hash_ctl.hcxt = TopTransactionContext;
 	uncommitted_enum_types = hash_create("Uncommitted enum types",
 										 32,
@@ -286,8 +285,7 @@ init_uncommitted_enum_values(void)
 {
 	HASHCTL		hash_ctl;
 
-	hash_ctl.keysize = sizeof(Oid);
-	hash_ctl.entrysize = sizeof(Oid);
+	HASH_ELEM_INIT_FULL(hash_ctl, Oid);
 	hash_ctl.hcxt = TopTransactionContext;
 	uncommitted_enum_values = hash_create("Uncommitted enum values",
 										  32,

@@ -936,8 +936,7 @@ json_unique_check_init(JsonUniqueCheckState *cxt)
 	HASHCTL		ctl;
 
 	memset(&ctl, 0, sizeof(ctl));
-	ctl.keysize = sizeof(JsonUniqueHashEntry);
-	ctl.entrysize = sizeof(JsonUniqueHashEntry);
+	HASH_ELEM_INIT_FULL(ctl, JsonUniqueHashEntry);
 	ctl.hcxt = CurrentMemoryContext;
 	ctl.hash = json_unique_hash;
 	ctl.match = json_unique_hash_match;

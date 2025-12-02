@@ -711,8 +711,7 @@ load_categories_hash(char *cats_sql, MemoryContext per_query_ctx)
 	MemoryContext SPIcontext;
 
 	/* initialize the category hash table */
-	ctl.keysize = MAX_CATNAME_LEN;
-	ctl.entrysize = sizeof(crosstab_HashEnt);
+	HASH_ELEM_INIT(ctl, crosstab_HashEnt, internal_catname);
 	ctl.hcxt = per_query_ctx;
 
 	/*

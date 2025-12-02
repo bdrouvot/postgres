@@ -80,8 +80,7 @@ InitializeTableSpaceCache(void)
 	HASHCTL		ctl;
 
 	/* Initialize the hash table. */
-	ctl.keysize = sizeof(Oid);
-	ctl.entrysize = sizeof(TableSpaceCacheEntry);
+	HASH_ELEM_INIT(ctl, TableSpaceCacheEntry, oid);
 	TableSpaceCacheHash =
 		hash_create("TableSpace cache", 16, &ctl,
 					HASH_ELEM | HASH_BLOBS);

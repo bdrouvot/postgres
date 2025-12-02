@@ -3816,8 +3816,7 @@ get_json_object_as_hash(const char *json, int len, const char *funcname,
 	JHashState *state;
 	JsonSemAction *sem;
 
-	ctl.keysize = NAMEDATALEN;
-	ctl.entrysize = sizeof(JsonHashEntry);
+	HASH_ELEM_INIT(ctl, JsonHashEntry, fname);
 	ctl.hcxt = CurrentMemoryContext;
 	tab = hash_create("json object hashtable",
 					  100,
@@ -4230,8 +4229,7 @@ populate_recordset_object_start(void *state)
 		return JSON_SUCCESS;
 
 	/* Object at level 1: set up a new hash table for this object */
-	ctl.keysize = NAMEDATALEN;
-	ctl.entrysize = sizeof(JsonHashEntry);
+	HASH_ELEM_INIT(ctl, JsonHashEntry, fname);
 	ctl.hcxt = CurrentMemoryContext;
 	_state->json_hash = hash_create("json object hashtable",
 									100,

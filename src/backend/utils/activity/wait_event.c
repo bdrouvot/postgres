@@ -133,8 +133,7 @@ WaitEventCustomShmemInit(void)
 	}
 
 	/* initialize or attach the hash tables to store custom wait events */
-	info.keysize = sizeof(uint32);
-	info.entrysize = sizeof(WaitEventCustomEntryByInfo);
+	HASH_ELEM_INIT(info, WaitEventCustomEntryByInfo, wait_event_info);
 	WaitEventCustomHashByInfo =
 		ShmemInitHash("WaitEventCustom hash by wait event information",
 					  WAIT_EVENT_CUSTOM_HASH_INIT_SIZE,
@@ -143,8 +142,7 @@ WaitEventCustomShmemInit(void)
 					  HASH_ELEM | HASH_BLOBS);
 
 	/* key is a NULL-terminated string */
-	info.keysize = sizeof(char[NAMEDATALEN]);
-	info.entrysize = sizeof(WaitEventCustomEntryByName);
+	HASH_ELEM_INIT(info, WaitEventCustomEntryByName, wait_event_name);
 	WaitEventCustomHashByName =
 		ShmemInitHash("WaitEventCustom hash by name",
 					  WAIT_EVENT_CUSTOM_HASH_INIT_SIZE,

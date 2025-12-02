@@ -99,8 +99,7 @@ InitializeAttoptCache(void)
 	HASHCTL		ctl;
 
 	/* Initialize the hash table. */
-	ctl.keysize = sizeof(AttoptCacheKey);
-	ctl.entrysize = sizeof(AttoptCacheEntry);
+	HASH_ELEM_INIT(ctl, AttoptCacheEntry, key);
 
 	/*
 	 * AttoptCacheEntry takes hash value from the system cache. For

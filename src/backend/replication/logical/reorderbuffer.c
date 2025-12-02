@@ -367,8 +367,7 @@ ReorderBufferAllocate(void)
 												  SLAB_DEFAULT_BLOCK_SIZE,
 												  SLAB_DEFAULT_BLOCK_SIZE);
 
-	hash_ctl.keysize = sizeof(TransactionId);
-	hash_ctl.entrysize = sizeof(ReorderBufferTXNByIdEnt);
+	HASH_ELEM_INIT(hash_ctl, ReorderBufferTXNByIdEnt, xid);
 	hash_ctl.hcxt = buffer->context;
 
 	buffer->by_txn = hash_create("ReorderBufferByXid", 1000, &hash_ctl,
@@ -1841,8 +1840,7 @@ ReorderBufferBuildTupleCidHash(ReorderBuffer *rb, ReorderBufferTXN *txn)
 	if (!rbtxn_has_catalog_changes(txn) || dlist_is_empty(&txn->tuplecids))
 		return;
 
-	hash_ctl.keysize = sizeof(ReorderBufferTupleCidKey);
-	hash_ctl.entrysize = sizeof(ReorderBufferTupleCidEnt);
+	HASH_ELEM_INIT(hash_ctl, ReorderBufferTupleCidEnt, key);
 	hash_ctl.hcxt = rb->context;
 
 	/*
@@ -4981,8 +4979,7 @@ ReorderBufferToastInitHash(ReorderBuffer *rb, ReorderBufferTXN *txn)
 
 	Assert(txn->toast_hash == NULL);
 
-	hash_ctl.keysize = sizeof(Oid);
-	hash_ctl.entrysize = sizeof(ReorderBufferToastEnt);
+	HASH_ELEM_INIT(hash_ctl, ReorderBufferToastEnt, chunk_id);
 	hash_ctl.hcxt = rb->context;
 	txn->toast_hash = hash_create("ReorderBufferToastHash", 5, &hash_ctl,
 								  HASH_ELEM | HASH_BLOBS | HASH_CONTEXT);

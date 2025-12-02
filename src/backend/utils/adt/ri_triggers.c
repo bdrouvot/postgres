@@ -2859,8 +2859,7 @@ ri_InitHashTables(void)
 {
 	HASHCTL		ctl;
 
-	ctl.keysize = sizeof(Oid);
-	ctl.entrysize = sizeof(RI_ConstraintInfo);
+	HASH_ELEM_INIT(ctl, RI_ConstraintInfo, constraint_id);
 	ri_constraint_cache = hash_create("RI constraint cache",
 									  RI_INIT_CONSTRAINTHASHSIZE,
 									  &ctl, HASH_ELEM | HASH_BLOBS);
@@ -2870,14 +2869,12 @@ ri_InitHashTables(void)
 								  InvalidateConstraintCacheCallBack,
 								  (Datum) 0);
 
-	ctl.keysize = sizeof(RI_QueryKey);
-	ctl.entrysize = sizeof(RI_QueryHashEntry);
+	HASH_ELEM_INIT(ctl, RI_QueryHashEntry, key);
 	ri_query_cache = hash_create("RI query cache",
 								 RI_INIT_QUERYHASHSIZE,
 								 &ctl, HASH_ELEM | HASH_BLOBS);
 
-	ctl.keysize = sizeof(RI_CompareKey);
-	ctl.entrysize = sizeof(RI_CompareHashEntry);
+	HASH_ELEM_INIT(ctl, RI_CompareHashEntry, key);
 	ri_compare_cache = hash_create("RI compare cache",
 								   RI_INIT_QUERYHASHSIZE,
 								   &ctl, HASH_ELEM | HASH_BLOBS);

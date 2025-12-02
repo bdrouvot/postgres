@@ -263,8 +263,7 @@ begin_heap_rewrite(Relation old_heap, Relation new_heap, TransactionId oldest_xm
 	state->rs_bulkstate = smgr_bulk_start_rel(new_heap, MAIN_FORKNUM);
 
 	/* Initialize hash tables used to track update chains */
-	hash_ctl.keysize = sizeof(TidHashKey);
-	hash_ctl.entrysize = sizeof(UnresolvedTupData);
+	HASH_ELEM_INIT(hash_ctl, UnresolvedTupData, key);
 	hash_ctl.hcxt = state->rs_cxt;
 
 	state->rs_unresolved_tups =
@@ -273,7 +272,7 @@ begin_heap_rewrite(Relation old_heap, Relation new_heap, TransactionId oldest_xm
 					&hash_ctl,
 					HASH_ELEM | HASH_BLOBS | HASH_CONTEXT);
 
-	hash_ctl.entrysize = sizeof(OldToNewMappingData);
+	HASH_ELEM_INIT(hash_ctl, OldToNewMappingData, key);
 
 	state->rs_old_new_tid_map =
 		hash_create("Rewrite / Old to new tid map",
@@ -788,8 +787,7 @@ logical_begin_heap_rewrite(RewriteState state)
 	state->rs_begin_lsn = GetXLogInsertRecPtr();
 	state->rs_num_rewrite_mappings = 0;
 
-	hash_ctl.keysize = sizeof(TransactionId);
-	hash_ctl.entrysize = sizeof(RewriteMappingFile);
+	HASH_ELEM_INIT(hash_ctl, RewriteMappingFile, xid);
 	hash_ctl.hcxt = state->rs_cxt;
 
 	state->rs_logical_mappings =

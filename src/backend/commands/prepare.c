@@ -373,8 +373,7 @@ InitQueryHashTable(void)
 {
 	HASHCTL		hash_ctl;
 
-	hash_ctl.keysize = NAMEDATALEN;
-	hash_ctl.entrysize = sizeof(PreparedStatement);
+	HASH_ELEM_INIT(hash_ctl, PreparedStatement, stmt_name);
 
 	prepared_queries = hash_create("Prepared Queries",
 								   32,

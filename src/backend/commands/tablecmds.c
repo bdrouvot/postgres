@@ -2158,8 +2158,7 @@ ExecuteTruncateGuts(List *explicit_rels,
 				HASHCTL		hctl;
 
 				memset(&hctl, 0, sizeof(HASHCTL));
-				hctl.keysize = sizeof(Oid);
-				hctl.entrysize = sizeof(ForeignTruncateInfo);
+				HASH_ELEM_INIT(hctl, ForeignTruncateInfo, serverid);
 				hctl.hcxt = CurrentMemoryContext;
 
 				ft_htab = hash_create("TRUNCATE for Foreign Tables",

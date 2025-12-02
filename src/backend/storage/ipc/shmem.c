@@ -294,8 +294,7 @@ InitShmemIndex(void)
 	 * initializing the ShmemIndex itself.  The special "ShmemIndex" hash
 	 * table name will tell ShmemInitStruct to fake it.
 	 */
-	info.keysize = SHMEM_INDEX_KEYSIZE;
-	info.entrysize = sizeof(ShmemIndexEnt);
+	HASH_ELEM_INIT(info, ShmemIndexEnt, key);
 
 	ShmemIndex = ShmemInitHash("ShmemIndex",
 							   SHMEM_INDEX_SIZE, SHMEM_INDEX_SIZE,

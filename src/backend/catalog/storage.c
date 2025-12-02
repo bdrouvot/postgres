@@ -93,8 +93,7 @@ AddPendingSync(const RelFileLocator *rlocator)
 	{
 		HASHCTL		ctl;
 
-		ctl.keysize = sizeof(RelFileLocator);
-		ctl.entrysize = sizeof(PendingRelSync);
+		HASH_ELEM_INIT(ctl, PendingRelSync, rlocator);
 		ctl.hcxt = TopTransactionContext;
 		pendingSyncHash = hash_create("pending sync hash", 16, &ctl,
 									  HASH_ELEM | HASH_BLOBS | HASH_CONTEXT);
@@ -611,8 +610,7 @@ SerializePendingSyncs(Size maxSize, char *startAddress)
 		goto terminate;
 
 	/* Create temporary hash to collect active relfilelocators */
-	ctl.keysize = sizeof(RelFileLocator);
-	ctl.entrysize = sizeof(RelFileLocator);
+	HASH_ELEM_INIT_FULL(ctl, RelFileLocator);
 	ctl.hcxt = CurrentMemoryContext;
 	tmphash = hash_create("tmp relfilelocators",
 						  hash_get_num_entries(pendingSyncHash), &ctl,

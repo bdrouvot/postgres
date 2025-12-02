@@ -395,8 +395,7 @@ lookup_type_cache(Oid type_id, int flags)
 		HASHCTL		ctl;
 		int			allocsize;
 
-		ctl.keysize = sizeof(Oid);
-		ctl.entrysize = sizeof(TypeCacheEntry);
+		HASH_ELEM_INIT(ctl, TypeCacheEntry, type_id);
 
 		/*
 		 * TypeCacheEntry takes hash value from the system cache. For
@@ -410,8 +409,7 @@ lookup_type_cache(Oid type_id, int flags)
 
 		Assert(RelIdToTypeIdCacheHash == NULL);
 
-		ctl.keysize = sizeof(Oid);
-		ctl.entrysize = sizeof(RelIdToTypeIdCacheEntry);
+		HASH_ELEM_INIT(ctl, RelIdToTypeIdCacheEntry, relid);
 		RelIdToTypeIdCacheHash = hash_create("Map from relid to OID of cached composite type", 64,
 											 &ctl, HASH_ELEM | HASH_BLOBS);
 
@@ -2052,8 +2050,7 @@ assign_record_type_typmod(TupleDesc tupDesc)
 		/* First time through: initialize the hash table */
 		HASHCTL		ctl;
 
-		ctl.keysize = sizeof(TupleDesc);	/* just the pointer */
-		ctl.entrysize = sizeof(RecordCacheEntry);
+		HASH_ELEM_INIT(ctl, RecordCacheEntry, tupdesc);
 		ctl.hash = record_type_typmod_hash;
 		ctl.match = record_type_typmod_compare;
 		RecordCacheHash = hash_create("Record information cache", 64,

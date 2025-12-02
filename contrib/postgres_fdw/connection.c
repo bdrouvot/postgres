@@ -220,8 +220,7 @@ GetConnection(UserMapping *user, bool will_prep_stmt, PgFdwConnState **state)
 			pgfdw_we_get_result =
 				WaitEventExtensionNew("PostgresFdwGetResult");
 
-		ctl.keysize = sizeof(ConnCacheKey);
-		ctl.entrysize = sizeof(ConnCacheEntry);
+		HASH_ELEM_INIT(ctl, ConnCacheEntry, key);
 		ConnectionHash = hash_create("postgres_fdw connections", 8,
 									 &ctl,
 									 HASH_ELEM | HASH_BLOBS);

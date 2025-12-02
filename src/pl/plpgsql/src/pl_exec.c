@@ -4052,8 +4052,7 @@ plpgsql_estate_setup(PLpgSQL_execstate *estate,
 	/* Create the session-wide cast-expression hash if we didn't already */
 	if (cast_expr_hash == NULL)
 	{
-		ctl.keysize = sizeof(plpgsql_CastHashKey);
-		ctl.entrysize = sizeof(plpgsql_CastExprHashEntry);
+		HASH_ELEM_INIT(ctl, plpgsql_CastExprHashEntry, key);
 		cast_expr_hash = hash_create("PLpgSQL cast expressions",
 									 16,	/* start small and extend */
 									 &ctl,
@@ -4065,8 +4064,7 @@ plpgsql_estate_setup(PLpgSQL_execstate *estate,
 	{
 		estate->simple_eval_estate = simple_eval_estate;
 		/* Private cast hash just lives in function's main context */
-		ctl.keysize = sizeof(plpgsql_CastHashKey);
-		ctl.entrysize = sizeof(plpgsql_CastHashEntry);
+		HASH_ELEM_INIT(ctl, plpgsql_CastHashEntry, key);
 		ctl.hcxt = CurrentMemoryContext;
 		estate->cast_hash = hash_create("PLpgSQL private cast cache",
 										16, /* start small and extend */
@@ -4079,8 +4077,7 @@ plpgsql_estate_setup(PLpgSQL_execstate *estate,
 		/* Create the session-wide cast-info hash table if we didn't already */
 		if (shared_cast_hash == NULL)
 		{
-			ctl.keysize = sizeof(plpgsql_CastHashKey);
-			ctl.entrysize = sizeof(plpgsql_CastHashEntry);
+			HASH_ELEM_INIT(ctl, plpgsql_CastHashEntry, key);
 			shared_cast_hash = hash_create("PLpgSQL cast cache",
 										   16,	/* start small and extend */
 										   &ctl,

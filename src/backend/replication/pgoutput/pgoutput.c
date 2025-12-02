@@ -1977,8 +1977,7 @@ init_rel_sync_cache(MemoryContext cachectx)
 		return;
 
 	/* Make a new hash table for the cache */
-	ctl.keysize = sizeof(Oid);
-	ctl.entrysize = sizeof(RelationSyncEntry);
+	HASH_ELEM_INIT(ctl, RelationSyncEntry, relid);
 	ctl.hcxt = cachectx;
 
 	RelationSyncCache = hash_create("logical replication output relation cache",

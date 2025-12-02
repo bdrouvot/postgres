@@ -203,8 +203,7 @@ init_timezone_hashtable(void)
 {
 	HASHCTL		hash_ctl;
 
-	hash_ctl.keysize = TZ_STRLEN_MAX + 1;
-	hash_ctl.entrysize = sizeof(pg_tz_cache);
+	HASH_ELEM_INIT(hash_ctl, pg_tz_cache, tznameupper);
 
 	timezone_cache = hash_create("Timezones",
 								 4,

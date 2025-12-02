@@ -1030,8 +1030,7 @@ find_oper_cache_entry(OprCacheKey *key)
 		/* First time through: initialize the hash table */
 		HASHCTL		ctl;
 
-		ctl.keysize = sizeof(OprCacheKey);
-		ctl.entrysize = sizeof(OprCacheEntry);
+		HASH_ELEM_INIT(ctl, OprCacheEntry, key);
 		OprCacheHash = hash_create("Operator lookup cache", 256,
 								   &ctl, HASH_ELEM | HASH_BLOBS);
 

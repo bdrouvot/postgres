@@ -2418,8 +2418,7 @@ AddEventToPendingNotifies(Notification *n)
 		ListCell   *l;
 
 		/* Create the hash table */
-		hash_ctl.keysize = sizeof(Notification *);
-		hash_ctl.entrysize = sizeof(struct NotificationHash);
+		HASH_ELEM_INIT(hash_ctl, struct NotificationHash, event);
 		hash_ctl.hash = notification_hash;
 		hash_ctl.match = notification_match;
 		hash_ctl.hcxt = CurTransactionContext;

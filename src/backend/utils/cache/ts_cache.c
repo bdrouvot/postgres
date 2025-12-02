@@ -119,8 +119,7 @@ lookup_ts_parser_cache(Oid prsId)
 		/* First time through: initialize the hash table */
 		HASHCTL		ctl;
 
-		ctl.keysize = sizeof(Oid);
-		ctl.entrysize = sizeof(TSParserCacheEntry);
+		HASH_ELEM_INIT(ctl, TSParserCacheEntry, prsId);
 		TSParserCacheHash = hash_create("Tsearch parser cache", 4,
 										&ctl, HASH_ELEM | HASH_BLOBS);
 		/* Flush cache on pg_ts_parser changes */
@@ -214,8 +213,7 @@ lookup_ts_dictionary_cache(Oid dictId)
 		/* First time through: initialize the hash table */
 		HASHCTL		ctl;
 
-		ctl.keysize = sizeof(Oid);
-		ctl.entrysize = sizeof(TSDictionaryCacheEntry);
+		HASH_ELEM_INIT(ctl, TSDictionaryCacheEntry, dictId);
 		TSDictionaryCacheHash = hash_create("Tsearch dictionary cache", 8,
 											&ctl, HASH_ELEM | HASH_BLOBS);
 		/* Flush cache on pg_ts_dict and pg_ts_template changes */
@@ -365,8 +363,7 @@ init_ts_config_cache(void)
 {
 	HASHCTL		ctl;
 
-	ctl.keysize = sizeof(Oid);
-	ctl.entrysize = sizeof(TSConfigCacheEntry);
+	HASH_ELEM_INIT(ctl, TSConfigCacheEntry, cfgId);
 	TSConfigCacheHash = hash_create("Tsearch configuration cache", 16,
 									&ctl, HASH_ELEM | HASH_BLOBS);
 	/* Flush cache on pg_ts_config and pg_ts_config_map changes */

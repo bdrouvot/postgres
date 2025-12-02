@@ -2542,8 +2542,7 @@ createConnHash(void)
 {
 	HASHCTL		ctl;
 
-	ctl.keysize = NAMEDATALEN;
-	ctl.entrysize = sizeof(remoteConnHashEnt);
+	HASH_ELEM_INIT(ctl, remoteConnHashEnt, name);
 
 	return hash_create("Remote Con hash", NUMCONN, &ctl,
 					   HASH_ELEM | HASH_STRINGS);

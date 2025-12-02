@@ -276,8 +276,7 @@ compute_array_stats(VacAttrStats *stats, AnalyzeAttrFetchFunc fetchfunc,
 	 * worry about overflowing the initial size. Also we don't need to pay any
 	 * attention to locking and memory management.
 	 */
-	elem_hash_ctl.keysize = sizeof(Datum);
-	elem_hash_ctl.entrysize = sizeof(TrackItem);
+	HASH_ELEM_INIT(elem_hash_ctl, TrackItem, key);
 	elem_hash_ctl.hash = element_hash;
 	elem_hash_ctl.match = element_match;
 	elem_hash_ctl.hcxt = CurrentMemoryContext;
@@ -287,8 +286,7 @@ compute_array_stats(VacAttrStats *stats, AnalyzeAttrFetchFunc fetchfunc,
 							   HASH_ELEM | HASH_FUNCTION | HASH_COMPARE | HASH_CONTEXT);
 
 	/* hashtable for array distinct elements counts */
-	count_hash_ctl.keysize = sizeof(int);
-	count_hash_ctl.entrysize = sizeof(DECountItem);
+	HASH_ELEM_INIT(count_hash_ctl, DECountItem, count);
 	count_hash_ctl.hcxt = CurrentMemoryContext;
 	count_tab = hash_create("Array distinct element count table",
 							64,

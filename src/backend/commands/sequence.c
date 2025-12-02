@@ -1115,8 +1115,7 @@ create_seq_hashtable(void)
 {
 	HASHCTL		ctl;
 
-	ctl.keysize = sizeof(Oid);
-	ctl.entrysize = sizeof(SeqTableData);
+	HASH_ELEM_INIT(ctl, SeqTableData, relid);
 
 	seqhashtab = hash_create("Sequence values", 16, &ctl,
 							 HASH_ELEM | HASH_BLOBS);

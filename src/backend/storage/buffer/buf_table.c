@@ -55,8 +55,7 @@ InitBufTable(int size)
 	/* assume no locking is needed yet */
 
 	/* BufferTag maps to Buffer */
-	info.keysize = sizeof(BufferTag);
-	info.entrysize = sizeof(BufferLookupEnt);
+	HASH_ELEM_INIT(info, BufferLookupEnt, key);
 	info.num_partitions = NUM_BUFFER_PARTITIONS;
 
 	SharedBufHash = ShmemInitHash("Shared Buffer Lookup Table",

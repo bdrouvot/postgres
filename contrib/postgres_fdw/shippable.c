@@ -93,8 +93,7 @@ InitializeShippableCache(void)
 	HASHCTL		ctl;
 
 	/* Create the hash table. */
-	ctl.keysize = sizeof(ShippableCacheKey);
-	ctl.entrysize = sizeof(ShippableCacheEntry);
+	HASH_ELEM_INIT(ctl, ShippableCacheEntry, key);
 	ShippableCacheHash =
 		hash_create("Shippability cache", 256, &ctl, HASH_ELEM | HASH_BLOBS);
 

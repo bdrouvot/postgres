@@ -487,8 +487,7 @@ pa_allocate_worker(TransactionId xid)
 		HASHCTL		ctl;
 
 		MemSet(&ctl, 0, sizeof(ctl));
-		ctl.keysize = sizeof(TransactionId);
-		ctl.entrysize = sizeof(ParallelApplyWorkerEntry);
+		HASH_ELEM_INIT(ctl, ParallelApplyWorkerEntry, xid);
 		ctl.hcxt = ApplyContext;
 
 		ParallelApplyTxnHash = hash_create("logical replication parallel apply workers hash",

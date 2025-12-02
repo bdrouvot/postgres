@@ -193,8 +193,7 @@ PLy_add_exceptions(PyObject *plpy)
 	PLy_exc_spi_error = PLy_create_exception("plpy.SPIError", NULL, NULL,
 											 "SPIError", plpy);
 
-	hash_ctl.keysize = sizeof(int);
-	hash_ctl.entrysize = sizeof(PLyExceptionEntry);
+	HASH_ELEM_INIT(hash_ctl, PLyExceptionEntry, sqlstate);
 	PLy_spi_exceptions = hash_create("PL/Python SPI exceptions", 256,
 									 &hash_ctl, HASH_ELEM | HASH_BLOBS);
 

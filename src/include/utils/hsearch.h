@@ -107,6 +107,41 @@ typedef struct HASHCTL
 /* max_dsize value to indicate expansible directory */
 #define NO_MAX_DSIZE			(-1)
 
+/*
+ * Initialize hash table elements with type safety.
+ *
+ * This macro sets up the keysize and entrysize fields of a HASHCTL structure
+ * in a type-safe manner. It ensures:
+ *
+ * 1. The key member is at offset 0 in the entry structure
+ * 2. The key size is derived from the actual member type
+ * 3. The key member is explicitly referenced
+ *
+ * This replaces the error prone pattern:
+ *
+ *   ctl.keysize = sizeof(KeyType);
+ *   ctl.entrysize = sizeof(MyHashEntry);
+ */
+#define HASH_ELEM_INIT(ctl, entrytype, keymember)								\
+	do {																		\
+		StaticAssertStmt(offsetof(entrytype, keymember) == 0,					\
+						 #keymember " must be first member in " #entrytype);	\
+		(ctl).keysize = sizeof(((entrytype *)0)->keymember);					\
+		(ctl).entrysize = sizeof(entrytype);									\
+	} while (0)
+
+/*
+ * Initialize hash table elements where the whole entry is the key.
+ *
+ * This macro is used for the special case where the hash table entry structure
+ * itself serves as the key.
+ */
+#define HASH_ELEM_INIT_FULL(ctl, entrytype)		\
+	do {										\
+		(ctl).keysize = sizeof(entrytype);		\
+		(ctl).entrysize = sizeof(entrytype);	\
+	} while (0)
+
 /* hash_search operations */
 typedef enum
 {

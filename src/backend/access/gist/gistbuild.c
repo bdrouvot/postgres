@@ -1517,8 +1517,7 @@ gistInitParentMap(GISTBuildState *buildstate)
 {
 	HASHCTL		hashCtl;
 
-	hashCtl.keysize = sizeof(BlockNumber);
-	hashCtl.entrysize = sizeof(ParentMapEntry);
+	HASH_ELEM_INIT(hashCtl, ParentMapEntry, childblkno);
 	hashCtl.hcxt = CurrentMemoryContext;
 	buildstate->parentMap = hash_create("gistbuild parent map",
 										1024,

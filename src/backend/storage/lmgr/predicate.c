@@ -1163,8 +1163,7 @@ PredicateLockShmemInit(void)
 	 * Allocate hash table for PREDICATELOCKTARGET structs.  This stores
 	 * per-predicate-lock-target information.
 	 */
-	info.keysize = sizeof(PREDICATELOCKTARGETTAG);
-	info.entrysize = sizeof(PREDICATELOCKTARGET);
+	HASH_ELEM_INIT(info, PREDICATELOCKTARGET, tag);
 	info.num_partitions = NUM_PREDICATELOCK_PARTITIONS;
 
 	PredicateLockTargetHash = ShmemInitHash("PREDICATELOCKTARGET hash",
@@ -1195,8 +1194,7 @@ PredicateLockShmemInit(void)
 	 * Allocate hash table for PREDICATELOCK structs.  This stores per
 	 * xact-lock-of-a-target information.
 	 */
-	info.keysize = sizeof(PREDICATELOCKTAG);
-	info.entrysize = sizeof(PREDICATELOCK);
+	HASH_ELEM_INIT(info, PREDICATELOCK, tag);
 	info.hash = predicatelock_hash;
 	info.num_partitions = NUM_PREDICATELOCK_PARTITIONS;
 
@@ -1282,8 +1280,7 @@ PredicateLockShmemInit(void)
 	 * Allocate hash table for SERIALIZABLEXID structs.  This stores per-xid
 	 * information for serializable transactions which have accessed data.
 	 */
-	info.keysize = sizeof(SERIALIZABLEXIDTAG);
-	info.entrysize = sizeof(SERIALIZABLEXID);
+	HASH_ELEM_INIT(info, SERIALIZABLEXID, tag);
 
 	SerializableXidHash = ShmemInitHash("SERIALIZABLEXID hash",
 										max_table_size,
@@ -1943,8 +1940,7 @@ CreateLocalPredicateLockHash(void)
 
 	/* Initialize the backend-local hash table of parent locks */
 	Assert(LocalPredicateLockHash == NULL);
-	hash_ctl.keysize = sizeof(PREDICATELOCKTARGETTAG);
-	hash_ctl.entrysize = sizeof(LOCALPREDICATELOCK);
+	HASH_ELEM_INIT(hash_ctl, LOCALPREDICATELOCK, tag);
 	LocalPredicateLockHash = hash_create("Local predicate lock",
 										 max_predicate_locks_per_xact,
 										 &hash_ctl,

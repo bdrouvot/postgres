@@ -906,8 +906,7 @@ transformGraph(TrgmNFA *trgmNFA)
 	trgmNFA->overflowed = false;
 
 	/* Create hashtable for states */
-	hashCtl.keysize = sizeof(TrgmStateKey);
-	hashCtl.entrysize = sizeof(TrgmState);
+	HASH_ELEM_INIT(hashCtl, TrgmState, stateKey);
 	hashCtl.hcxt = CurrentMemoryContext;
 	trgmNFA->states = hash_create("Trigram NFA",
 								  1024,

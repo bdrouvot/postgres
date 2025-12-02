@@ -446,8 +446,7 @@ _PG_init(void)
 	/************************************************************
 	 * Create the hash table for working interpreters
 	 ************************************************************/
-	hash_ctl.keysize = sizeof(Oid);
-	hash_ctl.entrysize = sizeof(pltcl_interp_desc);
+	HASH_ELEM_INIT(hash_ctl, pltcl_interp_desc, user_id);
 	pltcl_interp_htab = hash_create("PL/Tcl interpreters",
 									8,
 									&hash_ctl,
@@ -456,8 +455,7 @@ _PG_init(void)
 	/************************************************************
 	 * Create the hash table for function lookup
 	 ************************************************************/
-	hash_ctl.keysize = sizeof(pltcl_proc_key);
-	hash_ctl.entrysize = sizeof(pltcl_proc_ptr);
+	HASH_ELEM_INIT(hash_ctl, pltcl_proc_ptr, proc_key);
 	pltcl_proc_htab = hash_create("PL/Tcl functions",
 								  100,
 								  &hash_ctl,

@@ -146,8 +146,7 @@ InitSync(void)
 											  ALLOCSET_DEFAULT_SIZES);
 		MemoryContextAllowInCriticalSection(pendingOpsCxt, true);
 
-		hash_ctl.keysize = sizeof(FileTag);
-		hash_ctl.entrysize = sizeof(PendingFsyncEntry);
+		HASH_ELEM_INIT(hash_ctl, PendingFsyncEntry, tag);
 		hash_ctl.hcxt = pendingOpsCxt;
 		pendingOps = hash_create("Pending Ops Table",
 								 100L,

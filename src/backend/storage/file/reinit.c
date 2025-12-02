@@ -184,8 +184,7 @@ ResetUnloggedRelationsInDbspaceDir(const char *dbspacedirname, int op)
 		 * need to be reset.  Otherwise, this cleanup operation would be
 		 * O(n^2).
 		 */
-		ctl.keysize = sizeof(Oid);
-		ctl.entrysize = sizeof(unlogged_relation_entry);
+		HASH_ELEM_INIT(ctl, unlogged_relation_entry, relnumber);
 		ctl.hcxt = CurrentMemoryContext;
 		hash = hash_create("unlogged relation OIDs", 32, &ctl,
 						   HASH_ELEM | HASH_BLOBS | HASH_CONTEXT);

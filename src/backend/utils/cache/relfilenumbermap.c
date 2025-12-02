@@ -113,8 +113,7 @@ InitializeRelfilenumberMap(void)
 	 * initialized when fmgr_info_cxt() above ERRORs out with an out of memory
 	 * error.
 	 */
-	ctl.keysize = sizeof(RelfilenumberMapKey);
-	ctl.entrysize = sizeof(RelfilenumberMapEntry);
+	HASH_ELEM_INIT(ctl, RelfilenumberMapEntry, key);
 	ctl.hcxt = CacheMemoryContext;
 
 	RelfilenumberMapHash =

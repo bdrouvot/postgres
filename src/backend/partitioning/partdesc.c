@@ -429,8 +429,7 @@ CreatePartitionDirectory(MemoryContext mcxt, bool omit_detached)
 	pdir = palloc(sizeof(PartitionDirectoryData));
 	pdir->pdir_mcxt = mcxt;
 
-	ctl.keysize = sizeof(Oid);
-	ctl.entrysize = sizeof(PartitionDirectoryEntry);
+	HASH_ELEM_INIT(ctl, PartitionDirectoryEntry, reloid);
 	ctl.hcxt = mcxt;
 
 	pdir->pdir_hash = hash_create("partition directory", 256, &ctl,

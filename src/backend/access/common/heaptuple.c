@@ -127,8 +127,7 @@ init_missing_cache()
 {
 	HASHCTL		hash_ctl;
 
-	hash_ctl.keysize = sizeof(missing_cache_key);
-	hash_ctl.entrysize = sizeof(missing_cache_key);
+	HASH_ELEM_INIT_FULL(hash_ctl, missing_cache_key);
 	hash_ctl.hcxt = TopMemoryContext;
 	hash_ctl.hash = missing_hash;
 	hash_ctl.match = missing_match;

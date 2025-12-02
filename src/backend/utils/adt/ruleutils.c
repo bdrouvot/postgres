@@ -3903,8 +3903,7 @@ set_rtable_names(deparse_namespace *dpns, List *parent_namespaces,
 	 * We use a hash table to hold known names, so that this process is O(N)
 	 * not O(N^2) for N names.
 	 */
-	hash_ctl.keysize = NAMEDATALEN;
-	hash_ctl.entrysize = sizeof(NameHashEntry);
+	HASH_ELEM_INIT(hash_ctl, NameHashEntry, name);
 	hash_ctl.hcxt = CurrentMemoryContext;
 	names_hash = hash_create("set_rtable_names names",
 							 list_length(dpns->rtable),

@@ -252,8 +252,7 @@ smgropen(RelFileLocator rlocator, ProcNumber backend)
 		/* First time through: initialize the hash table */
 		HASHCTL		ctl;
 
-		ctl.keysize = sizeof(RelFileLocatorBackend);
-		ctl.entrysize = sizeof(SMgrRelationData);
+		HASH_ELEM_INIT(ctl, SMgrRelationData, smgr_rlocator);
 		SMgrRelationHash = hash_create("smgr relation table", 400,
 									   &ctl, HASH_ELEM | HASH_BLOBS);
 		dlist_init(&unpinned_relns);

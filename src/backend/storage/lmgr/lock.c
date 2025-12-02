@@ -459,8 +459,7 @@ LockManagerShmemInit(void)
 	 * Allocate hash table for LOCK structs.  This stores per-locked-object
 	 * information.
 	 */
-	info.keysize = sizeof(LOCKTAG);
-	info.entrysize = sizeof(LOCK);
+	HASH_ELEM_INIT(info, LOCK, tag);
 	info.num_partitions = NUM_LOCK_PARTITIONS;
 
 	LockMethodLockHash = ShmemInitHash("LOCK hash",
@@ -477,8 +476,7 @@ LockManagerShmemInit(void)
 	 * Allocate hash table for PROCLOCK structs.  This stores
 	 * per-lock-per-holder information.
 	 */
-	info.keysize = sizeof(PROCLOCKTAG);
-	info.entrysize = sizeof(PROCLOCK);
+	HASH_ELEM_INIT(info, PROCLOCK, tag);
 	info.hash = proclock_hash;
 	info.num_partitions = NUM_LOCK_PARTITIONS;
 
@@ -510,8 +508,7 @@ InitLockManagerAccess(void)
 	 */
 	HASHCTL		info;
 
-	info.keysize = sizeof(LOCALLOCKTAG);
-	info.entrysize = sizeof(LOCALLOCK);
+	HASH_ELEM_INIT(info, LOCALLOCK, tag);
 
 	LockMethodLocalHash = hash_create("LOCALLOCK hash",
 									  16,
@@ -3402,8 +3399,7 @@ CheckForSessionAndXactLocks(void)
 	LOCALLOCK  *locallock;
 
 	/* Create a local hash table keyed by LOCKTAG only */
-	hash_ctl.keysize = sizeof(LOCKTAG);
-	hash_ctl.entrysize = sizeof(PerLockTagEntry);
+	HASH_ELEM_INIT(hash_ctl, PerLockTagEntry, lock);
 	hash_ctl.hcxt = CurrentMemoryContext;
 
 	lockhtab = hash_create("CheckForSessionAndXactLocks table",
