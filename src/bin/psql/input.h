@@ -17,6 +17,17 @@
 #ifdef HAVE_LIBREADLINE
 #define USE_READLINE 1
 
+/*
+ * Suppress strict-prototypes warnings from readline headers.
+ * Some readline implementations have old-style function declarations
+ * that trigger -Wstrict-prototypes, which we can't fix in third party code.
+ */
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-prototypes"
+#pragma GCC diagnostic ignored "-Wold-style-definition"
+#endif
+
 #if defined(HAVE_READLINE_READLINE_H)
 #include <readline/readline.h>
 #if defined(HAVE_READLINE_HISTORY_H)
@@ -33,6 +44,11 @@
 #include <history.h>
 #endif
 #endif							/* HAVE_READLINE_READLINE_H, etc */
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
+
 #endif							/* HAVE_LIBREADLINE */
 
 #include "pqexpbuffer.h"
