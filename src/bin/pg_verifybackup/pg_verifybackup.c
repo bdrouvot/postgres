@@ -1007,7 +1007,7 @@ verify_tar_file(verifier_context *context, char *relpath, char *fullpath,
 		return;
 	}
 
-	buffer = pg_malloc(READ_CHUNK_SIZE * sizeof(uint8));
+	buffer = pg_malloc(READ_CHUNK_SIZE * sizeof(char));
 
 	/* Perform the reads */
 	while ((rc = read(fd, buffer, READ_CHUNK_SIZE)) > 0)
