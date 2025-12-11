@@ -212,10 +212,10 @@ interpret_function_parameter_list(ParseState *pstate,
 	*variadicArgType = InvalidOid;	/* default result */
 	*requiredResultType = InvalidOid;	/* default result */
 
-	inTypes = (Oid *) palloc(parameterCount * sizeof(Oid));
-	allTypes = (Datum *) palloc(parameterCount * sizeof(Datum));
-	paramModes = (Datum *) palloc(parameterCount * sizeof(Datum));
-	paramNames = (Datum *) palloc0(parameterCount * sizeof(Datum));
+	inTypes = (Oid *) palloc(parameterCount * sizeof(*inTypes));
+	allTypes = (Datum *) palloc(parameterCount * sizeof(*allTypes));
+	paramModes = (Datum *) palloc(parameterCount * sizeof(*paramModes));
+	paramNames = (Datum *) palloc0(parameterCount * sizeof(*paramNames));
 	*parameterDefaults = NIL;
 
 	/* Scan the list and extract data into work arrays */
@@ -917,8 +917,8 @@ interpret_AS_clause(Oid languageOid, const char *languageName,
 
 		pinfo->fname = funcname;
 		pinfo->nargs = list_length(parameterTypes);
-		pinfo->argtypes = (Oid *) palloc(pinfo->nargs * sizeof(Oid));
-		pinfo->argnames = (char **) palloc(pinfo->nargs * sizeof(char *));
+		pinfo->argtypes = (Oid *) palloc(pinfo->nargs * sizeof(*pinfo->argtypes));
+		pinfo->argnames = (char **) palloc(pinfo->nargs * sizeof(*pinfo->argnames));
 		for (int i = 0; i < list_length(parameterTypes); i++)
 		{
 			char	   *s = strVal(list_nth(inParameterNames, i));
@@ -1226,7 +1226,7 @@ CreateFunction(ParseState *pstate, CreateFunctionStmt *stmt)
 		Datum	   *arr;
 		int			i;
 
-		arr = palloc(list_length(trftypes_list) * sizeof(Datum));
+		arr = palloc(list_length(trftypes_list) * sizeof(*arr));
 		i = 0;
 		foreach(lc, trftypes_list)
 			arr[i++] = ObjectIdGetDatum(lfirst_oid(lc));

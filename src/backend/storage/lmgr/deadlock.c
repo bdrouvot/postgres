@@ -152,16 +152,16 @@ InitDeadLockChecking(void)
 	 * FindLockCycle needs at most MaxBackends entries in visitedProcs[] and
 	 * deadlockDetails[].
 	 */
-	visitedProcs = (PGPROC **) palloc(MaxBackends * sizeof(PGPROC *));
-	deadlockDetails = (DEADLOCK_INFO *) palloc(MaxBackends * sizeof(DEADLOCK_INFO));
+	visitedProcs = (PGPROC **) palloc(MaxBackends * sizeof(*visitedProcs));
+	deadlockDetails = (DEADLOCK_INFO *) palloc(MaxBackends * sizeof(*deadlockDetails));
 
 	/*
 	 * TopoSort needs to consider at most MaxBackends wait-queue entries, and
 	 * it needn't run concurrently with FindLockCycle.
 	 */
 	topoProcs = visitedProcs;	/* re-use this space */
-	beforeConstraints = (int *) palloc(MaxBackends * sizeof(int));
-	afterConstraints = (int *) palloc(MaxBackends * sizeof(int));
+	beforeConstraints = (int *) palloc(MaxBackends * sizeof(*beforeConstraints));
+	afterConstraints = (int *) palloc(MaxBackends * sizeof(*afterConstraints));
 
 	/*
 	 * We need to consider rearranging at most MaxBackends/2 wait queues
@@ -170,8 +170,8 @@ InitDeadLockChecking(void)
 	 * MaxBackends total waiters.
 	 */
 	waitOrders = (WAIT_ORDER *)
-		palloc((MaxBackends / 2) * sizeof(WAIT_ORDER));
-	waitOrderProcs = (PGPROC **) palloc(MaxBackends * sizeof(PGPROC *));
+		palloc((MaxBackends / 2) * sizeof(*waitOrders));
+	waitOrderProcs = (PGPROC **) palloc(MaxBackends * sizeof(*waitOrderProcs));
 
 	/*
 	 * Allow at most MaxBackends distinct constraints in a configuration. (Is
@@ -182,7 +182,7 @@ InitDeadLockChecking(void)
 	 * really big might potentially allow a stack-overflow problem.
 	 */
 	maxCurConstraints = MaxBackends;
-	curConstraints = (EDGE *) palloc(maxCurConstraints * sizeof(EDGE));
+	curConstraints = (EDGE *) palloc(maxCurConstraints * sizeof(*curConstraints));
 
 	/*
 	 * Allow up to 3*MaxBackends constraints to be saved without having to
@@ -196,7 +196,7 @@ InitDeadLockChecking(void)
 					 "MAX_BACKENDS_BITS too big for * 4");
 	maxPossibleConstraints = MaxBackends * 4;
 	possibleConstraints =
-		(EDGE *) palloc(maxPossibleConstraints * sizeof(EDGE));
+		(EDGE *) palloc(maxPossibleConstraints * sizeof(*possibleConstraints));
 
 	MemoryContextSwitchTo(oldcxt);
 }

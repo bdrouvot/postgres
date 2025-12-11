@@ -422,7 +422,7 @@ dotrim(const char *string, int stringlen,
 			int			str_len;
 
 			stringchars = (const char **) palloc(stringlen * sizeof(char *));
-			stringmblen = (int *) palloc(stringlen * sizeof(int));
+			stringmblen = (int *) palloc(stringlen * sizeof(*stringmblen));
 			stringnchars = 0;
 			p = string;
 			len = stringlen;
@@ -436,7 +436,7 @@ dotrim(const char *string, int stringlen,
 			}
 
 			setchars = (const char **) palloc(setlen * sizeof(char *));
-			setmblen = (int *) palloc(setlen * sizeof(int));
+			setmblen = (int *) palloc(setlen * sizeof(*setmblen));
 			setnchars = 0;
 			p = set;
 			len = setlen;

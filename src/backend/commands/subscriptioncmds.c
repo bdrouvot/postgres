@@ -975,8 +975,8 @@ AlterSubscription_refresh(Subscription *sub, bool copy_data,
 		 * allocate separate arrays for table OIDs and sequence OIDs based on
 		 * the total number of relations (subrel_count).
 		 */
-		subrel_local_oids = palloc(subrel_count * sizeof(Oid));
-		subseq_local_oids = palloc(subrel_count * sizeof(Oid));
+		subrel_local_oids = palloc(subrel_count * sizeof(*subrel_local_oids));
+		subseq_local_oids = palloc(subrel_count * sizeof(*subseq_local_oids));
 		foreach(lc, subrel_states)
 		{
 			SubscriptionRelState *relstate = (SubscriptionRelState *) lfirst(lc);
@@ -1008,7 +1008,7 @@ AlterSubscription_refresh(Subscription *sub, bool copy_data,
 		 * step.
 		 */
 		off = 0;
-		pubrel_local_oids = palloc(list_length(pubrels) * sizeof(Oid));
+		pubrel_local_oids = palloc(list_length(pubrels) * sizeof(*pubrel_local_oids));
 
 		foreach_ptr(PublicationRelKind, pubrelinfo, pubrels)
 		{

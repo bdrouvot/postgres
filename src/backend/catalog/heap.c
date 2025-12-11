@@ -2174,7 +2174,7 @@ StoreRelCheck(Relation rel, const char *ccname, Node *expr,
 		ListCell   *vl;
 		int			i = 0;
 
-		attNos = (int16 *) palloc(keycount * sizeof(int16));
+		attNos = (int16 *) palloc(keycount * sizeof(*attNos));
 		foreach(vl, varList)
 		{
 			Var		   *var = (Var *) lfirst(vl);

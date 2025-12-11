@@ -2557,7 +2557,7 @@ convert_requires_to_datum(List *requires)
 	ListCell   *lc;
 
 	ndatums = list_length(requires);
-	datums = (Datum *) palloc(ndatums * sizeof(Datum));
+	datums = (Datum *) palloc(ndatums * sizeof(*datums));
 	ndatums = 0;
 	foreach(lc, requires)
 	{

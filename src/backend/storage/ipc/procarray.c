@@ -1458,7 +1458,7 @@ TransactionIdIsInProgress(TransactionId xid)
 		 */
 		int			maxxids = RecoveryInProgress() ? TOTAL_MAX_CACHED_SUBXIDS : arrayP->maxProcs;
 
-		xids = (TransactionId *) malloc(maxxids * sizeof(TransactionId));
+		xids = (TransactionId *) malloc(maxxids * sizeof(*xids));
 		if (xids == NULL)
 			ereport(ERROR,
 					(errcode(ERRCODE_OUT_OF_MEMORY),
@@ -2158,14 +2158,14 @@ GetSnapshotData(Snapshot snapshot)
 		 * we are in recovery, see later comments.
 		 */
 		snapshot->xip = (TransactionId *)
-			malloc(GetMaxSnapshotXidCount() * sizeof(TransactionId));
+			malloc(GetMaxSnapshotXidCount() * sizeof(*snapshot->xip));
 		if (snapshot->xip == NULL)
 			ereport(ERROR,
 					(errcode(ERRCODE_OUT_OF_MEMORY),
 					 errmsg("out of memory")));
 		Assert(snapshot->subxip == NULL);
 		snapshot->subxip = (TransactionId *)
-			malloc(GetMaxSnapshotSubxidCount() * sizeof(TransactionId));
+			malloc(GetMaxSnapshotSubxidCount() * sizeof(*snapshot->subxip));
 		if (snapshot->subxip == NULL)
 			ereport(ERROR,
 					(errcode(ERRCODE_OUT_OF_MEMORY),
@@ -2668,7 +2668,7 @@ GetRunningTransactionData(void)
 		 * First call
 		 */
 		CurrentRunningXacts->xids = (TransactionId *)
-			malloc(TOTAL_MAX_CACHED_SUBXIDS * sizeof(TransactionId));
+			malloc(TOTAL_MAX_CACHED_SUBXIDS * sizeof(*CurrentRunningXacts->xids));
 		if (CurrentRunningXacts->xids == NULL)
 			ereport(ERROR,
 					(errcode(ERRCODE_OUT_OF_MEMORY),
@@ -3389,7 +3389,7 @@ GetConflictingVirtualXIDs(TransactionId limitXmin, Oid dbOid)
 	if (vxids == NULL)
 	{
 		vxids = (VirtualTransactionId *)
-			malloc(sizeof(VirtualTransactionId) * (arrayP->maxProcs + 1));
+			malloc(sizeof(*vxids) * (arrayP->maxProcs + 1));
 		if (vxids == NULL)
 			ereport(ERROR,
 					(errcode(ERRCODE_OUT_OF_MEMORY),

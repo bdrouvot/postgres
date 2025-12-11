@@ -140,7 +140,7 @@ InitArchiveFmt_Directory(ArchiveHandle *AH)
 	AH->WorkerJobDumpPtr = _WorkerJobDumpDirectory;
 
 	/* Set up our private context */
-	ctx = (lclContext *) pg_malloc0(sizeof(lclContext));
+	ctx = (lclContext *) pg_malloc0(sizeof(*ctx));
 	AH->formatData = ctx;
 
 	ctx->dataFH = NULL;
@@ -200,7 +200,7 @@ _ArchiveEntry(ArchiveHandle *AH, TocEntry *te)
 	lclTocEntry *tctx;
 	char		fn[MAXPGPATH];
 
-	tctx = (lclTocEntry *) pg_malloc0(sizeof(lclTocEntry));
+	tctx = (lclTocEntry *) pg_malloc0(sizeof(*tctx));
 	if (strcmp(te->desc, "BLOBS") == 0)
 	{
 		snprintf(fn, MAXPGPATH, "blobs_%d.toc", te->dumpId);
@@ -252,7 +252,7 @@ _ReadExtraToc(ArchiveHandle *AH, TocEntry *te)
 
 	if (tctx == NULL)
 	{
-		tctx = (lclTocEntry *) pg_malloc0(sizeof(lclTocEntry));
+		tctx = (lclTocEntry *) pg_malloc0(sizeof(*tctx));
 		te->formatData = tctx;
 	}
 

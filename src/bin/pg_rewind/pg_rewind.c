@@ -874,7 +874,7 @@ getTimelineHistory(TimeLineID tli, bool is_source, int *nentries)
 	 */
 	if (tli == 1)
 	{
-		history = (TimeLineHistoryEntry *) pg_malloc(sizeof(TimeLineHistoryEntry));
+		history = (TimeLineHistoryEntry *) pg_malloc(sizeof(*history));
 		history->tli = tli;
 		history->begin = history->end = InvalidXLogRecPtr;
 		*nentries = 1;

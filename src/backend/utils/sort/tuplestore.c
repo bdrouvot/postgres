@@ -290,7 +290,7 @@ tuplestore_begin_common(int eflags, bool interXact, int maxKBytes)
 							ALLOCSET_SEPARATE_THRESHOLD / sizeof(void *) + 1);
 
 	state->growmemtuples = true;
-	state->memtuples = (void **) palloc(state->memtupsize * sizeof(void *));
+	state->memtuples = (void **) palloc(state->memtupsize * sizeof(*state->memtuples));
 
 	USEMEM(state, GetMemoryChunkSpace(state->memtuples));
 
@@ -298,7 +298,7 @@ tuplestore_begin_common(int eflags, bool interXact, int maxKBytes)
 	state->readptrcount = 1;
 	state->readptrsize = 8;		/* arbitrary */
 	state->readptrs = (TSReadPointer *)
-		palloc(state->readptrsize * sizeof(TSReadPointer));
+		palloc(state->readptrsize * sizeof(*state->readptrs));
 
 	state->readptrs[0].eflags = eflags;
 	state->readptrs[0].eof_reached = false;

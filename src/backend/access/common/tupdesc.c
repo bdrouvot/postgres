@@ -369,7 +369,7 @@ CreateTupleDescCopyConstr(TupleDesc tupdesc)
 
 		if ((cpy->num_defval = constr->num_defval) > 0)
 		{
-			cpy->defval = (AttrDefault *) palloc(cpy->num_defval * sizeof(AttrDefault));
+			cpy->defval = (AttrDefault *) palloc(cpy->num_defval * sizeof(*cpy->defval));
 			memcpy(cpy->defval, constr->defval, cpy->num_defval * sizeof(AttrDefault));
 			for (i = cpy->num_defval - 1; i >= 0; i--)
 				cpy->defval[i].adbin = pstrdup(constr->defval[i].adbin);
@@ -394,7 +394,7 @@ CreateTupleDescCopyConstr(TupleDesc tupdesc)
 
 		if ((cpy->num_check = constr->num_check) > 0)
 		{
-			cpy->check = (ConstrCheck *) palloc(cpy->num_check * sizeof(ConstrCheck));
+			cpy->check = (ConstrCheck *) palloc(cpy->num_check * sizeof(*cpy->check));
 			memcpy(cpy->check, constr->check, cpy->num_check * sizeof(ConstrCheck));
 			for (i = cpy->num_check - 1; i >= 0; i--)
 			{

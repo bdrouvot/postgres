@@ -534,7 +534,7 @@ ginExtractEntries(GinState *ginstate, OffsetNumber attnum,
 	 * assuming that everything's non-null.
 	 */
 	if (nullFlags == NULL)
-		nullFlags = (bool *) palloc0(*nentries * sizeof(bool));
+		nullFlags = (bool *) palloc0(*nentries * sizeof(*nullFlags));
 
 	/*
 	 * If there's more than one key, sort and unique-ify.
@@ -596,7 +596,7 @@ ginExtractEntries(GinState *ginstate, OffsetNumber attnum,
 	/*
 	 * Create GinNullCategory representation from nullFlags.
 	 */
-	*categories = (GinNullCategory *) palloc0(*nentries * sizeof(GinNullCategory));
+	*categories = (GinNullCategory *) palloc0(*nentries * sizeof(**categories));
 	for (i = 0; i < *nentries; i++)
 		(*categories)[i] = (nullFlags[i] ? GIN_CAT_NULL_KEY : GIN_CAT_NORM_KEY);
 

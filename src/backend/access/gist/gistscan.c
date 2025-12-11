@@ -228,7 +228,7 @@ gistrescan(IndexScanDesc scan, ScanKey key, int nkeys,
 		 */
 		if (!first_time)
 		{
-			fn_extras = (void **) palloc(scan->numberOfKeys * sizeof(void *));
+			fn_extras = (void **) palloc(scan->numberOfKeys * sizeof(*fn_extras));
 			for (i = 0; i < scan->numberOfKeys; i++)
 				fn_extras[i] = scan->keyData[i].sk_func.fn_extra;
 		}
@@ -283,14 +283,14 @@ gistrescan(IndexScanDesc scan, ScanKey key, int nkeys,
 		/* As above, preserve fn_extra if not first time through */
 		if (!first_time)
 		{
-			fn_extras = (void **) palloc(scan->numberOfOrderBys * sizeof(void *));
+			fn_extras = (void **) palloc(scan->numberOfOrderBys * sizeof(*fn_extras));
 			for (i = 0; i < scan->numberOfOrderBys; i++)
 				fn_extras[i] = scan->orderByData[i].sk_func.fn_extra;
 		}
 
 		memcpy(scan->orderByData, orderbys, scan->numberOfOrderBys * sizeof(ScanKeyData));
 
-		so->orderByTypes = (Oid *) palloc(scan->numberOfOrderBys * sizeof(Oid));
+		so->orderByTypes = (Oid *) palloc(scan->numberOfOrderBys * sizeof(*so->orderByTypes));
 
 		/*
 		 * Modify the order-by key so that the Distance method is called for

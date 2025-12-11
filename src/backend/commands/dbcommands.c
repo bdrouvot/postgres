@@ -3052,7 +3052,7 @@ remove_dbtablespaces(Oid db_id)
 		return;
 	}
 
-	tablespace_ids = (Oid *) palloc(ntblspc * sizeof(Oid));
+	tablespace_ids = (Oid *) palloc(ntblspc * sizeof(*tablespace_ids));
 	i = 0;
 	foreach(cell, ltblspc)
 		tablespace_ids[i++] = lfirst_oid(cell);

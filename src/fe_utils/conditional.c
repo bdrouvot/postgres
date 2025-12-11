@@ -52,7 +52,7 @@ conditional_stack_destroy(ConditionalStack cstack)
 void
 conditional_stack_push(ConditionalStack cstack, ifState new_state)
 {
-	IfStackElem *p = (IfStackElem *) pg_malloc(sizeof(IfStackElem));
+	IfStackElem *p = (IfStackElem *) pg_malloc(sizeof(*p));
 
 	p->if_state = new_state;
 	p->query_len = -1;

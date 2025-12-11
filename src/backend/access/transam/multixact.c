@@ -1309,7 +1309,7 @@ GetMultiXactIdMembers(MultiXactId multi, MultiXactMember **members,
 	length = nextMXOffset - offset;
 
 	/* read the members */
-	ptr = (MultiXactMember *) palloc(length * sizeof(MultiXactMember));
+	ptr = (MultiXactMember *) palloc(length * sizeof(*ptr));
 	prev_pageno = -1;
 	for (int i = 0; i < length; i++, offset++)
 	{

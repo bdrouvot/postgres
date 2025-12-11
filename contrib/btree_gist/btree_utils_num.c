@@ -344,7 +344,7 @@ gbt_num_picksplit(const GistEntryVector *entryvec, GIST_SPLITVEC *v,
 	Nsrt	   *arr;
 	int			nbytes;
 
-	arr = (Nsrt *) palloc((maxoff + 1) * sizeof(Nsrt));
+	arr = (Nsrt *) palloc((maxoff + 1) * sizeof(*arr));
 	nbytes = (maxoff + 2) * sizeof(OffsetNumber);
 	v->spl_left = (OffsetNumber *) palloc(nbytes);
 	v->spl_right = (OffsetNumber *) palloc(nbytes);

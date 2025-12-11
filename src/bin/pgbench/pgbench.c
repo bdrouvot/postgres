@@ -3067,7 +3067,7 @@ allocCStatePrepared(CState *st)
 {
 	Assert(st->prepared == NULL);
 
-	st->prepared = pg_malloc(sizeof(bool *) * num_scripts);
+	st->prepared = pg_malloc(sizeof(*st->prepared) * num_scripts);
 	for (int i = 0; i < num_scripts; i++)
 	{
 		ParsedScript *script = &sql_script[i];
@@ -3075,7 +3075,7 @@ allocCStatePrepared(CState *st)
 
 		for (numcmds = 0; script->commands[numcmds] != NULL; numcmds++)
 			;
-		st->prepared[i] = pg_malloc0(sizeof(bool) * numcmds);
+		st->prepared[i] = pg_malloc0(sizeof(*st->prepared[i]) * numcmds);
 	}
 }
 
@@ -5659,7 +5659,7 @@ create_sql_command(PQExpBuffer buf)
 		return NULL;
 
 	/* Allocate and initialize Command structure */
-	my_command = (Command *) pg_malloc(sizeof(Command));
+	my_command = (Command *) pg_malloc(sizeof(*my_command));
 	initPQExpBuffer(&my_command->lines);
 	appendPQExpBufferStr(&my_command->lines, p);
 	my_command->first_line = NULL;	/* this is set later */
@@ -5755,7 +5755,7 @@ process_backslash_command(PsqlScanState sstate, const char *source,
 	}
 
 	/* Allocate and initialize Command structure */
-	my_command = (Command *) pg_malloc0(sizeof(Command));
+	my_command = (Command *) pg_malloc0(sizeof(*my_command));
 	my_command->type = META_COMMAND;
 	my_command->argc = 0;
 	initSimpleStats(&my_command->stats);
@@ -6011,7 +6011,7 @@ ParseScript(const char *script, const char *desc, int weight)
 	/* Initialize all fields of ps */
 	ps.desc = desc;
 	ps.weight = weight;
-	ps.commands = (Command **) pg_malloc(sizeof(Command *) * alloc_num);
+	ps.commands = (Command **) pg_malloc(sizeof(*ps.commands) * alloc_num);
 	initStats(&ps.stats, 0);
 
 	/* Prepare to parse script */
@@ -6844,7 +6844,7 @@ main(int argc, char **argv)
 		}
 	}
 
-	state = (CState *) pg_malloc0(sizeof(CState));
+	state = (CState *) pg_malloc0(sizeof(*state));
 
 	/* set random seed early, because it may be used while parsing scripts. */
 	if (!set_random_seed(getenv("PGBENCH_RANDOM_SEED")))
@@ -7412,7 +7412,7 @@ main(int argc, char **argv)
 	PQfinish(con);
 
 	/* set up thread data structures */
-	threads = (TState *) pg_malloc(sizeof(TState) * nthreads);
+	threads = (TState *) pg_malloc(sizeof(*threads) * nthreads);
 	nclients_dealt = 0;
 
 	for (i = 0; i < nthreads; i++)

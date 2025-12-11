@@ -1153,7 +1153,7 @@ parse_comma_separated_list(char **startptr, bool *more)
 	*more = (*e == ',');
 
 	len = e - s;
-	p = (char *) malloc(sizeof(char) * (len + 1));
+	p = (char *) malloc(sizeof(*p) * (len + 1));
 	if (p)
 	{
 		memcpy(p, s, len);
@@ -4979,7 +4979,7 @@ pqMakeEmptyPGconn(void)
 	WSASetLastError(0);
 #endif							/* WIN32 */
 
-	conn = (PGconn *) malloc(sizeof(PGconn));
+	conn = (PGconn *) malloc(sizeof(*conn));
 	if (conn == NULL)
 		return conn;
 
@@ -5023,7 +5023,7 @@ pqMakeEmptyPGconn(void)
 	conn->outBufSize = 16 * 1024;
 	conn->outBuffer = (char *) malloc(conn->outBufSize);
 	conn->rowBufLen = 32;
-	conn->rowBuf = (PGdataValue *) malloc(conn->rowBufLen * sizeof(PGdataValue));
+	conn->rowBuf = (PGdataValue *) malloc(conn->rowBufLen * sizeof(*conn->rowBuf));
 	initPQExpBuffer(&conn->errorMessage);
 	initPQExpBuffer(&conn->workBuffer);
 

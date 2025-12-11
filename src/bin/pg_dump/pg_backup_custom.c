@@ -136,7 +136,7 @@ InitArchiveFmt_Custom(ArchiveHandle *AH)
 	AH->WorkerJobRestorePtr = _WorkerJobRestoreCustom;
 
 	/* Set up a private area. */
-	ctx = (lclContext *) pg_malloc0(sizeof(lclContext));
+	ctx = (lclContext *) pg_malloc0(sizeof(*ctx));
 	AH->formatData = ctx;
 
 	/*
@@ -199,7 +199,7 @@ _ArchiveEntry(ArchiveHandle *AH, TocEntry *te)
 {
 	lclTocEntry *ctx;
 
-	ctx = (lclTocEntry *) pg_malloc0(sizeof(lclTocEntry));
+	ctx = (lclTocEntry *) pg_malloc0(sizeof(*ctx));
 	if (te->dataDumper)
 		ctx->dataState = K_OFFSET_POS_NOT_SET;
 	else
@@ -240,7 +240,7 @@ _ReadExtraToc(ArchiveHandle *AH, TocEntry *te)
 
 	if (ctx == NULL)
 	{
-		ctx = (lclTocEntry *) pg_malloc0(sizeof(lclTocEntry));
+		ctx = (lclTocEntry *) pg_malloc0(sizeof(*ctx));
 		te->formatData = ctx;
 	}
 

@@ -48,7 +48,7 @@ opendir(const char *dirname)
 		return NULL;
 	}
 
-	d = malloc(sizeof(DIR));
+	d = malloc(sizeof(*d));
 	if (!d)
 	{
 		errno = ENOMEM;

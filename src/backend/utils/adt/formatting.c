@@ -3922,7 +3922,7 @@ datetime_to_char_body(TmToChar *tmtc, const text *fmt, bool is_interval, Oid col
 		 */
 		incache = false;
 
-		format = (FormatNode *) palloc((fmt_len + 1) * sizeof(FormatNode));
+		format = (FormatNode *) palloc((fmt_len + 1) * sizeof(*format));
 
 		parse_format(format, fmt_str, DCH_keywords,
 					 DCH_suff, DCH_index, DCH_FLAG, NULL);
@@ -4337,7 +4337,7 @@ datetime_format_has_tz(const char *fmt_str)
 		 */
 		incache = false;
 
-		format = (FormatNode *) palloc((fmt_len + 1) * sizeof(FormatNode));
+		format = (FormatNode *) palloc((fmt_len + 1) * sizeof(*format));
 
 		parse_format(format, fmt_str, DCH_keywords,
 					 DCH_suff, DCH_index, DCH_FLAG, NULL);
@@ -4424,7 +4424,7 @@ do_to_timestamp(const text *date_txt, const text *fmt, Oid collid, bool std,
 			 * Allocate new memory if format picture is bigger than static
 			 * cache and do not use cache (call parser always)
 			 */
-			format = (FormatNode *) palloc((fmt_len + 1) * sizeof(FormatNode));
+			format = (FormatNode *) palloc((fmt_len + 1) * sizeof(*format));
 
 			parse_format(format, fmt_str, DCH_keywords, DCH_suff, DCH_index,
 						 DCH_FLAG | (std ? STD_FLAG : 0), NULL);
@@ -4960,7 +4960,7 @@ NUM_cache(int len, NUMDesc *Num, const text *pars_str, bool *shouldFree)
 		 * Allocate new memory if format picture is bigger than static cache
 		 * and do not use cache (call parser always)
 		 */
-		format = (FormatNode *) palloc((len + 1) * sizeof(FormatNode));
+		format = (FormatNode *) palloc((len + 1) * sizeof(*format));
 
 		*shouldFree = true;
 

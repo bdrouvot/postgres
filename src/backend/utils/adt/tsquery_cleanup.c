@@ -102,7 +102,7 @@ plaintree(NODE *root, int *len)
 	pl.len = 16;
 	if (root && (root->valnode->type == QI_VAL || root->valnode->type == QI_OPR))
 	{
-		pl.ptr = (QueryItem *) palloc(pl.len * sizeof(QueryItem));
+		pl.ptr = (QueryItem *) palloc(pl.len * sizeof(*pl.ptr));
 		plainnode(&pl, root);
 	}
 	else

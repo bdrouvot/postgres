@@ -188,7 +188,7 @@ InitJumble(void)
 	jstate->jumble_len = 0;
 	jstate->clocations_buf_size = 32;
 	jstate->clocations = (LocationLen *) palloc(jstate->clocations_buf_size *
-												sizeof(LocationLen));
+												sizeof(*jstate->clocations));
 	jstate->clocations_count = 0;
 	jstate->highest_extern_param_id = 0;
 	jstate->pending_nulls = 0;

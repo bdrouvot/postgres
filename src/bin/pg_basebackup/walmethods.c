@@ -102,7 +102,7 @@ static char *
 dir_get_file_name(WalWriteMethod *wwmethod,
 				  const char *pathname, const char *temp_suffix)
 {
-	char	   *filename = pg_malloc0(MAXPGPATH * sizeof(char));
+	char	   *filename = pg_malloc0(MAXPGPATH * sizeof(*filename));
 
 	snprintf(filename, MAXPGPATH, "%s%s%s",
 			 pathname,
@@ -275,7 +275,7 @@ dir_open_for_write(WalWriteMethod *wwmethod, const char *pathname,
 		}
 	}
 
-	f = pg_malloc0(sizeof(DirectoryMethodFile));
+	f = pg_malloc0(sizeof(*f));
 #ifdef HAVE_LIBZ
 	if (wwmethod->compression_algorithm == PG_COMPRESSION_GZIP)
 		f->gzfp = gzfp;
@@ -643,7 +643,7 @@ CreateWalDirectoryMethod(const char *basedir,
 {
 	DirectoryMethodData *wwmethod;
 
-	wwmethod = pg_malloc0(sizeof(DirectoryMethodData));
+	wwmethod = pg_malloc0(sizeof(*wwmethod));
 	*((const WalWriteMethodOps **) &wwmethod->base.ops) =
 		&WalDirectoryMethodOps;
 	wwmethod->base.compression_algorithm = compression_algorithm;
@@ -825,7 +825,7 @@ static char *
 tar_get_file_name(WalWriteMethod *wwmethod, const char *pathname,
 				  const char *temp_suffix)
 {
-	char	   *filename = pg_malloc0(MAXPGPATH * sizeof(char));
+	char	   *filename = pg_malloc0(MAXPGPATH * sizeof(*filename));
 
 	snprintf(filename, MAXPGPATH, "%s%s",
 			 pathname, temp_suffix ? temp_suffix : "");
@@ -893,7 +893,7 @@ tar_open_for_write(WalWriteMethod *wwmethod, const char *pathname,
 		return NULL;
 	}
 
-	tar_data->currentfile = pg_malloc0(sizeof(TarMethodFile));
+	tar_data->currentfile = pg_malloc0(sizeof(*tar_data->currentfile));
 	tar_data->currentfile->base.wwmethod = wwmethod;
 
 	tmppath = tar_get_file_name(wwmethod, pathname, temp_suffix);
@@ -1360,7 +1360,7 @@ CreateWalTarMethod(const char *tarbase,
 	const char *suffix = (compression_algorithm == PG_COMPRESSION_GZIP) ?
 		".tar.gz" : ".tar";
 
-	wwmethod = pg_malloc0(sizeof(TarMethodData));
+	wwmethod = pg_malloc0(sizeof(*wwmethod));
 	*((const WalWriteMethodOps **) &wwmethod->base.ops) =
 		&WalTarMethodOps;
 	wwmethod->base.compression_algorithm = compression_algorithm;

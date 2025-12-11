@@ -3844,7 +3844,7 @@ fetch_more_data(ForeignScanState *node)
 
 	/* Convert the data into HeapTuples */
 	numrows = PQntuples(res);
-	fsstate->tuples = (HeapTuple *) palloc0(numrows * sizeof(HeapTuple));
+	fsstate->tuples = (HeapTuple *) palloc0(numrows * sizeof(*fsstate->tuples));
 	fsstate->num_tuples = numrows;
 	fsstate->next_tuple = 0;
 
@@ -4650,7 +4650,7 @@ init_returning_filter(PgFdwDirectModifyState *dmstate,
 	 * Also get the indexes of the entries for ctid and oid if any.
 	 */
 	dmstate->attnoMap = (AttrNumber *)
-		palloc0(resultTupType->natts * sizeof(AttrNumber));
+		palloc0(resultTupType->natts * sizeof(*dmstate->attnoMap));
 
 	dmstate->ctidAttno = dmstate->oidAttno = 0;
 
@@ -7528,8 +7528,8 @@ make_tuple_from_result_row(PGresult *res,
 		tupdesc = fsstate->ss.ss_ScanTupleSlot->tts_tupleDescriptor;
 	}
 
-	values = (Datum *) palloc0(tupdesc->natts * sizeof(Datum));
-	nulls = (bool *) palloc(tupdesc->natts * sizeof(bool));
+	values = (Datum *) palloc0(tupdesc->natts * sizeof(*values));
+	nulls = (bool *) palloc(tupdesc->natts * sizeof(*nulls));
 	/* Initialize to nulls for any columns not present in result */
 	memset(nulls, true, tupdesc->natts * sizeof(bool));
 

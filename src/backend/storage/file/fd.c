@@ -902,7 +902,7 @@ InitFileAccess(void)
 	Assert(SizeVfdCache == 0);	/* call me only once */
 
 	/* initialize cache header entry */
-	VfdCache = (Vfd *) malloc(sizeof(Vfd));
+	VfdCache = (Vfd *) malloc(sizeof(*VfdCache));
 	if (VfdCache == NULL)
 		ereport(FATAL,
 				(errcode(ERRCODE_OUT_OF_MEMORY),
@@ -972,7 +972,7 @@ count_usable_fds(int max_to_probe, int *usable_fds, int *already_open)
 #endif
 
 	size = 1024;
-	fd = (int *) palloc(size * sizeof(int));
+	fd = (int *) palloc(size * sizeof(*fd));
 
 #ifdef HAVE_GETRLIMIT
 	getrlimit_status = getrlimit(RLIMIT_NOFILE, &rlim);
@@ -2581,7 +2581,7 @@ reserveAllocatedDesc(void)
 	if (allocatedDescs == NULL)
 	{
 		newMax = FD_MINFREE / 3;
-		newDescs = (AllocateDesc *) malloc(newMax * sizeof(AllocateDesc));
+		newDescs = (AllocateDesc *) malloc(newMax * sizeof(*newDescs));
 		/* Out of memory already?  Treat as fatal error. */
 		if (newDescs == NULL)
 			ereport(ERROR,

@@ -1347,7 +1347,7 @@ pg_SSPI_recvauth(Port *port)
 		 */
 		if (sspictx == NULL)
 		{
-			sspictx = malloc(sizeof(CtxtHandle));
+			sspictx = malloc(sizeof(*sspictx));
 			if (sspictx == NULL)
 				ereport(ERROR,
 						(errmsg("out of memory")));

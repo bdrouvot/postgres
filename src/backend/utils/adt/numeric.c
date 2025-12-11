@@ -12016,8 +12016,8 @@ accum_sum_rescale(NumericSumAccum *accum, const NumericVar *val)
 
 		weightdiff = accum_weight - old_weight;
 
-		new_pos_digits = palloc0(accum_ndigits * sizeof(int32));
-		new_neg_digits = palloc0(accum_ndigits * sizeof(int32));
+		new_pos_digits = palloc0(accum_ndigits * sizeof(*new_pos_digits));
+		new_neg_digits = palloc0(accum_ndigits * sizeof(*new_neg_digits));
 
 		if (accum->pos_digits)
 		{
@@ -12105,8 +12105,8 @@ accum_sum_final(NumericSumAccum *accum, NumericVar *result)
 static void
 accum_sum_copy(NumericSumAccum *dst, NumericSumAccum *src)
 {
-	dst->pos_digits = palloc(src->ndigits * sizeof(int32));
-	dst->neg_digits = palloc(src->ndigits * sizeof(int32));
+	dst->pos_digits = palloc(src->ndigits * sizeof(*dst->pos_digits));
+	dst->neg_digits = palloc(src->ndigits * sizeof(*dst->neg_digits));
 
 	memcpy(dst->pos_digits, src->pos_digits, src->ndigits * sizeof(int32));
 	memcpy(dst->neg_digits, src->neg_digits, src->ndigits * sizeof(int32));

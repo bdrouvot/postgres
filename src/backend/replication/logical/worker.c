@@ -974,8 +974,8 @@ slot_fill_defaults(LogicalRepRelMapEntry *rel, EState *estate,
 	if (num_phys_attrs == rel->remoterel.natts)
 		return;
 
-	defmap = (int *) palloc(num_phys_attrs * sizeof(int));
-	defexprs = (ExprState **) palloc(num_phys_attrs * sizeof(ExprState *));
+	defmap = (int *) palloc(num_phys_attrs * sizeof(*defmap));
+	defexprs = (ExprState **) palloc(num_phys_attrs * sizeof(*defexprs));
 
 	Assert(rel->attrmap->maplen == num_phys_attrs);
 	for (attnum = 0; attnum < num_phys_attrs; attnum++)
@@ -5265,7 +5265,7 @@ subxact_info_read(Oid subid, TransactionId xid)
 	 */
 	oldctx = MemoryContextSwitchTo(LogicalStreamingContext);
 	subxact_data.subxacts = palloc(subxact_data.nsubxacts_max *
-								   sizeof(SubXactInfo));
+								   sizeof(*subxact_data.subxacts));
 	MemoryContextSwitchTo(oldctx);
 
 	if (len > 0)
@@ -5331,7 +5331,7 @@ subxact_info_add(TransactionId xid)
 		 * subxact_info_read.
 		 */
 		oldctx = MemoryContextSwitchTo(LogicalStreamingContext);
-		subxacts = palloc(subxact_data.nsubxacts_max * sizeof(SubXactInfo));
+		subxacts = palloc(subxact_data.nsubxacts_max * sizeof(*subxacts));
 		MemoryContextSwitchTo(oldctx);
 	}
 	else if (subxact_data.nsubxacts == subxact_data.nsubxacts_max)

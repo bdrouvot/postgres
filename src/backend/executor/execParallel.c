@@ -568,7 +568,7 @@ ExecParallelSetupTupleQueues(ParallelContext *pcxt, bool reinitialize)
 
 	/* Allocate memory for shared memory queue handles. */
 	responseq = (shm_mq_handle **)
-		palloc(pcxt->nworkers * sizeof(shm_mq_handle *));
+		palloc(pcxt->nworkers * sizeof(*responseq));
 
 	/*
 	 * If not reinitializing, allocate space from the DSM for the queues;

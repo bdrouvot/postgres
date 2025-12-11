@@ -118,7 +118,7 @@ CreateConstraintEntry(const char *constraintName,
 	{
 		Datum	   *conkey;
 
-		conkey = (Datum *) palloc(constraintNKeys * sizeof(Datum));
+		conkey = (Datum *) palloc(constraintNKeys * sizeof(*conkey));
 		for (i = 0; i < constraintNKeys; i++)
 			conkey[i] = Int16GetDatum(constraintKey[i]);
 		conkeyArray = construct_array_builtin(conkey, constraintNKeys, INT2OID);
@@ -131,7 +131,7 @@ CreateConstraintEntry(const char *constraintName,
 		Datum	   *fkdatums;
 		int			nkeys = Max(foreignNKeys, numFkDeleteSetCols);
 
-		fkdatums = (Datum *) palloc(nkeys * sizeof(Datum));
+		fkdatums = (Datum *) palloc(nkeys * sizeof(*fkdatums));
 		for (i = 0; i < foreignNKeys; i++)
 			fkdatums[i] = Int16GetDatum(foreignKey[i]);
 		confkeyArray = construct_array_builtin(fkdatums, foreignNKeys, INT2OID);
@@ -167,7 +167,7 @@ CreateConstraintEntry(const char *constraintName,
 	{
 		Datum	   *opdatums;
 
-		opdatums = (Datum *) palloc(constraintNKeys * sizeof(Datum));
+		opdatums = (Datum *) palloc(constraintNKeys * sizeof(*opdatums));
 		for (i = 0; i < constraintNKeys; i++)
 			opdatums[i] = ObjectIdGetDatum(exclOp[i]);
 		conexclopArray = construct_array_builtin(opdatums, constraintNKeys, OIDOID);

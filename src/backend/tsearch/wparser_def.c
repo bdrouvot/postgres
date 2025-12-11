@@ -2251,7 +2251,7 @@ mark_hl_fragments(HeadlineParsedText *prs, TSQuery query, List *locations,
 				maxitems;
 	CoverPos   *covers;
 
-	covers = palloc(maxcovers * sizeof(CoverPos));
+	covers = palloc(maxcovers * sizeof(*covers));
 
 	/* get all covers */
 	while (hlCover(prs, query, locations, &nextpos, &p, &q))

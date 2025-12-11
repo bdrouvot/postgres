@@ -125,7 +125,7 @@ AllocateCompressor(const pg_compress_specification compression_spec,
 {
 	CompressorState *cs;
 
-	cs = (CompressorState *) pg_malloc0(sizeof(CompressorState));
+	cs = (CompressorState *) pg_malloc0(sizeof(*cs));
 	cs->readF = readF;
 	cs->writeF = writeF;
 
@@ -195,7 +195,7 @@ InitCompressFileHandle(const pg_compress_specification compression_spec)
 {
 	CompressFileHandle *CFH;
 
-	CFH = pg_malloc0(sizeof(CompressFileHandle));
+	CFH = pg_malloc0(sizeof(*CFH));
 
 	if (compression_spec.algorithm == PG_COMPRESSION_NONE)
 		InitCompressFileHandleNone(CFH, compression_spec);

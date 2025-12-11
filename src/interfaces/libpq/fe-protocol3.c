@@ -1252,13 +1252,13 @@ reportErrorPosition(PQExpBuffer msg, const char *query, int loc, int encoding)
 		return;
 	}
 
-	qidx = (int *) malloc(slen * sizeof(int));
+	qidx = (int *) malloc(slen * sizeof(*qidx));
 	if (qidx == NULL)
 	{
 		free(wquery);
 		return;
 	}
-	scridx = (int *) malloc(slen * sizeof(int));
+	scridx = (int *) malloc(slen * sizeof(*scridx));
 	if (scridx == NULL)
 	{
 		free(qidx);

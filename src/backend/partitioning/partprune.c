@@ -653,12 +653,12 @@ make_partitionedrel_pruneinfo(PlannerInfo *root, RelOptInfo *parentrel,
 		 * Also construct a Bitmapset of all partitions that are present (that
 		 * is, not pruned already).
 		 */
-		subplan_map = (int *) palloc(nparts * sizeof(int));
+		subplan_map = (int *) palloc(nparts * sizeof(*subplan_map));
 		memset(subplan_map, -1, nparts * sizeof(int));
-		subpart_map = (int *) palloc(nparts * sizeof(int));
+		subpart_map = (int *) palloc(nparts * sizeof(*subpart_map));
 		memset(subpart_map, -1, nparts * sizeof(int));
-		relid_map = (Oid *) palloc0(nparts * sizeof(Oid));
-		leafpart_rti_map = (int *) palloc0(nparts * sizeof(int));
+		relid_map = (Oid *) palloc0(nparts * sizeof(*relid_map));
+		leafpart_rti_map = (int *) palloc0(nparts * sizeof(*leafpart_rti_map));
 		present_parts = NULL;
 
 		i = -1;
@@ -867,7 +867,7 @@ get_matching_partitions(PartitionPruneContext *context, List *pruning_steps)
 	 * of the last pruning step.
 	 */
 	results = (PruneStepResult **)
-		palloc0(num_steps * sizeof(PruneStepResult *));
+		palloc0(num_steps * sizeof(*results));
 	foreach(lc, pruning_steps)
 	{
 		PartitionPruneStep *step = lfirst(lc);

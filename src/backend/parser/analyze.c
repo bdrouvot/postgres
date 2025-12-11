@@ -1615,7 +1615,7 @@ transformValuesClause(ParseState *pstate, SelectStmt *stmt)
 			/* Remember post-transformation length of first sublist */
 			sublist_length = list_length(sublist);
 			/* and allocate array for per-column lists */
-			colexprs = (List **) palloc0(sublist_length * sizeof(List *));
+			colexprs = (List **) palloc0(sublist_length * sizeof(*colexprs));
 		}
 		else if (sublist_length != list_length(sublist))
 		{
@@ -1888,7 +1888,7 @@ transformSetOperationStmt(ParseState *pstate, SelectStmt *stmt)
 	targetvars = NIL;
 	targetnames = NIL;
 	sortnscolumns = (ParseNamespaceColumn *)
-		palloc0(list_length(sostmt->colTypes) * sizeof(ParseNamespaceColumn));
+		palloc0(list_length(sostmt->colTypes) * sizeof(*sortnscolumns));
 	sortcolindex = 0;
 
 	forfour(lct, sostmt->colTypes,

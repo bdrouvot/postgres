@@ -2569,7 +2569,7 @@ pg_get_constraintdef_worker(Oid constraintId, bool fullCommand,
 				deconstruct_array_builtin(DatumGetArrayTypeP(val), OIDOID,
 										  &elems, NULL, &nElems);
 
-				operators = (Oid *) palloc(nElems * sizeof(Oid));
+				operators = (Oid *) palloc(nElems * sizeof(*operators));
 				for (i = 0; i < nElems; i++)
 					operators[i] = DatumGetObjectId(elems[i]);
 
@@ -3771,7 +3771,7 @@ deparse_context_for_plan_tree(PlannedStmt *pstmt, List *rtable_names)
 		ListCell   *lc;
 
 		dpns->appendrels = (AppendRelInfo **)
-			palloc0((ntables + 1) * sizeof(AppendRelInfo *));
+			palloc0((ntables + 1) * sizeof(*dpns->appendrels));
 		foreach(lc, pstmt->appendRelations)
 		{
 			AppendRelInfo *appinfo = lfirst_node(AppendRelInfo, lc);
@@ -4400,7 +4400,7 @@ set_relation_column_names(deparse_namespace *dpns, RangeTblEntry *rte,
 		tupdesc = RelationGetDescr(rel);
 
 		ncolumns = tupdesc->natts;
-		real_colnames = (char **) palloc(ncolumns * sizeof(char *));
+		real_colnames = (char **) palloc(ncolumns * sizeof(*real_colnames));
 
 		for (i = 0; i < ncolumns; i++)
 		{
@@ -4444,7 +4444,7 @@ set_relation_column_names(deparse_namespace *dpns, RangeTblEntry *rte,
 			colnames = rte->eref->colnames;
 
 		ncolumns = list_length(colnames);
-		real_colnames = (char **) palloc(ncolumns * sizeof(char *));
+		real_colnames = (char **) palloc(ncolumns * sizeof(*real_colnames));
 
 		i = 0;
 		foreach(lc, colnames)
@@ -4480,8 +4480,8 @@ set_relation_column_names(deparse_namespace *dpns, RangeTblEntry *rte,
 	 * colname_is_unique will not consult that array, which is fine because it
 	 * would only be duplicate effort.
 	 */
-	colinfo->new_colnames = (char **) palloc(ncolumns * sizeof(char *));
-	colinfo->is_new_col = (bool *) palloc(ncolumns * sizeof(bool));
+	colinfo->new_colnames = (char **) palloc(ncolumns * sizeof(*colinfo->new_colnames));
+	colinfo->is_new_col = (bool *) palloc(ncolumns * sizeof(*colinfo->is_new_col));
 
 	/* If the RTE is wide enough, use a hash table to avoid O(N^2) costs */
 	build_colinfo_names_hash(colinfo);
@@ -4683,8 +4683,8 @@ set_join_column_names(deparse_namespace *dpns, RangeTblEntry *rte,
 	nnewcolumns = leftcolinfo->num_new_cols + rightcolinfo->num_new_cols -
 		list_length(colinfo->usingNames);
 	colinfo->num_new_cols = nnewcolumns;
-	colinfo->new_colnames = (char **) palloc0(nnewcolumns * sizeof(char *));
-	colinfo->is_new_col = (bool *) palloc0(nnewcolumns * sizeof(bool));
+	colinfo->new_colnames = (char **) palloc0(nnewcolumns * sizeof(*colinfo->new_colnames));
+	colinfo->is_new_col = (bool *) palloc0(nnewcolumns * sizeof(*colinfo->is_new_col));
 
 	/*
 	 * Generating the new_colnames array is a bit tricky since any new columns
@@ -5096,8 +5096,8 @@ identify_join_columns(JoinExpr *j, RangeTblEntry *jrte,
 	/* Initialize result arrays with zeroes */
 	numjoincols = list_length(jrte->joinaliasvars);
 	Assert(numjoincols == list_length(jrte->eref->colnames));
-	colinfo->leftattnos = (int *) palloc0(numjoincols * sizeof(int));
-	colinfo->rightattnos = (int *) palloc0(numjoincols * sizeof(int));
+	colinfo->leftattnos = (int *) palloc0(numjoincols * sizeof(*colinfo->leftattnos));
+	colinfo->rightattnos = (int *) palloc0(numjoincols * sizeof(*colinfo->rightattnos));
 
 	/*
 	 * Deconstruct RTE's joinleftcols/joinrightcols into desired format.

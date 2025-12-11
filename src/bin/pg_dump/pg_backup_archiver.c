@@ -134,7 +134,7 @@ static void StrictNamesCheck(RestoreOptions *ropt);
 DumpOptions *
 NewDumpOptions(void)
 {
-	DumpOptions *opts = (DumpOptions *) pg_malloc(sizeof(DumpOptions));
+	DumpOptions *opts = (DumpOptions *) pg_malloc(sizeof(*opts));
 
 	InitDumpOptions(opts);
 	return opts;
@@ -1107,7 +1107,7 @@ NewRestoreOptions(void)
 {
 	RestoreOptions *opts;
 
-	opts = (RestoreOptions *) pg_malloc0(sizeof(RestoreOptions));
+	opts = (RestoreOptions *) pg_malloc0(sizeof(*opts));
 
 	/* set any fields that shouldn't default to zeroes */
 	opts->format = archUnknown;
@@ -1244,7 +1244,7 @@ ArchiveEntry(Archive *AHX, CatalogId catalogId, DumpId dumpId,
 	ArchiveHandle *AH = (ArchiveHandle *) AHX;
 	TocEntry   *newToc;
 
-	newToc = (TocEntry *) pg_malloc0(sizeof(TocEntry));
+	newToc = (TocEntry *) pg_malloc0(sizeof(*newToc));
 
 	AH->tocCount++;
 	if (dumpId > AH->maxDumpId)
@@ -1272,7 +1272,7 @@ ArchiveEntry(Archive *AHX, CatalogId catalogId, DumpId dumpId,
 
 	if (opts->nDeps > 0)
 	{
-		newToc->dependencies = (DumpId *) pg_malloc(opts->nDeps * sizeof(DumpId));
+		newToc->dependencies = (DumpId *) pg_malloc(opts->nDeps * sizeof(*newToc->dependencies));
 		memcpy(newToc->dependencies, opts->deps, opts->nDeps * sizeof(DumpId));
 		newToc->nDeps = opts->nDeps;
 	}
@@ -1575,7 +1575,7 @@ SortTocFromFile(Archive *AHX)
 	StringInfoData linebuf;
 
 	/* Allocate space for the 'wanted' array, and init it */
-	ropt->idWanted = (bool *) pg_malloc0(sizeof(bool) * AH->maxDumpId);
+	ropt->idWanted = (bool *) pg_malloc0(sizeof(*ropt->idWanted) * AH->maxDumpId);
 
 	/* Setup the file */
 	fh = fopen(ropt->tocFile, PG_BINARY_R);
@@ -1991,7 +1991,7 @@ buildTocEntryArrays(ArchiveHandle *AH)
 	TocEntry   *te;
 
 	AH->tocsByDumpId = (TocEntry **) pg_malloc0((maxDumpId + 1) * sizeof(TocEntry *));
-	AH->tableDataId = (DumpId *) pg_malloc0((maxDumpId + 1) * sizeof(DumpId));
+	AH->tableDataId = (DumpId *) pg_malloc0((maxDumpId + 1) * sizeof(*AH->tableDataId));
 
 	for (te = AH->toc->next; te != AH->toc; te = te->next)
 	{
@@ -2385,7 +2385,7 @@ _allocAH(const char *FileSpec, const ArchiveFormat fmt,
 	pg_log_debug("allocating AH for %s, format %d",
 				 FileSpec ? FileSpec : "(stdio)", fmt);
 
-	AH = (ArchiveHandle *) pg_malloc0(sizeof(ArchiveHandle));
+	AH = (ArchiveHandle *) pg_malloc0(sizeof(*AH));
 
 	AH->version = K_VERS_SELF;
 
@@ -2509,7 +2509,7 @@ WriteDataChunks(ArchiveHandle *AH, ParallelState *pstate)
 		TocEntry  **tes;
 		int			ntes;
 
-		tes = (TocEntry **) pg_malloc(AH->tocCount * sizeof(TocEntry *));
+		tes = (TocEntry **) pg_malloc(AH->tocCount * sizeof(*tes));
 		ntes = 0;
 		for (te = AH->toc->next; te != AH->toc; te = te->next)
 		{
@@ -2720,7 +2720,7 @@ ReadToc(ArchiveHandle *AH)
 
 	for (i = 0; i < AH->tocCount; i++)
 	{
-		te = (TocEntry *) pg_malloc0(sizeof(TocEntry));
+		te = (TocEntry *) pg_malloc0(sizeof(*te));
 		te->dumpId = ReadInt(AH);
 
 		if (te->dumpId > AH->maxDumpId)
@@ -2817,7 +2817,7 @@ ReadToc(ArchiveHandle *AH)
 		if (AH->version >= K_VERS_1_5)
 		{
 			depSize = 100;
-			deps = (DumpId *) pg_malloc(sizeof(DumpId) * depSize);
+			deps = (DumpId *) pg_malloc(sizeof(*deps) * depSize);
 			depIdx = 0;
 			for (;;)
 			{
@@ -4883,7 +4883,7 @@ fix_dependencies(ArchiveHandle *AH)
 				{
 					if (strcmp(te2->desc, "BLOBS") == 0)
 					{
-						te->dependencies = (DumpId *) pg_malloc(sizeof(DumpId));
+						te->dependencies = (DumpId *) pg_malloc(sizeof(*te->dependencies));
 						te->dependencies[0] = te2->dumpId;
 						te->nDeps++;
 						te->depCount++;
@@ -4926,7 +4926,7 @@ fix_dependencies(ArchiveHandle *AH)
 	for (te = AH->toc->next; te != AH->toc; te = te->next)
 	{
 		if (te->nRevDeps > 0)
-			te->revDeps = (DumpId *) pg_malloc(te->nRevDeps * sizeof(DumpId));
+			te->revDeps = (DumpId *) pg_malloc(te->nRevDeps * sizeof(*te->revDeps));
 		te->nRevDeps = 0;
 	}
 
@@ -5041,7 +5041,7 @@ identify_locking_dependencies(ArchiveHandle *AH, TocEntry *te)
 	 * difference between a dependency on a table and a dependency on its
 	 * data, so that closer analysis would be needed here.
 	 */
-	lockids = (DumpId *) pg_malloc(te->nDeps * sizeof(DumpId));
+	lockids = (DumpId *) pg_malloc(te->nDeps * sizeof(*lockids));
 	nlockids = 0;
 	for (i = 0; i < te->nDeps; i++)
 	{
@@ -5149,11 +5149,11 @@ CloneArchive(ArchiveHandle *AH)
 	ArchiveHandle *clone;
 
 	/* Make a "flat" copy */
-	clone = (ArchiveHandle *) pg_malloc(sizeof(ArchiveHandle));
+	clone = (ArchiveHandle *) pg_malloc(sizeof(*clone));
 	memcpy(clone, AH, sizeof(ArchiveHandle));
 
 	/* Likewise flat-copy the RestoreOptions, so we can alter them locally */
-	clone->public.ropt = (RestoreOptions *) pg_malloc(sizeof(RestoreOptions));
+	clone->public.ropt = (RestoreOptions *) pg_malloc(sizeof(*clone->public.ropt));
 	memcpy(clone->public.ropt, AH->public.ropt, sizeof(RestoreOptions));
 
 	/* Handle format-independent fields */

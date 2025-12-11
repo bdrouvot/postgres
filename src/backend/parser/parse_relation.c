@@ -1316,7 +1316,7 @@ buildNSItemFromTupleDesc(RangeTblEntry *rte, Index rtindex,
 
 	/* extract per-column data from the tupdesc */
 	nscolumns = (ParseNamespaceColumn *)
-		palloc0(maxattrs * sizeof(ParseNamespaceColumn));
+		palloc0(maxattrs * sizeof(*nscolumns));
 
 	for (varattno = 0; varattno < maxattrs; varattno++)
 	{
@@ -1382,7 +1382,7 @@ buildNSItemFromLists(RangeTblEntry *rte, Index rtindex,
 
 	/* extract per-column data from the lists */
 	nscolumns = (ParseNamespaceColumn *)
-		palloc0(maxattrs * sizeof(ParseNamespaceColumn));
+		palloc0(maxattrs * sizeof(*nscolumns));
 
 	varattno = 0;
 	forthree(lct, coltypes,

@@ -57,7 +57,7 @@ DeflateCompressorInit(CompressorState *cs)
 	GzipCompressorState *gzipcs;
 	z_streamp	zp;
 
-	gzipcs = (GzipCompressorState *) pg_malloc0(sizeof(GzipCompressorState));
+	gzipcs = (GzipCompressorState *) pg_malloc0(sizeof(*gzipcs));
 	zp = gzipcs->zp = (z_streamp) pg_malloc(sizeof(z_stream));
 	zp->zalloc = Z_NULL;
 	zp->zfree = Z_NULL;

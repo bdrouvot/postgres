@@ -1000,7 +1000,7 @@ multirange_constructor2(PG_FUNCTION_ARGS)
 		deconstruct_array(rangeArray, rngtypid, rangetyp->typlen, rangetyp->typbyval,
 						  rangetyp->typalign, &elements, &nulls, &range_count);
 
-		ranges = palloc0(range_count * sizeof(RangeType *));
+		ranges = palloc0(range_count * sizeof(*ranges));
 		for (i = 0; i < range_count; i++)
 		{
 			if (nulls[i])
@@ -1104,7 +1104,7 @@ multirange_union(PG_FUNCTION_ARGS)
 	multirange_deserialize(typcache->rngtype, mr2, &range_count2, &ranges2);
 
 	range_count3 = range_count1 + range_count2;
-	ranges3 = palloc0(range_count3 * sizeof(RangeType *));
+	ranges3 = palloc0(range_count3 * sizeof(*ranges3));
 	memcpy(ranges3, ranges1, range_count1 * sizeof(RangeType *));
 	memcpy(ranges3 + range_count1, ranges2, range_count2 * sizeof(RangeType *));
 	PG_RETURN_MULTIRANGE_P(make_multirange(typcache->type_id, typcache->rngtype,
@@ -1158,7 +1158,7 @@ multirange_minus_internal(Oid mltrngtypoid, TypeCacheEntry *rangetyp,
 	 * Worst case: every range in ranges1 makes a different cut to some range
 	 * in ranges2.
 	 */
-	ranges3 = palloc0((range_count1 + range_count2) * sizeof(RangeType *));
+	ranges3 = palloc0((range_count1 + range_count2) * sizeof(*ranges3));
 	range_count3 = 0;
 
 	/*
@@ -1355,7 +1355,7 @@ multirange_intersect_internal(Oid mltrngtypoid, TypeCacheEntry *rangetyp,
 	 * but one extra won't hurt.
 	 *-----------------------------------------------
 	 */
-	ranges3 = palloc0((range_count1 + range_count2) * sizeof(RangeType *));
+	ranges3 = palloc0((range_count1 + range_count2) * sizeof(*ranges3));
 	range_count3 = 0;
 
 	/*
@@ -1468,7 +1468,7 @@ range_agg_finalfn(PG_FUNCTION_ARGS)
 	mltrngtypoid = get_fn_expr_rettype(fcinfo->flinfo);
 	typcache = multirange_get_typcache(fcinfo, mltrngtypoid);
 
-	ranges = palloc0(range_count * sizeof(RangeType *));
+	ranges = palloc0(range_count * sizeof(*ranges));
 	for (i = 0; i < range_count; i++)
 		ranges[i] = DatumGetRangeTypeP(state->dvalues[i]);
 

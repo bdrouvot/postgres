@@ -408,7 +408,7 @@ gather_merge_setup(GatherMergeState *gm_state)
 	 * case the extra array entries go unused.
 	 */
 	gm_state->gm_slots = (TupleTableSlot **)
-		palloc0((nreaders + 1) * sizeof(TupleTableSlot *));
+		palloc0((nreaders + 1) * sizeof(*gm_state->gm_slots));
 
 	/* Allocate the tuple slot and tuple array for each worker */
 	gm_state->gm_tuple_buffers = (GMReaderTupleBuffer *)

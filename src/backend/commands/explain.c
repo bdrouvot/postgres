@@ -4982,10 +4982,10 @@ ExplainCreateWorkersState(int num_workers)
 
 	wstate = palloc_object(ExplainWorkersState);
 	wstate->num_workers = num_workers;
-	wstate->worker_inited = (bool *) palloc0(num_workers * sizeof(bool));
+	wstate->worker_inited = (bool *) palloc0(num_workers * sizeof(*wstate->worker_inited));
 	wstate->worker_str = (StringInfoData *)
-		palloc0(num_workers * sizeof(StringInfoData));
-	wstate->worker_state_save = (int *) palloc(num_workers * sizeof(int));
+		palloc0(num_workers * sizeof(*wstate->worker_str));
+	wstate->worker_state_save = (int *) palloc(num_workers * sizeof(*wstate->worker_state_save));
 	return wstate;
 }
 

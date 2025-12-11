@@ -286,7 +286,7 @@ pgstat_get_transactional_drops(bool isCommit, xl_xact_stats_item **items)
 	Assert(!isCommit || xact_state->prev == NULL);
 
 	*items = palloc(dclist_count(&xact_state->pending_drops)
-					* sizeof(xl_xact_stats_item));
+					* sizeof(**items));
 
 	dclist_foreach(iter, &xact_state->pending_drops)
 	{

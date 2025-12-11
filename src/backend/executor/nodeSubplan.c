@@ -976,14 +976,14 @@ ExecInitSubPlan(SubPlan *subplan, PlanState *parent)
 
 		lefttlist = righttlist = NIL;
 		sstate->numCols = ncols;
-		sstate->keyColIdx = (AttrNumber *) palloc(ncols * sizeof(AttrNumber));
-		sstate->tab_eq_funcoids = (Oid *) palloc(ncols * sizeof(Oid));
-		sstate->tab_collations = (Oid *) palloc(ncols * sizeof(Oid));
-		sstate->tab_hash_funcs = (FmgrInfo *) palloc(ncols * sizeof(FmgrInfo));
-		lhs_hash_funcs = (FmgrInfo *) palloc(ncols * sizeof(FmgrInfo));
-		sstate->cur_eq_funcs = (FmgrInfo *) palloc(ncols * sizeof(FmgrInfo));
+		sstate->keyColIdx = (AttrNumber *) palloc(ncols * sizeof(*sstate->keyColIdx));
+		sstate->tab_eq_funcoids = (Oid *) palloc(ncols * sizeof(*sstate->tab_eq_funcoids));
+		sstate->tab_collations = (Oid *) palloc(ncols * sizeof(*sstate->tab_collations));
+		sstate->tab_hash_funcs = (FmgrInfo *) palloc(ncols * sizeof(*sstate->tab_hash_funcs));
+		lhs_hash_funcs = (FmgrInfo *) palloc(ncols * sizeof(*lhs_hash_funcs));
+		sstate->cur_eq_funcs = (FmgrInfo *) palloc(ncols * sizeof(*sstate->cur_eq_funcs));
 		/* we'll need the cross-type equality fns below, but not in sstate */
-		cross_eq_funcoids = (Oid *) palloc(ncols * sizeof(Oid));
+		cross_eq_funcoids = (Oid *) palloc(ncols * sizeof(*cross_eq_funcoids));
 
 		i = 1;
 		foreach(l, oplist)

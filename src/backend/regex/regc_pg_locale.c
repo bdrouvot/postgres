@@ -283,7 +283,7 @@ regc_ctype_get_cache(regc_wc_probefunc probefunc, int cclasscode)
 	/*
 	 * Nope, so initialize some workspace ...
 	 */
-	pcc = (pg_ctype_cache *) malloc(sizeof(pg_ctype_cache));
+	pcc = (pg_ctype_cache *) malloc(sizeof(*pcc));
 	if (pcc == NULL)
 		return NULL;
 	pcc->probefunc = probefunc;

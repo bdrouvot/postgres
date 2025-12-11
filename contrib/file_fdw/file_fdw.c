@@ -1206,8 +1206,8 @@ file_acquire_sample_rows(Relation onerel, int elevel,
 	Assert(targrows > 0);
 
 	tupDesc = RelationGetDescr(onerel);
-	values = (Datum *) palloc(tupDesc->natts * sizeof(Datum));
-	nulls = (bool *) palloc(tupDesc->natts * sizeof(bool));
+	values = (Datum *) palloc(tupDesc->natts * sizeof(*values));
+	nulls = (bool *) palloc(tupDesc->natts * sizeof(*nulls));
 
 	/* Fetch options of foreign table */
 	fileGetOptions(RelationGetRelid(onerel), &filename, &is_program, &options);

@@ -1517,7 +1517,7 @@ GinBufferStoreTuple(GinBuffer *buffer, GinTuple *tup)
 		 * still pass 0 as number of elements in that array though.
 		 */
 		if (buffer->items == NULL)
-			buffer->items = palloc((buffer->nitems + tup->nitems) * sizeof(ItemPointerData));
+			buffer->items = palloc((buffer->nitems + tup->nitems) * sizeof(*buffer->items));
 		else
 			buffer->items = repalloc(buffer->items,
 									 (buffer->nitems + tup->nitems) * sizeof(ItemPointerData));

@@ -1001,9 +1001,9 @@ PLy_modify_tuple(PLyProcedure *proc, PyObject *pltd, TriggerData *tdata,
 
 		tupdesc = RelationGetDescr(tdata->tg_relation);
 
-		modvalues = (Datum *) palloc0(tupdesc->natts * sizeof(Datum));
-		modnulls = (bool *) palloc0(tupdesc->natts * sizeof(bool));
-		modrepls = (bool *) palloc0(tupdesc->natts * sizeof(bool));
+		modvalues = (Datum *) palloc0(tupdesc->natts * sizeof(*modvalues));
+		modnulls = (bool *) palloc0(tupdesc->natts * sizeof(*modnulls));
+		modrepls = (bool *) palloc0(tupdesc->natts * sizeof(*modrepls));
 
 		for (i = 0; i < nkeys; i++)
 		{

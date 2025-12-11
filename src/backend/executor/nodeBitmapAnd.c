@@ -69,7 +69,7 @@ ExecInitBitmapAnd(BitmapAnd *node, EState *estate, int eflags)
 	 */
 	nplans = list_length(node->bitmapplans);
 
-	bitmapplanstates = (PlanState **) palloc0(nplans * sizeof(PlanState *));
+	bitmapplanstates = (PlanState **) palloc0(nplans * sizeof(*bitmapplanstates));
 
 	/*
 	 * create new BitmapAndState for our BitmapAnd node

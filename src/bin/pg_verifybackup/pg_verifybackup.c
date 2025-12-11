@@ -418,7 +418,7 @@ parse_manifest_file(char *manifest_path)
 	/* Create the hash table. */
 	ht = manifest_files_create(initial_size, NULL);
 
-	result = pg_malloc0(sizeof(manifest_data));
+	result = pg_malloc0(sizeof(*result));
 	result->files = ht;
 	context.private_data = result;
 	context.version_cb = verifybackup_version_cb;
@@ -970,7 +970,7 @@ precheck_tar_backup_file(verifier_context *context, char *relpath,
 	 * Append the information to the list for complete verification at a later
 	 * stage.
 	 */
-	tar = pg_malloc(sizeof(tar_file));
+	tar = pg_malloc(sizeof(*tar));
 	tar->relpath = pstrdup(relpath);
 	tar->tblspc_oid = tblspc_oid;
 	tar->compress_algorithm = compress_algorithm;
@@ -1007,7 +1007,7 @@ verify_tar_file(verifier_context *context, char *relpath, char *fullpath,
 		return;
 	}
 
-	buffer = pg_malloc(READ_CHUNK_SIZE * sizeof(char));
+	buffer = pg_malloc(READ_CHUNK_SIZE * sizeof(*buffer));
 
 	/* Perform the reads */
 	while ((rc = read(fd, buffer, READ_CHUNK_SIZE)) > 0)
@@ -1065,7 +1065,7 @@ verify_backup_checksums(verifier_context *context)
 
 	progress_report(false);
 
-	buffer = pg_malloc(READ_CHUNK_SIZE * sizeof(uint8));
+	buffer = pg_malloc(READ_CHUNK_SIZE * sizeof(*buffer));
 
 	manifest_files_start_iterate(manifest->files, &it);
 	while ((m = manifest_files_iterate(manifest->files, &it)) != NULL)

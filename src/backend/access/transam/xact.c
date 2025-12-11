@@ -5599,7 +5599,7 @@ SerializeTransactionState(Size maxsize, char *start_address)
 		   <= maxsize);
 
 	/* Copy them to our scratch space. */
-	workspace = palloc(nxids * sizeof(TransactionId));
+	workspace = palloc(nxids * sizeof(*workspace));
 	for (s = CurrentTransactionState; s != NULL; s = s->parent)
 	{
 		if (FullTransactionIdIsValid(s->fullTransactionId))

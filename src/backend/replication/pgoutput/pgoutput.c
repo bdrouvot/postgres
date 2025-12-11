@@ -1667,7 +1667,7 @@ pgoutput_truncate(LogicalDecodingContext *ctx, ReorderBufferTXN *txn,
 
 	old = MemoryContextSwitchTo(data->context);
 
-	relids = palloc0(nrelations * sizeof(Oid));
+	relids = palloc0(nrelations * sizeof(*relids));
 	nrelids = 0;
 
 	for (i = 0; i < nrelations; i++)

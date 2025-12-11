@@ -572,7 +572,7 @@ enum_range_internal(Oid enumtypoid, Oid lower, Oid upper)
 	enum_scan = systable_beginscan_ordered(enum_rel, enum_idx, NULL, 1, &skey);
 
 	max = 64;
-	elems = (Datum *) palloc(max * sizeof(Datum));
+	elems = (Datum *) palloc(max * sizeof(*elems));
 	cnt = 0;
 	left_found = !OidIsValid(lower);
 

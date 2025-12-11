@@ -195,7 +195,7 @@ varstr_levenshtein(const char *source, int slen,
 		int			i;
 		const char *cp = source;
 
-		s_char_len = (int *) palloc((m + 1) * sizeof(int));
+		s_char_len = (int *) palloc((m + 1) * sizeof(*s_char_len));
 		for (i = 0; i < m; ++i)
 		{
 			s_char_len[i] = pg_mblen(cp);
@@ -209,7 +209,7 @@ varstr_levenshtein(const char *source, int slen,
 	++n;
 
 	/* Previous and current rows of notional array. */
-	prev = (int *) palloc(2 * m * sizeof(int));
+	prev = (int *) palloc(2 * m * sizeof(*prev));
 	curr = prev + m;
 
 	/*

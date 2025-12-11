@@ -302,7 +302,7 @@ pg_SSPI_continue(PGconn *conn, int payloadlen)
 	if (conn->sspictx == NULL)
 	{
 		/* On first run, transfer retrieved context handle */
-		conn->sspictx = malloc(sizeof(CtxtHandle));
+		conn->sspictx = malloc(sizeof(*conn->sspictx));
 		if (conn->sspictx == NULL)
 		{
 			libpq_append_conn_error(conn, "out of memory");

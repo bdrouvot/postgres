@@ -1063,7 +1063,7 @@ set_append_rel_size(PlannerInfo *root, RelOptInfo *rel,
 	parent_rows = 0;
 	parent_size = 0;
 	nattrs = rel->max_attr - rel->min_attr + 1;
-	parent_attrsizes = (double *) palloc0(nattrs * sizeof(double));
+	parent_attrsizes = (double *) palloc0(nattrs * sizeof(*parent_attrsizes));
 
 	foreach(l, root->append_rel_list)
 	{
@@ -2651,7 +2651,7 @@ set_subquery_pathlist(PlannerInfo *root, RelOptInfo *rel,
 	 */
 	memset(&safetyInfo, 0, sizeof(safetyInfo));
 	safetyInfo.unsafeFlags = (unsigned char *)
-		palloc0((list_length(subquery->targetList) + 1) * sizeof(unsigned char));
+		palloc0((list_length(subquery->targetList) + 1) * sizeof(*safetyInfo.unsafeFlags));
 
 	/*
 	 * If the subquery has the "security_barrier" flag, it means the subquery

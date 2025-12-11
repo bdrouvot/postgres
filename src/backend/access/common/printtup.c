@@ -264,7 +264,7 @@ printtup_prepare_info(DR_printtup *myState, TupleDesc typeinfo, int numAttrs)
 		return;
 
 	myState->myinfo = (PrinttupAttrInfo *)
-		palloc0(numAttrs * sizeof(PrinttupAttrInfo));
+		palloc0(numAttrs * sizeof(*myState->myinfo));
 
 	for (i = 0; i < numAttrs; i++)
 	{

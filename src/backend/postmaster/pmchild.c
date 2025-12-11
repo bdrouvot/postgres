@@ -137,7 +137,7 @@ InitPostmasterChildSlots(void)
 		num_pmchild_slots += pmchild_pools[i].size;
 
 	/* Allocate enough slots, and make sure Valgrind doesn't complain */
-	slots = palloc(num_pmchild_slots * sizeof(PMChild));
+	slots = palloc(num_pmchild_slots * sizeof(*slots));
 #ifdef USE_VALGRIND
 	pmchild_array = slots;
 #endif

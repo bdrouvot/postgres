@@ -1728,8 +1728,8 @@ create_memoize_plan(PlannerInfo *root, MemoizePath *best_path, int flags)
 
 	nkeys = list_length(param_exprs);
 	Assert(nkeys > 0);
-	operators = palloc(nkeys * sizeof(Oid));
-	collations = palloc(nkeys * sizeof(Oid));
+	operators = palloc(nkeys * sizeof(*operators));
+	collations = palloc(nkeys * sizeof(*collations));
 
 	i = 0;
 	forboth(lc, param_exprs, lc2, best_path->hash_operators)
@@ -2270,7 +2270,7 @@ create_groupingsets_plan(PlannerInfo *root, GroupingSetsPath *best_path)
 			maxref = gc->tleSortGroupRef;
 	}
 
-	grouping_map = (AttrNumber *) palloc0((maxref + 1) * sizeof(AttrNumber));
+	grouping_map = (AttrNumber *) palloc0((maxref + 1) * sizeof(*grouping_map));
 
 	/* Now look up the column numbers in the child's tlist */
 	foreach(lc, root->processed_groupClause)
@@ -2708,9 +2708,9 @@ create_limit_plan(PlannerInfo *root, LimitPath *best_path, int flags)
 		ListCell   *l;
 
 		numUniqkeys = list_length(parse->sortClause);
-		uniqColIdx = (AttrNumber *) palloc(numUniqkeys * sizeof(AttrNumber));
-		uniqOperators = (Oid *) palloc(numUniqkeys * sizeof(Oid));
-		uniqCollations = (Oid *) palloc(numUniqkeys * sizeof(Oid));
+		uniqColIdx = (AttrNumber *) palloc(numUniqkeys * sizeof(*uniqColIdx));
+		uniqOperators = (Oid *) palloc(numUniqkeys * sizeof(*uniqOperators));
+		uniqCollations = (Oid *) palloc(numUniqkeys * sizeof(*uniqCollations));
 
 		numUniqkeys = 0;
 		foreach(l, parse->sortClause)
@@ -4524,10 +4524,10 @@ create_mergejoin_plan(PlannerInfo *root,
 	 */
 	nClauses = list_length(mergeclauses);
 	Assert(nClauses == list_length(best_path->path_mergeclauses));
-	mergefamilies = (Oid *) palloc(nClauses * sizeof(Oid));
-	mergecollations = (Oid *) palloc(nClauses * sizeof(Oid));
-	mergereversals = (bool *) palloc(nClauses * sizeof(bool));
-	mergenullsfirst = (bool *) palloc(nClauses * sizeof(bool));
+	mergefamilies = (Oid *) palloc(nClauses * sizeof(*mergefamilies));
+	mergecollations = (Oid *) palloc(nClauses * sizeof(*mergecollations));
+	mergereversals = (bool *) palloc(nClauses * sizeof(*mergereversals));
+	mergenullsfirst = (bool *) palloc(nClauses * sizeof(*mergenullsfirst));
 
 	opathkey = NULL;
 	opeclass = NULL;
@@ -5277,7 +5277,7 @@ order_qual_clauses(PlannerInfo *root, List *clauses)
 	 * Collect the items and costs into an array.  This is to avoid repeated
 	 * cost_qual_eval work if the inputs aren't RestrictInfos.
 	 */
-	items = (QualItem *) palloc(nitems * sizeof(QualItem));
+	items = (QualItem *) palloc(nitems * sizeof(*items));
 	i = 0;
 	foreach(lc, clauses)
 	{
@@ -6157,10 +6157,10 @@ prepare_sort_from_pathkeys(Plan *lefttree, List *pathkeys,
 	 * We will need at most list_length(pathkeys) sort columns; possibly less
 	 */
 	numsortkeys = list_length(pathkeys);
-	sortColIdx = (AttrNumber *) palloc(numsortkeys * sizeof(AttrNumber));
-	sortOperators = (Oid *) palloc(numsortkeys * sizeof(Oid));
-	collations = (Oid *) palloc(numsortkeys * sizeof(Oid));
-	nullsFirst = (bool *) palloc(numsortkeys * sizeof(bool));
+	sortColIdx = (AttrNumber *) palloc(numsortkeys * sizeof(*sortColIdx));
+	sortOperators = (Oid *) palloc(numsortkeys * sizeof(*sortOperators));
+	collations = (Oid *) palloc(numsortkeys * sizeof(*collations));
+	nullsFirst = (bool *) palloc(numsortkeys * sizeof(*nullsFirst));
 
 	numsortkeys = 0;
 
@@ -6398,10 +6398,10 @@ make_sort_from_sortclauses(List *sortcls, Plan *lefttree)
 
 	/* Convert list-ish representation to arrays wanted by executor */
 	numsortkeys = list_length(sortcls);
-	sortColIdx = (AttrNumber *) palloc(numsortkeys * sizeof(AttrNumber));
-	sortOperators = (Oid *) palloc(numsortkeys * sizeof(Oid));
-	collations = (Oid *) palloc(numsortkeys * sizeof(Oid));
-	nullsFirst = (bool *) palloc(numsortkeys * sizeof(bool));
+	sortColIdx = (AttrNumber *) palloc(numsortkeys * sizeof(*sortColIdx));
+	sortOperators = (Oid *) palloc(numsortkeys * sizeof(*sortOperators));
+	collations = (Oid *) palloc(numsortkeys * sizeof(*collations));
+	nullsFirst = (bool *) palloc(numsortkeys * sizeof(*nullsFirst));
 
 	numsortkeys = 0;
 	foreach(l, sortcls)
@@ -6449,10 +6449,10 @@ make_sort_from_groupcols(List *groupcls,
 
 	/* Convert list-ish representation to arrays wanted by executor */
 	numsortkeys = list_length(groupcls);
-	sortColIdx = (AttrNumber *) palloc(numsortkeys * sizeof(AttrNumber));
-	sortOperators = (Oid *) palloc(numsortkeys * sizeof(Oid));
-	collations = (Oid *) palloc(numsortkeys * sizeof(Oid));
-	nullsFirst = (bool *) palloc(numsortkeys * sizeof(bool));
+	sortColIdx = (AttrNumber *) palloc(numsortkeys * sizeof(*sortColIdx));
+	sortOperators = (Oid *) palloc(numsortkeys * sizeof(*sortOperators));
+	collations = (Oid *) palloc(numsortkeys * sizeof(*collations));
+	nullsFirst = (bool *) palloc(numsortkeys * sizeof(*nullsFirst));
 
 	numsortkeys = 0;
 	foreach(l, groupcls)

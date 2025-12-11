@@ -337,7 +337,7 @@ ExecMakeTableFunctionResult(SetExprState *setexpr,
 					int			natts = expectedDesc->natts;
 					bool	   *nullflags;
 
-					nullflags = (bool *) palloc(natts * sizeof(bool));
+					nullflags = (bool *) palloc(natts * sizeof(*nullflags));
 					memset(nullflags, true, natts * sizeof(bool));
 					tuplestore_putvalues(tupstore, expectedDesc, NULL, nullflags);
 				}
@@ -405,7 +405,7 @@ no_function_result:
 			int			natts = expectedDesc->natts;
 			bool	   *nullflags;
 
-			nullflags = (bool *) palloc(natts * sizeof(bool));
+			nullflags = (bool *) palloc(natts * sizeof(*nullflags));
 			memset(nullflags, true, natts * sizeof(bool));
 			tuplestore_putvalues(tupstore, expectedDesc, NULL, nullflags);
 		}

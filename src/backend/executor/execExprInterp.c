@@ -3447,10 +3447,10 @@ ExecEvalArrayExpr(ExprState *state, ExprEvalStep *op)
 		char	   *dat;
 		int			iitem;
 
-		subdata = (char **) palloc(nelems * sizeof(char *));
-		subbitmaps = (bits8 **) palloc(nelems * sizeof(bits8 *));
-		subbytes = (int *) palloc(nelems * sizeof(int));
-		subnitems = (int *) palloc(nelems * sizeof(int));
+		subdata = (char **) palloc(nelems * sizeof(*subdata));
+		subbitmaps = (bits8 **) palloc(nelems * sizeof(*subbitmaps));
+		subbytes = (int *) palloc(nelems * sizeof(*subbytes));
+		subnitems = (int *) palloc(nelems * sizeof(*subnitems));
 
 		/* loop through and get data area from each element */
 		for (int elemoff = 0; elemoff < nelems; elemoff++)
@@ -3501,9 +3501,9 @@ ExecEvalArrayExpr(ExprState *state, ExprEvalStep *op)
 							 errmsg("number of array dimensions (%d) exceeds the maximum allowed (%d)",
 									ndims, MAXDIM)));
 
-				elem_dims = (int *) palloc(elem_ndims * sizeof(int));
+				elem_dims = (int *) palloc(elem_ndims * sizeof(*elem_dims));
 				memcpy(elem_dims, ARR_DIMS(array), elem_ndims * sizeof(int));
-				elem_lbs = (int *) palloc(elem_ndims * sizeof(int));
+				elem_lbs = (int *) palloc(elem_ndims * sizeof(*elem_lbs));
 				memcpy(elem_lbs, ARR_LBOUND(array), elem_ndims * sizeof(int));
 
 				firstone = false;

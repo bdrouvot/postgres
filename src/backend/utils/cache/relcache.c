@@ -3109,7 +3109,7 @@ RememberToFreeTupleDescAtEOX(TupleDesc td)
 
 		oldcxt = MemoryContextSwitchTo(CacheMemoryContext);
 
-		EOXactTupleDescArray = (TupleDesc *) palloc(16 * sizeof(TupleDesc));
+		EOXactTupleDescArray = (TupleDesc *) palloc(16 * sizeof(*EOXactTupleDescArray));
 		EOXactTupleDescArrayLen = 16;
 		NextEOXactTupleDescNum = 0;
 		MemoryContextSwitchTo(oldcxt);
@@ -6194,7 +6194,7 @@ load_relcache_init_file(bool shared)
 	 * helps to guard against broken init files.
 	 */
 	max_rels = 100;
-	rels = (Relation *) palloc(max_rels * sizeof(Relation));
+	rels = (Relation *) palloc(max_rels * sizeof(*rels));
 	num_rels = 0;
 	nailed_rels = nailed_indexes = 0;
 

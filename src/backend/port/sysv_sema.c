@@ -350,7 +350,7 @@ PGReserveSemaphores(int maxSemas)
 
 	maxSemaSets = (maxSemas + SEMAS_PER_SET - 1) / SEMAS_PER_SET;
 	mySemaSets = (IpcSemaphoreId *)
-		malloc(maxSemaSets * sizeof(IpcSemaphoreId));
+		malloc(maxSemaSets * sizeof(*mySemaSets));
 	if (mySemaSets == NULL)
 		elog(PANIC, "out of memory");
 	numSemaSets = 0;

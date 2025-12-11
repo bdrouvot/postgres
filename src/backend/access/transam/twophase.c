@@ -2004,7 +2004,7 @@ PrescanPreparedTransactions(TransactionId **xids_p, int *nxids_p)
 				if (nxids == 0)
 				{
 					allocsize = 10;
-					xids = palloc(allocsize * sizeof(TransactionId));
+					xids = palloc(allocsize * sizeof(*xids));
 				}
 				else
 				{

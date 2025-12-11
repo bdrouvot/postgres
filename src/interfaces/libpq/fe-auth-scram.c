@@ -104,7 +104,7 @@ scram_init(PGconn *conn,
 
 	Assert(sasl_mechanism != NULL);
 
-	state = (fe_scram_state *) malloc(sizeof(fe_scram_state));
+	state = (fe_scram_state *) malloc(sizeof(*state));
 	if (!state)
 		return NULL;
 	memset(state, 0, sizeof(fe_scram_state));

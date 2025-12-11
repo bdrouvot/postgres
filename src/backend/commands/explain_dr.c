@@ -63,7 +63,7 @@ serialize_prepare_info(SerializeDestReceiver *receiver,
 	if (nattrs <= 0)
 		return;
 
-	receiver->finfos = (FmgrInfo *) palloc0(nattrs * sizeof(FmgrInfo));
+	receiver->finfos = (FmgrInfo *) palloc0(nattrs * sizeof(*receiver->finfos));
 
 	for (int i = 0; i < nattrs; i++)
 	{

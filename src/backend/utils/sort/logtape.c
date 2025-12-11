@@ -566,7 +566,7 @@ LogicalTapeSetCreate(bool preallocate, SharedFileSet *fileset, int worker)
 	lts->nHoleBlocks = 0L;
 	lts->forgetFreeSpace = false;
 	lts->freeBlocksLen = 32;	/* reasonable initial guess */
-	lts->freeBlocks = (int64 *) palloc(lts->freeBlocksLen * sizeof(int64));
+	lts->freeBlocks = (int64 *) palloc(lts->freeBlocksLen * sizeof(*lts->freeBlocks));
 	lts->nFreeBlocks = 0;
 	lts->enable_prealloc = preallocate;
 

@@ -1568,7 +1568,7 @@ _bt_unmark_keys(IndexScanDesc scan, int *keyDataMap)
 	 * Any requiredness markings that we might leave on later keys/attributes
 	 * are predicated on there being required = keys on all prior columns.
 	 */
-	unmarkikey = palloc0(so->numberOfKeys * sizeof(bool));
+	unmarkikey = palloc0(so->numberOfKeys * sizeof(*unmarkikey));
 	nunmark = 0;
 
 	/* Set things up for first key's attribute */
@@ -1659,8 +1659,8 @@ _bt_unmark_keys(IndexScanDesc scan, int *keyDataMap)
 	nkept = 0;
 	if (so->numArrayKeys)
 	{
-		unmarkOrderProcs = palloc(nunmark * sizeof(FmgrInfo));
-		keepOrderProcs = palloc((so->numberOfKeys - nunmark) * sizeof(FmgrInfo));
+		unmarkOrderProcs = palloc(nunmark * sizeof(*unmarkOrderProcs));
+		keepOrderProcs = palloc((so->numberOfKeys - nunmark) * sizeof(*keepOrderProcs));
 	}
 
 	/*
@@ -1893,10 +1893,10 @@ _bt_preprocess_array_keys(IndexScanDesc scan, int *new_numberOfKeys)
 	arrayKeyData = (ScanKey) palloc(numArrayKeyData * sizeof(ScanKeyData));
 
 	/* Allocate space for per-array data in the workspace context */
-	so->arrayKeys = (BTArrayKeyInfo *) palloc(numArrayKeys * sizeof(BTArrayKeyInfo));
+	so->arrayKeys = (BTArrayKeyInfo *) palloc(numArrayKeys * sizeof(*so->arrayKeys));
 
 	/* Allocate space for ORDER procs used to help _bt_checkkeys */
-	so->orderProcs = (FmgrInfo *) palloc(numArrayKeyData * sizeof(FmgrInfo));
+	so->orderProcs = (FmgrInfo *) palloc(numArrayKeyData * sizeof(*so->orderProcs));
 
 	numArrayKeys = 0;
 	numArrayKeyData = 0;

@@ -161,7 +161,7 @@ PQmakeEmptyPGresult(PGconn *conn, ExecStatusType status)
 {
 	PGresult   *result;
 
-	result = (PGresult *) malloc(sizeof(PGresult));
+	result = (PGresult *) malloc(sizeof(*result));
 	if (!result)
 		return NULL;
 
@@ -1043,7 +1043,7 @@ pqAddTuple(PGresult *res, PGresAttValue *tup, const char **errmsgp)
 
 		if (res->tuples == NULL)
 			newTuples = (PGresAttValue **)
-				malloc(newSize * sizeof(PGresAttValue *));
+				malloc(newSize * sizeof(*newTuples));
 		else
 			newTuples = (PGresAttValue **)
 				realloc(res->tuples, newSize * sizeof(PGresAttValue *));
@@ -1326,7 +1326,7 @@ pqAllocCmdQueueEntry(PGconn *conn)
 
 	if (conn->cmd_queue_recycle == NULL)
 	{
-		entry = (PGcmdQueueEntry *) malloc(sizeof(PGcmdQueueEntry));
+		entry = (PGcmdQueueEntry *) malloc(sizeof(*entry));
 		if (entry == NULL)
 		{
 			libpq_append_conn_error(conn, "out of memory");

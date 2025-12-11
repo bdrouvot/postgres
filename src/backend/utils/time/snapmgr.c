@@ -1489,7 +1489,7 @@ ImportSnapshot(const char *idstr)
 				(errcode(ERRCODE_INVALID_TEXT_REPRESENTATION),
 				 errmsg("invalid snapshot data in file \"%s\"", path)));
 
-	snapshot.xip = (TransactionId *) palloc(xcnt * sizeof(TransactionId));
+	snapshot.xip = (TransactionId *) palloc(xcnt * sizeof(*snapshot.xip));
 	for (i = 0; i < xcnt; i++)
 		snapshot.xip[i] = parseXidFromText("xip:", &filebuf, path);
 
@@ -1505,7 +1505,7 @@ ImportSnapshot(const char *idstr)
 					(errcode(ERRCODE_INVALID_TEXT_REPRESENTATION),
 					 errmsg("invalid snapshot data in file \"%s\"", path)));
 
-		snapshot.subxip = (TransactionId *) palloc(xcnt * sizeof(TransactionId));
+		snapshot.subxip = (TransactionId *) palloc(xcnt * sizeof(*snapshot.subxip));
 		for (i = 0; i < xcnt; i++)
 			snapshot.subxip[i] = parseXidFromText("sxp:", &filebuf, path);
 	}

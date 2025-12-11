@@ -1227,7 +1227,7 @@ check_temp_tablespaces(char **newval, void **extra, GucSource source)
 		ListCell   *l;
 
 		/* temporary workspace until we are done verifying the list */
-		tblSpcs = (Oid *) palloc(list_length(namelist) * sizeof(Oid));
+		tblSpcs = (Oid *) palloc(list_length(namelist) * sizeof(*tblSpcs));
 		numSpcs = 0;
 		foreach(l, namelist)
 		{

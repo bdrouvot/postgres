@@ -561,7 +561,7 @@ sortDumpableObjects(DumpableObject **objs, int numObjs,
 	preDataBoundId = preBoundaryId;
 	postDataBoundId = postBoundaryId;
 
-	ordering = (DumpableObject **) pg_malloc(numObjs * sizeof(DumpableObject *));
+	ordering = (DumpableObject **) pg_malloc(numObjs * sizeof(*ordering));
 	while (!TopoSort(objs, numObjs, ordering, &nOrdering))
 		findDependencyLoops(ordering, nOrdering, numObjs);
 
@@ -640,8 +640,8 @@ TopoSort(DumpableObject **objs,
 	 * We also make a map showing the input-order index of the item with
 	 * dumpId j.
 	 */
-	beforeConstraints = (int *) pg_malloc0((maxDumpId + 1) * sizeof(int));
-	idMap = (int *) pg_malloc((maxDumpId + 1) * sizeof(int));
+	beforeConstraints = (int *) pg_malloc0((maxDumpId + 1) * sizeof(*beforeConstraints));
+	idMap = (int *) pg_malloc((maxDumpId + 1) * sizeof(*idMap));
 	for (i = 0; i < numObjs; i++)
 	{
 		obj = objs[i];
@@ -776,9 +776,9 @@ findDependencyLoops(DumpableObject **objs, int nObjs, int totObjs)
 	bool		fixedloop;
 	int			i;
 
-	processed = (bool *) pg_malloc0((getMaxDumpId() + 1) * sizeof(bool));
-	searchFailed = (DumpId *) pg_malloc0((getMaxDumpId() + 1) * sizeof(DumpId));
-	workspace = (DumpableObject **) pg_malloc(totObjs * sizeof(DumpableObject *));
+	processed = (bool *) pg_malloc0((getMaxDumpId() + 1) * sizeof(*processed));
+	searchFailed = (DumpId *) pg_malloc0((getMaxDumpId() + 1) * sizeof(*searchFailed));
+	workspace = (DumpableObject **) pg_malloc(totObjs * sizeof(*workspace));
 	fixedloop = false;
 
 	for (i = 0; i < nObjs; i++)

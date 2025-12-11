@@ -699,7 +699,7 @@ llvm_compile_expr(ExprState *state)
 
 						/* create blocks for checking args, one for each */
 						b_checkargnulls = (LLVMBasicBlockRef *)
-							palloc(sizeof(LLVMBasicBlockRef) * op->d.func.nargs);
+							palloc(sizeof(*b_checkargnulls) * op->d.func.nargs);
 						for (int argno = 0; argno < op->d.func.nargs; argno++)
 							b_checkargnulls[argno] =
 								l_bb_before_v(b_nonull, "b.%d.isnull.%d", opno,

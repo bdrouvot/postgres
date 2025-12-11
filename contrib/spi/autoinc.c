@@ -67,9 +67,9 @@ autoinc(PG_FUNCTION_ARGS)
 	args = trigger->tgargs;
 	tupdesc = rel->rd_att;
 
-	chattrs = (int *) palloc(nargs / 2 * sizeof(int));
-	newvals = (Datum *) palloc(nargs / 2 * sizeof(Datum));
-	newnulls = (bool *) palloc(nargs / 2 * sizeof(bool));
+	chattrs = (int *) palloc(nargs / 2 * sizeof(*chattrs));
+	newvals = (Datum *) palloc(nargs / 2 * sizeof(*newvals));
+	newnulls = (bool *) palloc(nargs / 2 * sizeof(*newnulls));
 
 	for (i = 0; i < nargs;)
 	{

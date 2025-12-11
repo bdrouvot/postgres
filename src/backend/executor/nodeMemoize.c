@@ -1001,12 +1001,12 @@ ExecInitMemoize(Memoize *node, EState *estate, int eflags)
 	mstate->probeslot = MakeSingleTupleTableSlot(mstate->hashkeydesc,
 												 &TTSOpsVirtual);
 
-	mstate->param_exprs = (ExprState **) palloc(nkeys * sizeof(ExprState *));
+	mstate->param_exprs = (ExprState **) palloc(nkeys * sizeof(*mstate->param_exprs));
 	mstate->collations = node->collations;	/* Just point directly to the plan
 											 * data */
-	mstate->hashfunctions = (FmgrInfo *) palloc(nkeys * sizeof(FmgrInfo));
+	mstate->hashfunctions = (FmgrInfo *) palloc(nkeys * sizeof(*mstate->hashfunctions));
 
-	eqfuncoids = palloc(nkeys * sizeof(Oid));
+	eqfuncoids = palloc(nkeys * sizeof(*eqfuncoids));
 
 	for (i = 0; i < nkeys; i++)
 	{

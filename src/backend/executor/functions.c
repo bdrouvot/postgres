@@ -274,7 +274,7 @@ prepare_sql_fn_parse_info(HeapTuple procedureTuple,
 		Oid		   *argOidVect;
 		int			argnum;
 
-		argOidVect = (Oid *) palloc(nargs * sizeof(Oid));
+		argOidVect = (Oid *) palloc(nargs * sizeof(*argOidVect));
 		memcpy(argOidVect,
 			   procedureStruct->proargtypes.values,
 			   nargs * sizeof(Oid));

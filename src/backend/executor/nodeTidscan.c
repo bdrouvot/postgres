@@ -158,7 +158,7 @@ TidListEval(TidScanState *tidstate)
 	 */
 	numAllocTids = list_length(tidstate->tss_tidexprs);
 	tidList = (ItemPointerData *)
-		palloc(numAllocTids * sizeof(ItemPointerData));
+		palloc(numAllocTids * sizeof(*tidList));
 	numTids = 0;
 
 	foreach(l, tidstate->tss_tidexprs)

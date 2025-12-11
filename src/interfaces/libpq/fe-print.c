@@ -632,7 +632,7 @@ PQdisplayTuples(const PGresult *res,
 	/* will be somewhat time consuming for very large results */
 	if (fillAlign)
 	{
-		fLength = (int *) malloc(nFields * sizeof(int));
+		fLength = (int *) malloc(nFields * sizeof(*fLength));
 		if (!fLength)
 		{
 			fprintf(stderr, libpq_gettext("out of memory\n"));

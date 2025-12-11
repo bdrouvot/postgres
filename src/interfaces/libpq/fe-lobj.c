@@ -864,7 +864,7 @@ lo_initialize(PGconn *conn)
 	 * Allocate the structure to hold the function OIDs.  We don't store it
 	 * into the PGconn until it's successfully filled.
 	 */
-	lobjfuncs = (PGlobjfuncs *) malloc(sizeof(PGlobjfuncs));
+	lobjfuncs = (PGlobjfuncs *) malloc(sizeof(*lobjfuncs));
 	if (lobjfuncs == NULL)
 	{
 		libpq_append_conn_error(conn, "out of memory");

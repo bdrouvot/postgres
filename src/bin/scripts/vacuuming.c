@@ -459,7 +459,7 @@ vacuum_all_databases(ConnParams *cparams,
 		SimpleStringList **found_objs = NULL;
 
 		if (vacopts->missing_stats_only)
-			found_objs = palloc0(numdbs * sizeof(SimpleStringList *));
+			found_objs = palloc0(numdbs * sizeof(*found_objs));
 
 		/*
 		 * When analyzing all databases in stages, we analyze them all in the

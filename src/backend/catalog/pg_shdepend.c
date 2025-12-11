@@ -717,7 +717,7 @@ checkSharedDependencies(Oid classId, Oid objectId,
 
 	allocedobjects = 128;		/* arbitrary initial array size */
 	objects = (ShDependObjectInfo *)
-		palloc(allocedobjects * sizeof(ShDependObjectInfo));
+		palloc(allocedobjects * sizeof(*objects));
 	numobjects = 0;
 	initStringInfo(&descs);
 	initStringInfo(&alldescs);

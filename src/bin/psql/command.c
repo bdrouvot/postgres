@@ -5665,7 +5665,7 @@ savePsetInfo(const printQueryOpt *popt)
 {
 	printQueryOpt *save;
 
-	save = (printQueryOpt *) pg_malloc(sizeof(printQueryOpt));
+	save = (printQueryOpt *) pg_malloc(sizeof(*save));
 
 	/* Flat-copy all the scalar fields, then duplicate sub-structures. */
 	memcpy(save, popt, sizeof(printQueryOpt));

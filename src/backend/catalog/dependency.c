@@ -2691,7 +2691,7 @@ add_exact_object_address_extra(const ObjectAddress *object,
 	/* allocate extra space if first time */
 	if (!addrs->extras)
 		addrs->extras = (ObjectAddressExtra *)
-			palloc(addrs->maxrefs * sizeof(ObjectAddressExtra));
+			palloc(addrs->maxrefs * sizeof(*addrs->extras));
 
 	/* enlarge array if needed */
 	if (addrs->numrefs >= addrs->maxrefs)

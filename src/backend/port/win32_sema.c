@@ -46,7 +46,7 @@ PGSemaphoreShmemSize(int maxSemas)
 void
 PGReserveSemaphores(int maxSemas)
 {
-	mySemSet = (HANDLE *) malloc(maxSemas * sizeof(HANDLE));
+	mySemSet = (HANDLE *) malloc(maxSemas * sizeof(*mySemSet));
 	if (mySemSet == NULL)
 		elog(PANIC, "out of memory");
 	numSems = 0;

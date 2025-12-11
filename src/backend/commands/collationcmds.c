@@ -862,7 +862,7 @@ pg_import_system_collations(PG_FUNCTION_ARGS)
 
 		/* expansible array of aliases */
 		maxaliases = 100;
-		aliases = (CollAliasData *) palloc(maxaliases * sizeof(CollAliasData));
+		aliases = (CollAliasData *) palloc(maxaliases * sizeof(*aliases));
 		naliases = 0;
 
 		locale_a_handle = OpenPipeStream("locale -a", "r");

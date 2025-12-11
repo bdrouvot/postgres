@@ -121,7 +121,7 @@ check_primary_key(PG_FUNCTION_ARGS)
 	 * We use SPI plan preparation feature, so allocate space to place key
 	 * values.
 	 */
-	kvals = (Datum *) palloc(nkeys * sizeof(Datum));
+	kvals = (Datum *) palloc(nkeys * sizeof(*kvals));
 
 	/*
 	 * Construct ident string as TriggerName $ TriggeredRelationId and try to
@@ -132,7 +132,7 @@ check_primary_key(PG_FUNCTION_ARGS)
 
 	/* if there is no plan then allocate argtypes for preparation */
 	if (plan->nplans <= 0)
-		argtypes = (Oid *) palloc(nkeys * sizeof(Oid));
+		argtypes = (Oid *) palloc(nkeys * sizeof(*argtypes));
 
 	/* For each column in key ... */
 	for (i = 0; i < nkeys; i++)
@@ -343,7 +343,7 @@ check_foreign_key(PG_FUNCTION_ARGS)
 	 * We use SPI plan preparation feature, so allocate space to place key
 	 * values.
 	 */
-	kvals = (Datum *) palloc(nkeys * sizeof(Datum));
+	kvals = (Datum *) palloc(nkeys * sizeof(*kvals));
 
 	/*
 	 * Construct ident string as TriggerName $ TriggeredRelationId $
@@ -354,7 +354,7 @@ check_foreign_key(PG_FUNCTION_ARGS)
 
 	/* if there is no plan(s) then allocate argtypes for preparation */
 	if (plan->nplans <= 0)
-		argtypes = (Oid *) palloc(nkeys * sizeof(Oid));
+		argtypes = (Oid *) palloc(nkeys * sizeof(*argtypes));
 
 	/*
 	 * else - check that we have exactly nrefs plan(s) ready

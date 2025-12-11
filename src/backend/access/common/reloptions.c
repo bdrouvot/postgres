@@ -730,7 +730,7 @@ add_reloption(relopt_gen *newoption)
 		if (max_custom_options == 0)
 		{
 			max_custom_options = 8;
-			custom_options = palloc(max_custom_options * sizeof(relopt_gen *));
+			custom_options = palloc(max_custom_options * sizeof(*custom_options));
 		}
 		else
 		{
@@ -1544,7 +1544,7 @@ parseRelOptions(Datum options, bool validate, relopt_kind kind,
 
 	if (numoptions > 0)
 	{
-		reloptions = palloc(numoptions * sizeof(relopt_value));
+		reloptions = palloc(numoptions * sizeof(*reloptions));
 
 		for (i = 0, j = 0; relOpts[i]; i++)
 		{

@@ -210,7 +210,7 @@ PGReserveSemaphores(int maxSemas)
 						DataDir)));
 
 #ifdef USE_NAMED_POSIX_SEMAPHORES
-	mySemPointers = (sem_t **) malloc(maxSemas * sizeof(sem_t *));
+	mySemPointers = (sem_t **) malloc(maxSemas * sizeof(*mySemPointers));
 	if (mySemPointers == NULL)
 		elog(PANIC, "out of memory");
 #else

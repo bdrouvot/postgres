@@ -1108,8 +1108,8 @@ array_out(PG_FUNCTION_ARGS)
 	 * any overhead such as escaping backslashes), and detect whether each
 	 * item needs double quotes.
 	 */
-	values = (char **) palloc(nitems * sizeof(char *));
-	needquotes = (bool *) palloc(nitems * sizeof(bool));
+	values = (char **) palloc(nitems * sizeof(*values));
+	needquotes = (bool *) palloc(nitems * sizeof(*needquotes));
 	overall_length = 0;
 
 	array_iter_setup(&iter, v);
@@ -1394,8 +1394,8 @@ array_recv(PG_FUNCTION_ARGS)
 	typalign = my_extra->typalign;
 	typioparam = my_extra->typioparam;
 
-	dataPtr = (Datum *) palloc(nitems * sizeof(Datum));
-	nullsPtr = (bool *) palloc(nitems * sizeof(bool));
+	dataPtr = (Datum *) palloc(nitems * sizeof(*dataPtr));
+	nullsPtr = (bool *) palloc(nitems * sizeof(*nullsPtr));
 	ReadArrayBinary(buf, nitems,
 					&my_extra->proc, typioparam, typmod,
 					typlen, typbyval, typalign,
@@ -3272,8 +3272,8 @@ array_map(Datum arrayd,
 	typalign = ret_extra->typalign;
 
 	/* Allocate temporary arrays for new values */
-	values = (Datum *) palloc(nitems * sizeof(Datum));
-	nulls = (bool *) palloc(nitems * sizeof(bool));
+	values = (Datum *) palloc(nitems * sizeof(*values));
+	nulls = (bool *) palloc(nitems * sizeof(*nulls));
 
 	/* Loop over source data */
 	array_iter_setup(&iter, v);
@@ -4652,9 +4652,9 @@ array_create_iterator(ArrayType *arr, int slice_ndim, ArrayMetaState *mstate)
 		 * Create workspace for building sub-arrays.
 		 */
 		iterator->slice_values = (Datum *)
-			palloc(iterator->slice_len * sizeof(Datum));
+			palloc(iterator->slice_len * sizeof(*iterator->slice_values));
 		iterator->slice_nulls = (bool *)
-			palloc(iterator->slice_len * sizeof(bool));
+			palloc(iterator->slice_len * sizeof(*iterator->slice_nulls));
 	}
 
 	/*
@@ -6464,8 +6464,8 @@ array_replace_internal(ArrayType *array,
 							 collation, NULL, NULL);
 
 	/* Allocate temporary arrays for new values */
-	values = (Datum *) palloc(nitems * sizeof(Datum));
-	nulls = (bool *) palloc(nitems * sizeof(bool));
+	values = (Datum *) palloc(nitems * sizeof(*values));
+	nulls = (bool *) palloc(nitems * sizeof(*nulls));
 
 	/* Loop over source data */
 	arraydataptr = ARR_DATA_PTR(array);

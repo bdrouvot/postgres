@@ -243,8 +243,8 @@ PLy_cursor_plan(PyObject *ob, PyObject *args)
 
 		if (nargs > 0)
 		{
-			values = (Datum *) palloc(nargs * sizeof(Datum));
-			nulls = (char *) palloc(nargs * sizeof(char));
+			values = (Datum *) palloc(nargs * sizeof(*values));
+			nulls = (char *) palloc(nargs * sizeof(*nulls));
 		}
 		else
 		{

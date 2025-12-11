@@ -1069,7 +1069,7 @@ BlockRefTableEntryMarkBlockModified(BlockRefTableEntry *entry,
 		unsigned	j;
 
 		/* Allocate a new chunk. */
-		newchunk = palloc0(MAX_ENTRIES_PER_CHUNK * sizeof(uint16));
+		newchunk = palloc0(MAX_ENTRIES_PER_CHUNK * sizeof(*newchunk));
 
 		/* Set the bit for each existing entry. */
 		for (j = 0; j < entry->chunk_usage[chunkno]; ++j)

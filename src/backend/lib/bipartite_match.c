@@ -48,10 +48,10 @@ BipartiteMatch(int u_size, int v_size, short **adjacency)
 	state->v_size = v_size;
 	state->adjacency = adjacency;
 	state->matching = 0;
-	state->pair_uv = (short *) palloc0((u_size + 1) * sizeof(short));
-	state->pair_vu = (short *) palloc0((v_size + 1) * sizeof(short));
-	state->distance = (short *) palloc((u_size + 1) * sizeof(short));
-	state->queue = (short *) palloc((u_size + 2) * sizeof(short));
+	state->pair_uv = (short *) palloc0((u_size + 1) * sizeof(*state->pair_uv));
+	state->pair_vu = (short *) palloc0((v_size + 1) * sizeof(*state->pair_vu));
+	state->distance = (short *) palloc((u_size + 1) * sizeof(*state->distance));
+	state->queue = (short *) palloc((u_size + 2) * sizeof(*state->queue));
 
 	while (hk_breadth_search(state))
 	{

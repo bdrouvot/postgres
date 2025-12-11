@@ -1029,7 +1029,7 @@ rebuild_database_list(Oid newdb)
 		int			i;
 
 		/* put all the hash elements into an array */
-		dbary = palloc(nelems * sizeof(avl_dbase));
+		dbary = palloc(nelems * sizeof(*dbary));
 		/* keep Valgrind quiet */
 #ifdef USE_VALGRIND
 		avl_dbase_array = dbary;

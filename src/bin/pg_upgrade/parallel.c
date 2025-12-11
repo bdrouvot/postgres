@@ -85,13 +85,13 @@ parallel_exec_prog(const char *log_file, const char *opt_log_file,
 		/* parallel */
 #ifdef WIN32
 		if (thread_handles == NULL)
-			thread_handles = pg_malloc(user_opts.jobs * sizeof(HANDLE));
+			thread_handles = pg_malloc(user_opts.jobs * sizeof(*thread_handles));
 
 		if (exec_thread_args == NULL)
 		{
 			int			i;
 
-			exec_thread_args = pg_malloc(user_opts.jobs * sizeof(exec_thread_arg *));
+			exec_thread_args = pg_malloc(user_opts.jobs * sizeof(*exec_thread_args));
 
 			/*
 			 * For safety and performance, we keep the args allocated during
@@ -99,7 +99,7 @@ parallel_exec_prog(const char *log_file, const char *opt_log_file,
 			 * thread different from the one that allocated it.
 			 */
 			for (i = 0; i < user_opts.jobs; i++)
-				exec_thread_args[i] = pg_malloc0(sizeof(exec_thread_arg));
+				exec_thread_args[i] = pg_malloc0(sizeof(*exec_thread_args[i]));
 		}
 
 		cur_thread_args = (void **) exec_thread_args;
@@ -188,13 +188,13 @@ parallel_transfer_all_new_dbs(DbInfoArr *old_db_arr, DbInfoArr *new_db_arr,
 		/* parallel */
 #ifdef WIN32
 		if (thread_handles == NULL)
-			thread_handles = pg_malloc(user_opts.jobs * sizeof(HANDLE));
+			thread_handles = pg_malloc(user_opts.jobs * sizeof(*thread_handles));
 
 		if (transfer_thread_args == NULL)
 		{
 			int			i;
 
-			transfer_thread_args = pg_malloc(user_opts.jobs * sizeof(transfer_thread_arg *));
+			transfer_thread_args = pg_malloc(user_opts.jobs * sizeof(*transfer_thread_args));
 
 			/*
 			 * For safety and performance, we keep the args allocated during
@@ -202,7 +202,7 @@ parallel_transfer_all_new_dbs(DbInfoArr *old_db_arr, DbInfoArr *new_db_arr,
 			 * thread different from the one that allocated it.
 			 */
 			for (i = 0; i < user_opts.jobs; i++)
-				transfer_thread_args[i] = pg_malloc0(sizeof(transfer_thread_arg));
+				transfer_thread_args[i] = pg_malloc0(sizeof(*transfer_thread_args[i]));
 		}
 
 		cur_thread_args = (void **) transfer_thread_args;

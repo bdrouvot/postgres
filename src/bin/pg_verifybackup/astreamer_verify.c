@@ -79,7 +79,7 @@ astreamer_verify_content_new(astreamer *next, verifier_context *context,
 	streamer->tblspc_oid = tblspc_oid;
 
 	if (!context->skip_checksums)
-		streamer->checksum_ctx = pg_malloc(sizeof(pg_checksum_context));
+		streamer->checksum_ctx = pg_malloc(sizeof(*streamer->checksum_ctx));
 
 	return &streamer->base;
 }

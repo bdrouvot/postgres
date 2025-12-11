@@ -1553,7 +1553,7 @@ aclmembers(const Acl *acl, Oid **roleids)
 	check_acl(acl);
 
 	/* Allocate the worst-case space requirement */
-	list = palloc(ACL_NUM(acl) * 2 * sizeof(Oid));
+	list = palloc(ACL_NUM(acl) * 2 * sizeof(*list));
 	acldat = ACL_DAT(acl);
 
 	/*

@@ -932,7 +932,7 @@ CreateTriggerFiringOn(CreateTrigStmt *stmt, const char *queryString,
 		ListCell   *cell;
 		int			i = 0;
 
-		columns = (int16 *) palloc(ncolumns * sizeof(int16));
+		columns = (int16 *) palloc(ncolumns * sizeof(*columns));
 		foreach(cell, stmt->columns)
 		{
 			char	   *name = strVal(lfirst(cell));
@@ -1876,7 +1876,7 @@ RelationBuildTriggers(Relation relation)
 	 * necessary)
 	 */
 	maxtrigs = 16;
-	triggers = (Trigger *) palloc(maxtrigs * sizeof(Trigger));
+	triggers = (Trigger *) palloc(maxtrigs * sizeof(*triggers));
 	numtrigs = 0;
 
 	/*
@@ -1926,7 +1926,7 @@ RelationBuildTriggers(Relation relation)
 		build->tgnattr = pg_trigger->tgattr.dim1;
 		if (build->tgnattr > 0)
 		{
-			build->tgattr = (int16 *) palloc(build->tgnattr * sizeof(int16));
+			build->tgattr = (int16 *) palloc(build->tgnattr * sizeof(*build->tgattr));
 			memcpy(build->tgattr, &(pg_trigger->tgattr.values),
 				   build->tgnattr * sizeof(int16));
 		}
@@ -1944,7 +1944,7 @@ RelationBuildTriggers(Relation relation)
 				elog(ERROR, "tgargs is null in trigger for relation \"%s\"",
 					 RelationGetRelationName(relation));
 			p = (char *) VARDATA_ANY(val);
-			build->tgargs = (char **) palloc(build->tgnargs * sizeof(char *));
+			build->tgargs = (char **) palloc(build->tgnargs * sizeof(*build->tgargs));
 			for (i = 0; i < build->tgnargs; i++)
 			{
 				build->tgargs[i] = pstrdup(p);
@@ -2099,7 +2099,7 @@ CopyTriggerDesc(TriggerDesc *trigdesc)
 	newdesc = palloc_object(TriggerDesc);
 	memcpy(newdesc, trigdesc, sizeof(TriggerDesc));
 
-	trigger = (Trigger *) palloc(trigdesc->numtriggers * sizeof(Trigger));
+	trigger = (Trigger *) palloc(trigdesc->numtriggers * sizeof(*trigger));
 	memcpy(trigger, trigdesc->triggers,
 		   trigdesc->numtriggers * sizeof(Trigger));
 	newdesc->triggers = trigger;
@@ -2111,7 +2111,7 @@ CopyTriggerDesc(TriggerDesc *trigdesc)
 		{
 			int16	   *newattr;
 
-			newattr = (int16 *) palloc(trigger->tgnattr * sizeof(int16));
+			newattr = (int16 *) palloc(trigger->tgnattr * sizeof(*newattr));
 			memcpy(newattr, trigger->tgattr,
 				   trigger->tgnattr * sizeof(int16));
 			trigger->tgattr = newattr;
@@ -2121,7 +2121,7 @@ CopyTriggerDesc(TriggerDesc *trigdesc)
 			char	  **newargs;
 			int16		j;
 
-			newargs = (char **) palloc(trigger->tgnargs * sizeof(char *));
+			newargs = (char **) palloc(trigger->tgnargs * sizeof(*newargs));
 			for (j = 0; j < trigger->tgnargs; j++)
 				newargs[j] = pstrdup(trigger->tgargs[j]);
 			trigger->tgargs = newargs;

@@ -76,7 +76,7 @@ datapagemap_iterate(datapagemap_t *map)
 {
 	datapagemap_iterator_t *iter;
 
-	iter = pg_malloc(sizeof(datapagemap_iterator_t));
+	iter = pg_malloc(sizeof(*iter));
 	iter->map = map;
 	iter->nextblkno = 0;
 

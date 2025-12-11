@@ -661,7 +661,7 @@ gistgettuple(IndexScanDesc scan, ScanDirection dir)
 
 						so->killedItems =
 							(OffsetNumber *) palloc(MaxIndexTuplesPerPage
-													* sizeof(OffsetNumber));
+													* sizeof(*so->killedItems));
 
 						MemoryContextSwitchTo(oldCxt);
 					}
@@ -698,7 +698,7 @@ gistgettuple(IndexScanDesc scan, ScanDirection dir)
 
 					so->killedItems =
 						(OffsetNumber *) palloc(MaxIndexTuplesPerPage
-												* sizeof(OffsetNumber));
+												* sizeof(*so->killedItems));
 
 					MemoryContextSwitchTo(oldCxt);
 				}

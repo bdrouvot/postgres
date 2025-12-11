@@ -3305,7 +3305,7 @@ printTableAddCell(printTableContent *const content, char *cell,
 	{
 		if (content->cellmustfree == NULL)
 			content->cellmustfree =
-				pg_malloc0((total_cells + 1) * sizeof(bool));
+				pg_malloc0((total_cells + 1) * sizeof(*content->cellmustfree));
 
 		content->cellmustfree[content->cellsadded] = true;
 	}
@@ -3477,7 +3477,7 @@ count_table_lines(const printTableContent *cont,
 	 * Scan all column headers and determine their heights.  Cache the values
 	 * since vertical mode repeats the headers for every record.
 	 */
-	header_height = (int *) pg_malloc(cont->ncolumns * sizeof(int));
+	header_height = (int *) pg_malloc(cont->ncolumns * sizeof(*header_height));
 	for (i = 0; i < cont->ncolumns; i++)
 	{
 		pg_wcssize((const unsigned char *) cont->headers[i],

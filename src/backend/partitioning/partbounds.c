@@ -386,7 +386,7 @@ create_hash_bounds(PartitionBoundSpec **boundspecs, int nparts,
 	boundinfo->kind = NULL;
 	boundinfo->interleaved_parts = NULL;
 	boundinfo->nindexes = greatest_modulus;
-	boundinfo->indexes = (int *) palloc(greatest_modulus * sizeof(int));
+	boundinfo->indexes = (int *) palloc(greatest_modulus * sizeof(*boundinfo->indexes));
 	for (i = 0; i < greatest_modulus; i++)
 		boundinfo->indexes[i] = -1;
 
@@ -395,7 +395,7 @@ create_hash_bounds(PartitionBoundSpec **boundspecs, int nparts,
 	 * arrays, here we just allocate a single array and below we'll just
 	 * assign a portion of this array per partition.
 	 */
-	boundDatums = (Datum *) palloc(nparts * 2 * sizeof(Datum));
+	boundDatums = (Datum *) palloc(nparts * 2 * sizeof(*boundDatums));
 
 	/*
 	 * For hash partitioning, there are as many datums (modulus and remainder
@@ -478,7 +478,7 @@ create_list_bounds(PartitionBoundSpec **boundspecs, int nparts,
 
 	ndatums = get_non_null_list_datum_count(boundspecs, nparts);
 	all_values = (PartitionListValue *)
-		palloc(ndatums * sizeof(PartitionListValue));
+		palloc(ndatums * sizeof(*all_values));
 
 	/* Create a unified list of non-null values across all partitions. */
 	for (j = 0, i = 0; i < nparts; i++)
@@ -534,14 +534,14 @@ create_list_bounds(PartitionBoundSpec **boundspecs, int nparts,
 	boundinfo->kind = NULL;
 	boundinfo->interleaved_parts = NULL;
 	boundinfo->nindexes = ndatums;
-	boundinfo->indexes = (int *) palloc(ndatums * sizeof(int));
+	boundinfo->indexes = (int *) palloc(ndatums * sizeof(*boundinfo->indexes));
 
 	/*
 	 * In the loop below, to save from allocating a series of small datum
 	 * arrays, here we just allocate a single array and below we'll just
 	 * assign a portion of this array per datum.
 	 */
-	boundDatums = (Datum *) palloc(ndatums * sizeof(Datum));
+	boundDatums = (Datum *) palloc(ndatums * sizeof(*boundDatums));
 
 	/*
 	 * Copy values.  Canonical indexes are values ranging from 0 to (nparts -
@@ -735,7 +735,7 @@ create_range_bounds(PartitionBoundSpec **boundspecs, int nparts,
 
 	/* Save distinct bounds from all_bounds into rbounds. */
 	rbounds = (PartitionRangeBound **)
-		palloc(ndatums * sizeof(PartitionRangeBound *));
+		palloc(ndatums * sizeof(*rbounds));
 	k = 0;
 	prev = NULL;
 	for (i = 0; i < ndatums; i++)
@@ -816,7 +816,7 @@ create_range_bounds(PartitionBoundSpec **boundspecs, int nparts,
 	 * arrays in each loop.
 	 */
 	partnatts = key->partnatts;
-	boundDatums = (Datum *) palloc(ndatums * partnatts * sizeof(Datum));
+	boundDatums = (Datum *) palloc(ndatums * partnatts * sizeof(*boundDatums));
 	boundKinds = palloc_array(PartitionRangeDatumKind, ndatums * partnatts);
 
 	for (i = 0; i < ndatums; i++)
@@ -1020,7 +1020,7 @@ partition_bounds_copy(PartitionBoundInfo src,
 		Assert(key->strategy == PARTITION_STRATEGY_RANGE);
 
 		dest->kind = (PartitionRangeDatumKind **) palloc(ndatums *
-														 sizeof(PartitionRangeDatumKind *));
+														 sizeof(*dest->kind));
 
 		/*
 		 * In the loop below, to save from allocating a series of small arrays
@@ -1028,7 +1028,7 @@ partition_bounds_copy(PartitionBoundInfo src,
 		 * here and use a smaller portion of it for each datum.
 		 */
 		boundKinds = (PartitionRangeDatumKind *) palloc(ndatums * partnatts *
-														sizeof(PartitionRangeDatumKind));
+														sizeof(*boundKinds));
 
 		for (i = 0; i < ndatums; i++)
 		{
@@ -1051,7 +1051,7 @@ partition_bounds_copy(PartitionBoundInfo src,
 	{
 		bool		hash_part = (key->strategy == PARTITION_STRATEGY_HASH);
 		int			natts = hash_part ? 2 : partnatts;
-		Datum	   *boundDatums = palloc(ndatums * natts * sizeof(Datum));
+		Datum	   *boundDatums = palloc(ndatums * natts * sizeof(*boundDatums));
 
 		for (i = 0; i < ndatums; i++)
 		{

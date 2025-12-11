@@ -4192,7 +4192,7 @@ GetRunningTransactionLocks(int *nlocks)
 	 * Allocating enough space for all locks in the lock table is overkill,
 	 * but it's more convenient and faster than having to enlarge the array.
 	 */
-	accessExclusiveLocks = palloc(els * sizeof(xl_standby_lock));
+	accessExclusiveLocks = palloc(els * sizeof(*accessExclusiveLocks));
 
 	/* Now scan the tables to copy the data */
 	hash_seq_init(&seqstat, LockMethodProcLockHash);

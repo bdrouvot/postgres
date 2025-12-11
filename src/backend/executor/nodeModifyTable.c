@@ -462,7 +462,7 @@ ExecInitGenerated(ResultRelInfo *resultRelInfo,
 	 */
 	oldContext = MemoryContextSwitchTo(estate->es_query_cxt);
 
-	ri_GeneratedExprs = (ExprState **) palloc0(natts * sizeof(ExprState *));
+	ri_GeneratedExprs = (ExprState **) palloc0(natts * sizeof(*ri_GeneratedExprs));
 	ri_NumGeneratedNeeded = 0;
 
 	for (int i = 0; i < natts; i++)

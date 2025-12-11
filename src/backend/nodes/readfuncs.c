@@ -670,7 +670,7 @@ fnname(int numCols) \
 		return NULL;			/* it was "<>", so return NULL pointer */ \
 	if (length != 1 || token[0] != '(') \
 		elog(ERROR, "unrecognized token: \"%.*s\"", length, token); \
-	vals = (datatype *) palloc(numCols * sizeof(datatype)); \
+	vals = (datatype *) palloc(numCols * sizeof(*vals)); \
 	for (int i = 0; i < numCols; i++) \
 	{ \
 		token = pg_strtok(&length); \

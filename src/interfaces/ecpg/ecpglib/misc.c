@@ -114,7 +114,7 @@ ECPGget_sqlca(void)
 	sqlca = pthread_getspecific(sqlca_key);
 	if (sqlca == NULL)
 	{
-		sqlca = malloc(sizeof(struct sqlca_t));
+		sqlca = malloc(sizeof(*sqlca));
 		if (sqlca == NULL)
 			return NULL;
 		ecpg_init_sqlca(sqlca);

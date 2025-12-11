@@ -1383,7 +1383,7 @@ generate_base_implied_equalities_no_const(PlannerInfo *root,
 	 * to the way we build merged ECs.  (Use a list-of-lists for each rel.)
 	 */
 	prev_ems = (EquivalenceMember **)
-		palloc0(root->simple_rel_array_size * sizeof(EquivalenceMember *));
+		palloc0(root->simple_rel_array_size * sizeof(*prev_ems));
 
 	/* We don't expect any children yet */
 	Assert(ec->ec_childmembers == NULL);

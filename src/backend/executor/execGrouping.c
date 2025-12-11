@@ -72,7 +72,7 @@ execTuplesMatchPrepare(TupleDesc desc,
 	if (numCols == 0)
 		return NULL;
 
-	eqFunctions = (Oid *) palloc(numCols * sizeof(Oid));
+	eqFunctions = (Oid *) palloc(numCols * sizeof(*eqFunctions));
 
 	/* lookup equality functions */
 	for (i = 0; i < numCols; i++)
@@ -104,8 +104,8 @@ execTuplesHashPrepare(int numCols,
 {
 	int			i;
 
-	*eqFuncOids = (Oid *) palloc(numCols * sizeof(Oid));
-	*hashFunctions = (FmgrInfo *) palloc(numCols * sizeof(FmgrInfo));
+	*eqFuncOids = (Oid *) palloc(numCols * sizeof(**eqFuncOids));
+	*hashFunctions = (FmgrInfo *) palloc(numCols * sizeof(**hashFunctions));
 
 	for (i = 0; i < numCols; i++)
 	{

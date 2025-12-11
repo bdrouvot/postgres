@@ -1027,9 +1027,9 @@ ExecInitIndexScan(IndexScan *node, EState *estate, int eflags)
 		indexstate->iss_SortSupport = (SortSupportData *)
 			palloc0(numOrderByKeys * sizeof(SortSupportData));
 		indexstate->iss_OrderByTypByVals = (bool *)
-			palloc(numOrderByKeys * sizeof(bool));
+			palloc(numOrderByKeys * sizeof(*indexstate->iss_OrderByTypByVals));
 		indexstate->iss_OrderByTypLens = (int16 *)
-			palloc(numOrderByKeys * sizeof(int16));
+			palloc(numOrderByKeys * sizeof(*indexstate->iss_OrderByTypLens));
 		i = 0;
 		forboth(lco, node->indexorderbyops, lcx, node->indexorderbyorig)
 		{
@@ -1058,9 +1058,9 @@ ExecInitIndexScan(IndexScan *node, EState *estate, int eflags)
 
 		/* allocate arrays to hold the re-calculated distances */
 		indexstate->iss_OrderByValues = (Datum *)
-			palloc(numOrderByKeys * sizeof(Datum));
+			palloc(numOrderByKeys * sizeof(*indexstate->iss_OrderByValues));
 		indexstate->iss_OrderByNulls = (bool *)
-			palloc(numOrderByKeys * sizeof(bool));
+			palloc(numOrderByKeys * sizeof(*indexstate->iss_OrderByNulls));
 
 		/* and initialize the reorder queue */
 		indexstate->iss_ReorderQueue = pairingheap_allocate(reorderqueue_cmp,
@@ -1185,7 +1185,7 @@ ExecIndexBuildScanKeys(PlanState *planstate, Relation index,
 
 	/* Allocate array_keys as large as it could possibly need to be */
 	array_keys = (IndexArrayKeyInfo *)
-		palloc0(n_scan_keys * sizeof(IndexArrayKeyInfo));
+		palloc0(n_scan_keys * sizeof(*array_keys));
 	n_array_keys = 0;
 
 	/*
@@ -1276,7 +1276,7 @@ ExecIndexBuildScanKeys(PlanState *planstate, Relation index,
 					{
 						max_runtime_keys = 8;
 						runtime_keys = (IndexRuntimeKeyInfo *)
-							palloc(max_runtime_keys * sizeof(IndexRuntimeKeyInfo));
+							palloc(max_runtime_keys * sizeof(*runtime_keys));
 					}
 					else
 					{
@@ -1400,7 +1400,7 @@ ExecIndexBuildScanKeys(PlanState *planstate, Relation index,
 						{
 							max_runtime_keys = 8;
 							runtime_keys = (IndexRuntimeKeyInfo *)
-								palloc(max_runtime_keys * sizeof(IndexRuntimeKeyInfo));
+								palloc(max_runtime_keys * sizeof(*runtime_keys));
 						}
 						else
 						{
@@ -1518,7 +1518,7 @@ ExecIndexBuildScanKeys(PlanState *planstate, Relation index,
 						{
 							max_runtime_keys = 8;
 							runtime_keys = (IndexRuntimeKeyInfo *)
-								palloc(max_runtime_keys * sizeof(IndexRuntimeKeyInfo));
+								palloc(max_runtime_keys * sizeof(*runtime_keys));
 						}
 						else
 						{

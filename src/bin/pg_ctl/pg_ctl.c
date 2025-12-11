@@ -346,7 +346,7 @@ readfile(const char *path, int *numlines)
 	{
 		/* empty file */
 		close(fd);
-		result = (char **) pg_malloc(sizeof(char *));
+		result = (char **) pg_malloc(sizeof(*result));
 		*result = NULL;
 		return result;
 	}
@@ -374,7 +374,7 @@ readfile(const char *path, int *numlines)
 	}
 
 	/* set up the result buffer */
-	result = (char **) pg_malloc((nlines + 1) * sizeof(char *));
+	result = (char **) pg_malloc((nlines + 1) * sizeof(*result));
 	*numlines = nlines;
 
 	/* now split the buffer into lines */

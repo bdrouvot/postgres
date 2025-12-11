@@ -167,7 +167,7 @@ preparePresortedCols(IncrementalSortState *node)
 
 	node->presorted_keys =
 		(PresortedKeyData *) palloc(plannode->nPresortedCols *
-									sizeof(PresortedKeyData));
+									sizeof(*node->presorted_keys));
 
 	/* Pre-cache comparison functions for each pre-sorted key. */
 	for (int i = 0; i < plannode->nPresortedCols; i++)

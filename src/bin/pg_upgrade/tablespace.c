@@ -69,9 +69,9 @@ get_tablespace_paths(void)
 	if (PQntuples(res) != 0)
 	{
 		old_cluster.tablespaces =
-			(char **) pg_malloc(old_cluster.num_tablespaces * sizeof(char *));
+			(char **) pg_malloc(old_cluster.num_tablespaces * sizeof(*old_cluster.tablespaces));
 		new_cluster.tablespaces =
-			(char **) pg_malloc(new_cluster.num_tablespaces * sizeof(char *));
+			(char **) pg_malloc(new_cluster.num_tablespaces * sizeof(*new_cluster.tablespaces));
 	}
 	else
 	{

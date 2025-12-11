@@ -1218,7 +1218,7 @@ load_domaintype_info(TypeCacheEntry *typentry)
 			{
 				cconslen = 8;
 				ccons = (DomainConstraintState **)
-					palloc(cconslen * sizeof(DomainConstraintState *));
+					palloc(cconslen * sizeof(*ccons));
 			}
 			else if (nccons >= cconslen)
 			{

@@ -728,7 +728,7 @@ RE_compile(regex_t *regex, text *text_re, int cflags, Oid collation)
 	char		errMsg[100];
 
 	/* Convert pattern string to wide characters */
-	pattern = (pg_wchar *) palloc((text_re_len + 1) * sizeof(pg_wchar));
+	pattern = (pg_wchar *) palloc((text_re_len + 1) * sizeof(*pattern));
 	pattern_len = pg_mb2wchar_with_len(text_re_val,
 									   pattern,
 									   text_re_len);
@@ -769,7 +769,7 @@ getColorInfo(regex_t *regex, TrgmNFA *trgmNFA)
 
 	trgmNFA->ncolors = colorsCount;
 	trgmNFA->colorInfo = (TrgmColorInfo *)
-		palloc0(colorsCount * sizeof(TrgmColorInfo));
+		palloc0(colorsCount * sizeof(*trgmNFA->colorInfo));
 
 	/*
 	 * Loop over colors, filling TrgmColorInfo about each.  Note we include

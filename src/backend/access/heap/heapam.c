@@ -2399,7 +2399,7 @@ heap_multi_insert(Relation relation, TupleTableSlot **slots, int ntuples,
 												   HEAP_DEFAULT_FILLFACTOR);
 
 	/* Toast and set header data in all the slots */
-	heaptuples = palloc(ntuples * sizeof(HeapTuple));
+	heaptuples = palloc(ntuples * sizeof(*heaptuples));
 	for (i = 0; i < ntuples; i++)
 	{
 		HeapTuple	tuple;
@@ -8784,7 +8784,7 @@ bottomup_sort_and_shrink(TM_IndexDeleteOp *delstate)
 	/* Sort groups and rearrange caller's deltids array */
 	qsort(blockgroups, nblockgroups, sizeof(IndexDeleteCounts),
 		  bottomup_sort_and_shrink_cmp);
-	reordereddeltids = palloc(delstate->ndeltids * sizeof(TM_IndexDelete));
+	reordereddeltids = palloc(delstate->ndeltids * sizeof(*reordereddeltids));
 
 	nblockgroups = Min(BOTTOMUP_MAX_NBLOCKS, nblockgroups);
 	/* Determine number of favorable blocks at the start of final deltids */

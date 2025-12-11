@@ -1592,8 +1592,8 @@ SignalBackends(void)
 	 * XXX in principle these pallocs could fail, which would be bad. Maybe
 	 * preallocate the arrays?  They're not that large, though.
 	 */
-	pids = (int32 *) palloc(MaxBackends * sizeof(int32));
-	procnos = (ProcNumber *) palloc(MaxBackends * sizeof(ProcNumber));
+	pids = (int32 *) palloc(MaxBackends * sizeof(*pids));
+	procnos = (ProcNumber *) palloc(MaxBackends * sizeof(*procnos));
 	count = 0;
 
 	LWLockAcquire(NotifyQueueLock, LW_EXCLUSIVE);

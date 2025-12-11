@@ -3552,8 +3552,8 @@ populate_record(TupleDesc tupdesc,
 		record->ncolumns = ncolumns;
 	}
 
-	values = (Datum *) palloc(ncolumns * sizeof(Datum));
-	nulls = (bool *) palloc(ncolumns * sizeof(bool));
+	values = (Datum *) palloc(ncolumns * sizeof(*values));
+	nulls = (bool *) palloc(ncolumns * sizeof(*nulls));
 
 	if (defaultval)
 	{
@@ -3908,7 +3908,7 @@ hash_object_field_end(void *state, char *fname, bool isnull)
 	if (_state->save_json_start != NULL)
 	{
 		int			len = _state->lex->prev_token_terminator - _state->save_json_start;
-		char	   *val = palloc((len + 1) * sizeof(char));
+		char	   *val = palloc((len + 1) * sizeof(*val));
 
 		memcpy(val, _state->save_json_start, len);
 		val[len] = '\0';
@@ -4359,7 +4359,7 @@ populate_recordset_object_field_end(void *state, char *fname, bool isnull)
 	if (_state->save_json_start != NULL)
 	{
 		int			len = _state->lex->prev_token_terminator - _state->save_json_start;
-		char	   *val = palloc((len + 1) * sizeof(char));
+		char	   *val = palloc((len + 1) * sizeof(*val));
 
 		memcpy(val, _state->save_json_start, len);
 		val[len] = '\0';

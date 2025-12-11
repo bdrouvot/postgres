@@ -400,7 +400,7 @@ sql_exec(PGconn *conn, const char *todo, bool quiet)
 	nfields = PQnfields(res);
 
 	/* for each field, get the needed width */
-	length = (int *) pg_malloc(sizeof(int) * nfields);
+	length = (int *) pg_malloc(sizeof(*length) * nfields);
 	for (j = 0; j < nfields; j++)
 		length[j] = strlen(PQfname(res, j));
 
@@ -585,11 +585,11 @@ main(int argc, char **argv)
 	struct options *my_opts;
 	PGconn	   *pgconn;
 
-	my_opts = (struct options *) pg_malloc(sizeof(struct options));
+	my_opts = (struct options *) pg_malloc(sizeof(*my_opts));
 
-	my_opts->oids = (eary *) pg_malloc(sizeof(eary));
-	my_opts->tables = (eary *) pg_malloc(sizeof(eary));
-	my_opts->filenumbers = (eary *) pg_malloc(sizeof(eary));
+	my_opts->oids = (eary *) pg_malloc(sizeof(*my_opts->oids));
+	my_opts->tables = (eary *) pg_malloc(sizeof(*my_opts->tables));
+	my_opts->filenumbers = (eary *) pg_malloc(sizeof(*my_opts->filenumbers));
 
 	my_opts->oids->num = my_opts->oids->alloc = 0;
 	my_opts->tables->num = my_opts->tables->alloc = 0;

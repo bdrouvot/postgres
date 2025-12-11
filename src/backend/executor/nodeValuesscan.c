@@ -278,9 +278,9 @@ ExecInitValuesScan(ValuesScan *node, EState *estate, int eflags)
 	 * simpler expressions.)
 	 */
 	scanstate->exprlists = (List **)
-		palloc(scanstate->array_len * sizeof(List *));
+		palloc(scanstate->array_len * sizeof(*scanstate->exprlists));
 	scanstate->exprstatelists = (List **)
-		palloc0(scanstate->array_len * sizeof(List *));
+		palloc0(scanstate->array_len * sizeof(*scanstate->exprstatelists));
 	i = 0;
 	foreach(vtl, node->values_lists)
 	{

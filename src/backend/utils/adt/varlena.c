@@ -3331,7 +3331,7 @@ replace_text_regexp(text *src_text, text *pattern_text,
 	initStringInfo(&buf);
 
 	/* Convert data string to wide characters. */
-	data = (pg_wchar *) palloc((src_text_len + 1) * sizeof(pg_wchar));
+	data = (pg_wchar *) palloc((src_text_len + 1) * sizeof(*data));
 	data_len = pg_mb2wchar_with_len(VARDATA_ANY(src_text), data, src_text_len);
 
 	/* Check whether replace_text has escapes, especially regexp submatches. */
@@ -5464,7 +5464,7 @@ unicode_normalize_func(PG_FUNCTION_ARGS)
 
 	/* convert to char32_t */
 	size = pg_mbstrlen_with_len(VARDATA_ANY(input), VARSIZE_ANY_EXHDR(input));
-	input_chars = palloc((size + 1) * sizeof(char32_t));
+	input_chars = palloc((size + 1) * sizeof(*input_chars));
 	p = (unsigned char *) VARDATA_ANY(input);
 	for (i = 0; i < size; i++)
 	{
@@ -5532,7 +5532,7 @@ unicode_is_normalized(PG_FUNCTION_ARGS)
 
 	/* convert to char32_t */
 	size = pg_mbstrlen_with_len(VARDATA_ANY(input), VARSIZE_ANY_EXHDR(input));
-	input_chars = palloc((size + 1) * sizeof(char32_t));
+	input_chars = palloc((size + 1) * sizeof(*input_chars));
 	p = (unsigned char *) VARDATA_ANY(input);
 	for (i = 0; i < size; i++)
 	{

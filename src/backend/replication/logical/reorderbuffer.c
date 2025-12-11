@@ -2490,7 +2490,7 @@ ReorderBufferProcessTXN(ReorderBuffer *rb, ReorderBufferTXN *txn,
 						int			nrelations = 0;
 						Relation   *relations;
 
-						relations = palloc0(nrelids * sizeof(Relation));
+						relations = palloc0(nrelids * sizeof(*relations));
 						for (i = 0; i < nrelids; i++)
 						{
 							Oid			relid = change->data.truncate.relids[i];

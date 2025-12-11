@@ -101,7 +101,7 @@ hstoreArrayToPairs(ArrayType *a, int *npairs)
 				 errmsg("number of pairs (%d) exceeds the maximum allowed (%d)",
 						key_count, (int) (MaxAllocSize / sizeof(Pairs)))));
 
-	key_pairs = palloc(sizeof(Pairs) * key_count);
+	key_pairs = palloc(sizeof(*key_pairs) * key_count);
 
 	for (i = 0, j = 0; i < key_count; i++)
 	{
@@ -588,8 +588,8 @@ hstore_slice_to_array(PG_FUNCTION_ARGS)
 		PG_RETURN_POINTER(aout);
 	}
 
-	out_datums = palloc(sizeof(Datum) * key_count);
-	out_nulls = palloc(sizeof(bool) * key_count);
+	out_datums = palloc(sizeof(*out_datums) * key_count);
+	out_nulls = palloc(sizeof(*out_nulls) * key_count);
 
 	for (i = 0; i < key_count; ++i)
 	{
@@ -649,7 +649,7 @@ hstore_slice_to_hstore(PG_FUNCTION_ARGS)
 	}
 
 	/* hstoreArrayToPairs() checked overflow */
-	out_pairs = palloc(sizeof(Pairs) * nkeys);
+	out_pairs = palloc(sizeof(*out_pairs) * nkeys);
 	bufsiz = 0;
 
 	/*
@@ -705,7 +705,7 @@ hstore_akeys(PG_FUNCTION_ARGS)
 		PG_RETURN_POINTER(a);
 	}
 
-	d = (Datum *) palloc(sizeof(Datum) * count);
+	d = (Datum *) palloc(sizeof(*d) * count);
 
 	for (i = 0; i < count; ++i)
 	{
@@ -741,8 +741,8 @@ hstore_avals(PG_FUNCTION_ARGS)
 		PG_RETURN_POINTER(a);
 	}
 
-	d = (Datum *) palloc(sizeof(Datum) * count);
-	nulls = (bool *) palloc(sizeof(bool) * count);
+	d = (Datum *) palloc(sizeof(*d) * count);
+	nulls = (bool *) palloc(sizeof(*nulls) * count);
 
 	for (i = 0; i < count; ++i)
 	{

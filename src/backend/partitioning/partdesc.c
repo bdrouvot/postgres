@@ -171,9 +171,9 @@ retry:
 	/* Allocate working arrays for OIDs, leaf flags, and boundspecs. */
 	if (nparts > 0)
 	{
-		oids = (Oid *) palloc(nparts * sizeof(Oid));
-		is_leaf = (bool *) palloc(nparts * sizeof(bool));
-		boundspecs = palloc(nparts * sizeof(PartitionBoundSpec *));
+		oids = (Oid *) palloc(nparts * sizeof(*oids));
+		is_leaf = (bool *) palloc(nparts * sizeof(*is_leaf));
+		boundspecs = palloc(nparts * sizeof(*boundspecs));
 	}
 
 	/* Collect bound spec nodes for each partition. */
@@ -336,8 +336,8 @@ retry:
 		partdesc->last_found_part_index = -1;
 		partdesc->last_found_count = 0;
 
-		partdesc->oids = (Oid *) palloc(nparts * sizeof(Oid));
-		partdesc->is_leaf = (bool *) palloc(nparts * sizeof(bool));
+		partdesc->oids = (Oid *) palloc(nparts * sizeof(*partdesc->oids));
+		partdesc->is_leaf = (bool *) palloc(nparts * sizeof(*partdesc->is_leaf));
 
 		/*
 		 * Assign OIDs from the original array into mapped indexes of the

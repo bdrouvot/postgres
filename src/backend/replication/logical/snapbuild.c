@@ -209,7 +209,7 @@ AllocateSnapshotBuilder(ReorderBuffer *reorder,
 	builder->committed.xcnt = 0;
 	builder->committed.xcnt_space = 128;	/* arbitrary number */
 	builder->committed.xip =
-		palloc0(builder->committed.xcnt_space * sizeof(TransactionId));
+		palloc0(builder->committed.xcnt_space * sizeof(*builder->committed.xip));
 	builder->committed.includes_all_transactions = true;
 
 	builder->catchange.xcnt = 0;

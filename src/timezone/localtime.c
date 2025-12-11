@@ -1366,7 +1366,7 @@ gmtsub(pg_time_t const *timep, int_fast32_t offset,
 	if (gmtptr == NULL)
 	{
 		/* Allocate on first use */
-		gmtptr = (struct state *) malloc(sizeof(struct state));
+		gmtptr = (struct state *) malloc(sizeof(*gmtptr));
 		if (gmtptr == NULL)
 			return NULL;		/* errno should be set by malloc */
 		gmtload(gmtptr);

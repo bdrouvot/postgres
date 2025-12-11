@@ -308,7 +308,7 @@ ginPostingListDecodeAllSegments(GinPostingList *segment, int len, int *ndecoded_
 	 * Guess an initial size of the array.
 	 */
 	nallocated = segment->nbytes * 2 + 1;
-	result = palloc(nallocated * sizeof(ItemPointerData));
+	result = palloc(nallocated * sizeof(*result));
 
 	ndecoded = 0;
 	while ((char *) segment < endseg)

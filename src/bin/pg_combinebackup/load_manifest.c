@@ -139,7 +139,7 @@ load_backup_manifest(char *backup_directory)
 	/* Create the hash table. */
 	ht = manifest_files_create(initial_size, NULL);
 
-	result = pg_malloc0(sizeof(manifest_data));
+	result = pg_malloc0(sizeof(*result));
 	result->files = ht;
 	context.private_data = result;
 	context.version_cb = combinebackup_version_cb;

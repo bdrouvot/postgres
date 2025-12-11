@@ -441,8 +441,8 @@ pgp_extract_armor_headers(const uint8 *src, unsigned len,
 	buf[armor_len] = '\0';
 
 	/* Allocate return arrays */
-	*keys = (char **) palloc(hdrlines * sizeof(char *));
-	*values = (char **) palloc(hdrlines * sizeof(char *));
+	*keys = (char **) palloc(hdrlines * sizeof(**keys));
+	*values = (char **) palloc(hdrlines * sizeof(**values));
 
 	/*
 	 * Split the header lines at newlines and ": " separators, and collect

@@ -5306,7 +5306,7 @@ listSchemas(const char *pattern, bool verbose, bool showSystem)
 			 * storing "Publications:" string) + publication schema mapping
 			 * count +  1 (for storing NULL).
 			 */
-			footers = (char **) pg_malloc((1 + pub_schema_tuples + 1) * sizeof(char *));
+			footers = (char **) pg_malloc((1 + pub_schema_tuples + 1) * sizeof(*footers));
 			footers[0] = pg_strdup(_("Publications:"));
 
 			/* Might be an empty set - that's ok */

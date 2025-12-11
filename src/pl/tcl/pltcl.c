@@ -1595,8 +1595,8 @@ compile_pltcl_function(Oid fn_oid, Oid tgreloid,
 		prodesc->fn_xmin = HeapTupleHeaderGetRawXmin(procTup->t_data);
 		prodesc->fn_tid = procTup->t_self;
 		prodesc->nargs = procStruct->pronargs;
-		prodesc->arg_out_func = (FmgrInfo *) palloc0(prodesc->nargs * sizeof(FmgrInfo));
-		prodesc->arg_is_rowtype = (bool *) palloc0(prodesc->nargs * sizeof(bool));
+		prodesc->arg_out_func = (FmgrInfo *) palloc0(prodesc->nargs * sizeof(*prodesc->arg_out_func));
+		prodesc->arg_is_rowtype = (bool *) palloc0(prodesc->nargs * sizeof(*prodesc->arg_is_rowtype));
 		MemoryContextSwitchTo(oldcontext);
 
 		/* Remember if function is STABLE/IMMUTABLE */
@@ -2671,9 +2671,9 @@ pltcl_SPI_prepare(ClientData cdata, Tcl_Interp *interp,
 	qdesc = palloc0_object(pltcl_query_desc);
 	snprintf(qdesc->qname, sizeof(qdesc->qname), "%p", qdesc);
 	qdesc->nargs = nargs;
-	qdesc->argtypes = (Oid *) palloc(nargs * sizeof(Oid));
-	qdesc->arginfuncs = (FmgrInfo *) palloc(nargs * sizeof(FmgrInfo));
-	qdesc->argtypioparams = (Oid *) palloc(nargs * sizeof(Oid));
+	qdesc->argtypes = (Oid *) palloc(nargs * sizeof(*qdesc->argtypes));
+	qdesc->arginfuncs = (FmgrInfo *) palloc(nargs * sizeof(*qdesc->arginfuncs));
+	qdesc->argtypioparams = (Oid *) palloc(nargs * sizeof(*qdesc->argtypioparams));
 	MemoryContextSwitchTo(oldcontext);
 
 	/************************************************************
@@ -2916,7 +2916,7 @@ pltcl_SPI_execute_plan(ClientData cdata, Tcl_Interp *interp,
 		 * Setup the value array for SPI_execute_plan() using
 		 * the type specific input functions
 		 ************************************************************/
-		argvalues = (Datum *) palloc(callObjc * sizeof(Datum));
+		argvalues = (Datum *) palloc(callObjc * sizeof(*argvalues));
 
 		for (j = 0; j < callObjc; j++)
 		{
@@ -3290,7 +3290,7 @@ pltcl_build_tuple_result(Tcl_Interp *interp, Tcl_Obj **kvObjv, int kvObjc,
 		attinmeta = NULL;
 	}
 
-	values = (char **) palloc0(tupdesc->natts * sizeof(char *));
+	values = (char **) palloc0(tupdesc->natts * sizeof(*values));
 
 	if (kvObjc % 2 != 0)
 		ereport(ERROR,

@@ -246,10 +246,10 @@ PrintResultInCrosstab(const PGresult *res)
 	num_rows = piv_rows.count;
 
 	array_columns = (pivot_field *)
-		pg_malloc(sizeof(pivot_field) * num_columns);
+		pg_malloc(sizeof(*array_columns) * num_columns);
 
 	array_rows = (pivot_field *)
-		pg_malloc(sizeof(pivot_field) * num_rows);
+		pg_malloc(sizeof(*array_rows) * num_rows);
 
 	avlCollectFields(&piv_columns, piv_columns.root, array_columns, 0);
 	avlCollectFields(&piv_rows, piv_rows.root, array_rows, 0);
@@ -312,7 +312,7 @@ printCrosstab(const PGresult *result,
 	 * map associating each piv_columns[].rank to its index in piv_columns.
 	 * This avoids an O(N^2) loop later.
 	 */
-	horiz_map = (int *) pg_malloc(sizeof(int) * num_columns);
+	horiz_map = (int *) pg_malloc(sizeof(*horiz_map) * num_columns);
 	for (i = 0; i < num_columns; i++)
 		horiz_map[piv_columns[i].rank] = i;
 
@@ -437,7 +437,7 @@ error:
 static void
 avlInit(avl_tree *tree)
 {
-	tree->end = (avl_node *) pg_malloc0(sizeof(avl_node));
+	tree->end = (avl_node *) pg_malloc0(sizeof(*tree->end));
 	tree->end->children[0] = tree->end->children[1] = tree->end;
 	tree->count = 0;
 	tree->root = tree->end;
@@ -533,7 +533,7 @@ avlInsertNode(avl_tree *tree, avl_node **node, pivot_field field)
 	if (current == tree->end)
 	{
 		avl_node   *new_node = (avl_node *)
-			pg_malloc(sizeof(avl_node));
+			pg_malloc(sizeof(*new_node));
 
 		new_node->height = 1;
 		new_node->field = field;

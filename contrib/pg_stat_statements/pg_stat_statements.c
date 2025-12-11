@@ -2194,7 +2194,7 @@ entry_dealloc(void)
 	 * cur_median_usage includes the entries we're about to zap.
 	 */
 
-	entries = palloc(hash_get_num_entries(pgss_hash) * sizeof(pgssEntry *));
+	entries = palloc(hash_get_num_entries(pgss_hash) * sizeof(*entries));
 
 	i = 0;
 	tottextlen = 0;

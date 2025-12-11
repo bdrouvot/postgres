@@ -1410,7 +1410,7 @@ get_func_arg_info(HeapTuple procTup,
 			ARR_ELEMTYPE(arr) != OIDOID)
 			elog(ERROR, "proallargtypes is not a 1-D Oid array or it contains nulls");
 		Assert(numargs >= procStruct->pronargs);
-		*p_argtypes = (Oid *) palloc(numargs * sizeof(Oid));
+		*p_argtypes = (Oid *) palloc(numargs * sizeof(**p_argtypes));
 		memcpy(*p_argtypes, ARR_DATA_PTR(arr),
 			   numargs * sizeof(Oid));
 	}
@@ -1419,7 +1419,7 @@ get_func_arg_info(HeapTuple procTup,
 		/* If no proallargtypes, use proargtypes */
 		numargs = procStruct->proargtypes.dim1;
 		Assert(numargs == procStruct->pronargs);
-		*p_argtypes = (Oid *) palloc(numargs * sizeof(Oid));
+		*p_argtypes = (Oid *) palloc(numargs * sizeof(**p_argtypes));
 		memcpy(*p_argtypes, procStruct->proargtypes.values,
 			   numargs * sizeof(Oid));
 	}
@@ -1456,7 +1456,7 @@ get_func_arg_info(HeapTuple procTup,
 			ARR_ELEMTYPE(arr) != CHAROID)
 			elog(ERROR, "proargmodes is not a 1-D char array of length %d or it contains nulls",
 				 numargs);
-		*p_argmodes = (char *) palloc(numargs * sizeof(char));
+		*p_argmodes = (char *) palloc(numargs * sizeof(**p_argmodes));
 		memcpy(*p_argmodes, ARR_DATA_PTR(arr),
 			   numargs * sizeof(char));
 	}
@@ -1498,7 +1498,7 @@ get_func_trftypes(HeapTuple procTup,
 			ARR_HASNULL(arr) ||
 			ARR_ELEMTYPE(arr) != OIDOID)
 			elog(ERROR, "protrftypes is not a 1-D Oid array or it contains nulls");
-		*p_trftypes = (Oid *) palloc(nelems * sizeof(Oid));
+		*p_trftypes = (Oid *) palloc(nelems * sizeof(**p_trftypes));
 		memcpy(*p_trftypes, ARR_DATA_PTR(arr),
 			   nelems * sizeof(Oid));
 
@@ -1570,7 +1570,7 @@ get_func_input_arg_names(Datum proargnames, Datum proargmodes,
 	}
 
 	/* extract input-argument names */
-	inargnames = (char **) palloc(numargs * sizeof(char *));
+	inargnames = (char **) palloc(numargs * sizeof(*inargnames));
 	numinargs = 0;
 	for (i = 0; i < numargs; i++)
 	{
@@ -1809,8 +1809,8 @@ build_function_result_tupdesc_d(char prokind,
 		return NULL;
 
 	/* extract output-argument types and names */
-	outargtypes = (Oid *) palloc(numargs * sizeof(Oid));
-	outargnames = (char **) palloc(numargs * sizeof(char *));
+	outargtypes = (Oid *) palloc(numargs * sizeof(*outargtypes));
+	outargnames = (char **) palloc(numargs * sizeof(*outargnames));
 	numoutargs = 0;
 	for (i = 0; i < numargs; i++)
 	{
@@ -2040,7 +2040,7 @@ extract_variadic_args(FunctionCallInfo fcinfo, int variadic_start,
 						  &nargs);
 
 		/* All the elements of the array have the same type */
-		types_res = (Oid *) palloc0(nargs * sizeof(Oid));
+		types_res = (Oid *) palloc0(nargs * sizeof(*types_res));
 		for (i = 0; i < nargs; i++)
 			types_res[i] = element_type;
 	}
@@ -2048,9 +2048,9 @@ extract_variadic_args(FunctionCallInfo fcinfo, int variadic_start,
 	{
 		nargs = PG_NARGS() - variadic_start;
 		Assert(nargs > 0);
-		nulls_res = (bool *) palloc0(nargs * sizeof(bool));
-		args_res = (Datum *) palloc0(nargs * sizeof(Datum));
-		types_res = (Oid *) palloc0(nargs * sizeof(Oid));
+		nulls_res = (bool *) palloc0(nargs * sizeof(*nulls_res));
+		args_res = (Datum *) palloc0(nargs * sizeof(*args_res));
+		types_res = (Oid *) palloc0(nargs * sizeof(*types_res));
 
 		for (i = 0; i < nargs; i++)
 		{

@@ -2436,8 +2436,8 @@ eqjoinsel(PG_FUNCTION_ARGS)
 	if (have_mcvs1 && have_mcvs2)
 	{
 		fmgr_info(opfuncoid, &eqproc);
-		hasmatch1 = (bool *) palloc0(sslot1.nvalues * sizeof(bool));
-		hasmatch2 = (bool *) palloc0(sslot2.nvalues * sizeof(bool));
+		hasmatch1 = (bool *) palloc0(sslot1.nvalues * sizeof(*hasmatch1));
+		hasmatch2 = (bool *) palloc0(sslot2.nvalues * sizeof(*hasmatch2));
 
 		/*
 		 * If the MCV lists are long enough to justify hashing, try to look up

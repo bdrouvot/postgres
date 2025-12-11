@@ -93,7 +93,7 @@ ExecInitJunkFilter(List *targetList, TupleTableSlot *slot)
 		AttrNumber	cleanResno;
 		ListCell   *t;
 
-		cleanMap = (AttrNumber *) palloc(cleanLength * sizeof(AttrNumber));
+		cleanMap = (AttrNumber *) palloc(cleanLength * sizeof(*cleanMap));
 		cleanResno = 0;
 		foreach(t, targetList)
 		{
@@ -165,7 +165,7 @@ ExecInitJunkFilterConversion(List *targetList,
 	cleanLength = cleanTupType->natts;
 	if (cleanLength > 0)
 	{
-		cleanMap = (AttrNumber *) palloc0(cleanLength * sizeof(AttrNumber));
+		cleanMap = (AttrNumber *) palloc0(cleanLength * sizeof(*cleanMap));
 		t = list_head(targetList);
 		for (i = 0; i < cleanLength; i++)
 		{

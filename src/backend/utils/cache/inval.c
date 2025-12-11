@@ -1103,7 +1103,7 @@ inplaceGetInvalidationMessages(SharedInvalidationMessage **msgs,
 	*RelcacheInitFileInval = inplaceInvalInfo->RelcacheInitFileInval;
 	nummsgs = NumMessagesInGroup(&inplaceInvalInfo->CurrentCmdInvalidMsgs);
 	*msgs = msgarray = (SharedInvalidationMessage *)
-		palloc(nummsgs * sizeof(SharedInvalidationMessage));
+		palloc(nummsgs * sizeof(*msgarray));
 
 	nmsgs = 0;
 	ProcessMessageSubGroupMulti(&inplaceInvalInfo->CurrentCmdInvalidMsgs,

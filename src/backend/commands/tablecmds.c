@@ -2090,7 +2090,7 @@ ExecuteTruncateGuts(List *explicit_rels,
 	 */
 	estate = CreateExecutorState();
 	resultRelInfos = (ResultRelInfo *)
-		palloc(list_length(rels) * sizeof(ResultRelInfo));
+		palloc(list_length(rels) * sizeof(*resultRelInfos));
 	resultRelInfo = resultRelInfos;
 	foreach(cell, rels)
 	{
@@ -2297,7 +2297,7 @@ ExecuteTruncateGuts(List *explicit_rels,
 		/* should only get here if wal_level >= logical */
 		Assert(XLogLogicalInfoActive());
 
-		logrelids = palloc(list_length(relids_logged) * sizeof(Oid));
+		logrelids = palloc(list_length(relids_logged) * sizeof(*logrelids));
 		foreach(cell, relids_logged)
 			logrelids[i++] = lfirst_oid(cell);
 

@@ -797,7 +797,7 @@ ExecInitRangeTable(EState *estate, List *rangeTable, List *permInfos,
 	 * and stored here as needed.
 	 */
 	estate->es_relations = (Relation *)
-		palloc0(estate->es_range_table_size * sizeof(Relation));
+		palloc0(estate->es_range_table_size * sizeof(*estate->es_relations));
 
 	/*
 	 * es_result_relations and es_rowmarks are also parallel to
@@ -891,7 +891,7 @@ ExecInitResultRelation(EState *estate, ResultRelInfo *resultRelInfo,
 
 	if (estate->es_result_relations == NULL)
 		estate->es_result_relations = (ResultRelInfo **)
-			palloc0(estate->es_range_table_size * sizeof(ResultRelInfo *));
+			palloc0(estate->es_range_table_size * sizeof(*estate->es_result_relations));
 	estate->es_result_relations[rti - 1] = resultRelInfo;
 
 	/*

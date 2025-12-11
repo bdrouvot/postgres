@@ -289,7 +289,7 @@ ginNewScanKey(IndexScanDesc scan)
 	so->totalentries = 0;
 	so->allocentries = 32;
 	so->entries = (GinScanEntry *)
-		palloc(so->allocentries * sizeof(GinScanEntry));
+		palloc(so->allocentries * sizeof(*so->entries));
 
 	so->isVoidRes = false;
 
@@ -357,7 +357,7 @@ ginNewScanKey(IndexScanDesc scan)
 		 * didn't create a nullFlags array, we assume everything is non-null.
 		 * While at it, detect whether any null keys are present.
 		 */
-		categories = (GinNullCategory *) palloc0(nQueryValues * sizeof(GinNullCategory));
+		categories = (GinNullCategory *) palloc0(nQueryValues * sizeof(*categories));
 		if (nullFlags)
 		{
 			int32		j;

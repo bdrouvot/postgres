@@ -469,7 +469,7 @@ WaitForTerminatingWorkers(ParallelState *pstate)
 		}
 #else							/* WIN32 */
 		/* On Windows, we must use WaitForMultipleObjects() */
-		HANDLE	   *lpHandles = pg_malloc(sizeof(HANDLE) * pstate->numWorkers);
+		HANDLE	   *lpHandles = pg_malloc(sizeof(*lpHandles) * pstate->numWorkers);
 		int			nrun = 0;
 		DWORD		ret;
 		uintptr_t	hThread;
@@ -903,7 +903,7 @@ ParallelBackupStart(ArchiveHandle *AH)
 
 	Assert(AH->public.numWorkers > 0);
 
-	pstate = (ParallelState *) pg_malloc(sizeof(ParallelState));
+	pstate = (ParallelState *) pg_malloc(sizeof(*pstate));
 
 	pstate->numWorkers = AH->public.numWorkers;
 	pstate->te = NULL;
@@ -914,9 +914,9 @@ ParallelBackupStart(ArchiveHandle *AH)
 
 	/* Create status arrays, being sure to initialize all fields to 0 */
 	pstate->te = (TocEntry **)
-		pg_malloc0(pstate->numWorkers * sizeof(TocEntry *));
+		pg_malloc0(pstate->numWorkers * sizeof(*pstate->te));
 	pstate->parallelSlot = (ParallelSlot *)
-		pg_malloc0(pstate->numWorkers * sizeof(ParallelSlot));
+		pg_malloc0(pstate->numWorkers * sizeof(*pstate->parallelSlot));
 
 #ifdef WIN32
 	/* Make fmtId() and fmtQualifiedId() use thread-local storage */
@@ -969,7 +969,7 @@ ParallelBackupStart(ArchiveHandle *AH)
 
 #ifdef WIN32
 		/* Create transient structure to pass args to worker function */
-		wi = (WorkerInfo *) pg_malloc(sizeof(WorkerInfo));
+		wi = (WorkerInfo *) pg_malloc(sizeof(*wi));
 
 		wi->AH = AH;
 		wi->slot = slot;

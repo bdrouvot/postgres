@@ -61,7 +61,7 @@ PQregisterEventProc(PGconn *conn, PGEventProc proc,
 		if (conn->events)
 			e = (PGEvent *) realloc(conn->events, newSize * sizeof(PGEvent));
 		else
-			e = (PGEvent *) malloc(newSize * sizeof(PGEvent));
+			e = (PGEvent *) malloc(newSize * sizeof(*e));
 
 		if (!e)
 			return false;

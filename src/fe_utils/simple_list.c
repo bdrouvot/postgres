@@ -27,7 +27,7 @@ simple_oid_list_append(SimpleOidList *list, Oid val)
 {
 	SimpleOidListCell *cell;
 
-	cell = (SimpleOidListCell *) pg_malloc(sizeof(SimpleOidListCell));
+	cell = (SimpleOidListCell *) pg_malloc(sizeof(*cell));
 	cell->next = NULL;
 	cell->val = val;
 
@@ -163,7 +163,7 @@ simple_ptr_list_append(SimplePtrList *list, void *ptr)
 {
 	SimplePtrListCell *cell;
 
-	cell = (SimplePtrListCell *) pg_malloc(sizeof(SimplePtrListCell));
+	cell = (SimplePtrListCell *) pg_malloc(sizeof(*cell));
 	cell->next = NULL;
 	cell->ptr = ptr;
 

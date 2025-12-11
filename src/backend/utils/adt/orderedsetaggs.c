@@ -173,11 +173,11 @@ ordered_set_startup(FunctionCallInfo fcinfo, bool use_tuples)
 			if (ishypothetical)
 				numSortCols++;	/* make space for flag column */
 			qstate->numSortCols = numSortCols;
-			qstate->sortColIdx = (AttrNumber *) palloc(numSortCols * sizeof(AttrNumber));
-			qstate->sortOperators = (Oid *) palloc(numSortCols * sizeof(Oid));
-			qstate->eqOperators = (Oid *) palloc(numSortCols * sizeof(Oid));
-			qstate->sortCollations = (Oid *) palloc(numSortCols * sizeof(Oid));
-			qstate->sortNullsFirsts = (bool *) palloc(numSortCols * sizeof(bool));
+			qstate->sortColIdx = (AttrNumber *) palloc(numSortCols * sizeof(*qstate->sortColIdx));
+			qstate->sortOperators = (Oid *) palloc(numSortCols * sizeof(*qstate->sortOperators));
+			qstate->eqOperators = (Oid *) palloc(numSortCols * sizeof(*qstate->eqOperators));
+			qstate->sortCollations = (Oid *) palloc(numSortCols * sizeof(*qstate->sortCollations));
+			qstate->sortNullsFirsts = (bool *) palloc(numSortCols * sizeof(*qstate->sortNullsFirsts));
 
 			i = 0;
 			foreach(lc, sortlist)
@@ -668,7 +668,7 @@ setup_pct_info(int num_percentiles,
 	struct pct_info *pct_info;
 	int			i;
 
-	pct_info = (struct pct_info *) palloc(num_percentiles * sizeof(struct pct_info));
+	pct_info = (struct pct_info *) palloc(num_percentiles * sizeof(*pct_info));
 
 	for (i = 0; i < num_percentiles; i++)
 	{
@@ -774,8 +774,8 @@ percentile_disc_multi_final(PG_FUNCTION_ARGS)
 							  osastate->number_of_rows,
 							  false);
 
-	result_datum = (Datum *) palloc(num_percentiles * sizeof(Datum));
-	result_isnull = (bool *) palloc(num_percentiles * sizeof(bool));
+	result_datum = (Datum *) palloc(num_percentiles * sizeof(*result_datum));
+	result_isnull = (bool *) palloc(num_percentiles * sizeof(*result_isnull));
 
 	/*
 	 * Start by dealing with any nulls in the param array - those are sorted
@@ -897,8 +897,8 @@ percentile_cont_multi_final_common(FunctionCallInfo fcinfo,
 							  osastate->number_of_rows,
 							  true);
 
-	result_datum = (Datum *) palloc(num_percentiles * sizeof(Datum));
-	result_isnull = (bool *) palloc(num_percentiles * sizeof(bool));
+	result_datum = (Datum *) palloc(num_percentiles * sizeof(*result_datum));
+	result_isnull = (bool *) palloc(num_percentiles * sizeof(*result_isnull));
 
 	/*
 	 * Start by dealing with any nulls in the param array - those are sorted
