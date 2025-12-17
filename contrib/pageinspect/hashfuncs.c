@@ -415,7 +415,7 @@ hash_bitmap_info(PG_FUNCTION_ARGS)
 				(errcode(ERRCODE_INSUFFICIENT_PRIVILEGE),
 				 errmsg("must be superuser to use raw page functions")));
 
-	indexRel = relation_open(indexRelid, AccessShareLock);
+	indexRel = index_open(indexRelid, AccessShareLock);
 
 	if (!IS_INDEX(indexRel) || !IS_HASH(indexRel))
 		ereport(ERROR,

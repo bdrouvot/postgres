@@ -597,7 +597,7 @@ pgstathashindex(PG_FUNCTION_ARGS)
 	float8		free_percent;
 	uint64		total_space;
 
-	rel = relation_open(relid, AccessShareLock);
+	rel = index_open(relid, AccessShareLock);
 
 	if (!IS_INDEX(rel) || !IS_HASH(rel))
 		ereport(ERROR,

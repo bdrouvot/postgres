@@ -1478,7 +1478,7 @@ brin_summarize_range(PG_FUNCTION_ARGS)
 	/* Restore userid and security context */
 	SetUserIdAndSecContext(save_userid, save_sec_context);
 
-	relation_close(indexRel, ShareUpdateExclusiveLock);
+	index_close(indexRel, ShareUpdateExclusiveLock);
 	relation_close(heapRel, ShareUpdateExclusiveLock);
 
 	PG_RETURN_INT32((int32) numSummarized);
@@ -1568,7 +1568,7 @@ brin_desummarize_range(PG_FUNCTION_ARGS)
 				 errmsg("index \"%s\" is not valid",
 						RelationGetRelationName(indexRel))));
 
-	relation_close(indexRel, ShareUpdateExclusiveLock);
+	index_close(indexRel, ShareUpdateExclusiveLock);
 	relation_close(heapRel, ShareUpdateExclusiveLock);
 
 	PG_RETURN_VOID();
