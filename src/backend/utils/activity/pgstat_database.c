@@ -435,7 +435,7 @@ pgstat_reset_database_timestamp(Oid dboid, TimestampTz ts)
  * false without flushing the entry.  Otherwise returns true.
  */
 bool
-pgstat_database_flush_cb(PgStat_EntryRef *entry_ref, bool nowait)
+pgstat_database_flush_cb(PgStat_EntryRef *entry_ref, bool nowait, bool anytime_only)
 {
 	PgStatShared_Database *sharedent;
 	PgStat_StatDBEntry *pendingent;

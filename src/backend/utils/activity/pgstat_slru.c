@@ -19,6 +19,7 @@
 
 #include "utils/pgstat_internal.h"
 #include "utils/timestamp.h"
+#include "utils/timeout.h"
 
 
 static inline PgStat_SLRUStats *get_slru_entry(int slru_idx);
@@ -139,7 +140,7 @@ pgstat_get_slru_index(const char *name)
  * acquired. Otherwise return false.
  */
 bool
-pgstat_slru_flush_cb(bool nowait)
+pgstat_slru_flush_cb(bool nowait, bool anytime_only)
 {
 	PgStatShared_SLRU *stats_shmem = &pgStatLocal.shmem->slru;
 	int			i;
@@ -222,6 +223,9 @@ get_slru_entry(int slru_idx)
 	Assert(IsUnderPostmaster || !IsPostmasterEnvironment);
 
 	Assert((slru_idx >= 0) && (slru_idx < SLRU_NUM_ELEMENTS));
+
+	/* Schedule next anytime stats update timeout */
+	pgstat_schedule_anytime_update();
 
 	have_slrustats = true;
 	pgstat_report_fixed = true;

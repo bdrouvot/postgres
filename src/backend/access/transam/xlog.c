@@ -1085,6 +1085,9 @@ XLogInsertRecord(XLogRecData *rdata,
 		pgWalUsage.wal_fpi += num_fpi;
 		pgWalUsage.wal_fpi_bytes += fpi_bytes;
 
+		/* Schedule next anytime stats update timeout */
+		pgstat_schedule_anytime_update();
+
 		/* Required for the flush of pending stats WAL data */
 		pgstat_report_fixed = true;
 	}
@@ -2065,6 +2068,9 @@ AdvanceXLInsertBuffer(XLogRecPtr upto, TimeLineID tli, bool opportunistic)
 					LWLockRelease(WALWriteLock);
 					pgWalUsage.wal_buffers_full++;
 					TRACE_POSTGRESQL_WAL_BUFFER_WRITE_DIRTY_DONE();
+
+					/* Schedule next anytime stats update timeout */
+					pgstat_schedule_anytime_update();
 
 					/*
 					 * Required for the flush of pending stats WAL data, per

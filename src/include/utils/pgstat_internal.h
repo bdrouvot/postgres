@@ -224,6 +224,19 @@ typedef struct PgStat_SubXactStatus
 	PgStat_TableXactStatus *first;	/* head of list for this subxact */
 } PgStat_SubXactStatus;
 
+/*
+ * Flush mode for statistics kinds.
+ *
+ * FLUSH_AT_TXN_BOUNDARY has to be the first because we want it to be the
+ * default value.
+ */
+typedef enum PgStat_FlushMode
+{
+	FLUSH_AT_TXN_BOUNDARY,		/* All fields can only be flushed at
+								 * transaction boundary */
+	FLUSH_ANYTIME,				/* All fields can be flushed anytime,
+								 * including within transactions */
+} PgStat_FlushMode;
 
 /*
  * Metadata for a specific kind of statistics.
@@ -250,6 +263,16 @@ typedef struct PgStat_KindInfo
 	 * to update its PgStat_ShmemControl.entry_counts.
 	 */
 	bool		track_entry_count:1;
+
+	/*
+	 * The mode of when to flush stats. See PgStat_FlushMode for more details.
+	 *
+	 * This member only has meaning for statistics kinds that accumulate
+	 * pending stats and use flush callbacks. For kinds that write directly to
+	 * shared memory (e.g., archiver, bgwriter, checkpointer), this member has
+	 * no effect.
+	 */
+	PgStat_FlushMode flush_mode;
 
 	/*
 	 * The size of an entry in the shared stats hash table (pointed to by
@@ -297,8 +320,10 @@ typedef struct PgStat_KindInfo
 	 * For variable-numbered stats: flush pending stats. Required if pending
 	 * data is used. See flush_static_cb when dealing with stats data that
 	 * that cannot use PgStat_EntryRef->pending.
+	 *
+	 * The anytime_only parameter indicates whether this is an anytime flush.
 	 */
-	bool		(*flush_pending_cb) (PgStat_EntryRef *sr, bool nowait);
+	bool		(*flush_pending_cb) (PgStat_EntryRef *sr, bool nowait, bool anytime_only);
 
 	/*
 	 * For variable-numbered stats: delete pending stats. Optional.
@@ -366,8 +391,10 @@ typedef struct PgStat_KindInfo
 	 *
 	 * "pgstat_report_fixed" needs to be set to trigger the flush of pending
 	 * stats.
+	 *
+	 * The anytime_only parameter indicates whether this is an anytime flush.
 	 */
-	bool		(*flush_static_cb) (bool nowait);
+	bool		(*flush_static_cb) (bool nowait, bool anytime_only);
 
 	/*
 	 * For fixed-numbered statistics: Reset All.
@@ -677,6 +704,7 @@ extern PgStat_EntryRef *pgstat_fetch_pending_entry(PgStat_Kind kind,
 
 extern void *pgstat_fetch_entry(PgStat_Kind kind, Oid dboid, uint64 objid);
 extern void pgstat_snapshot_fixed(PgStat_Kind kind);
+extern void AnytimeStatsUpdateTimeoutHandler(void);
 
 
 /*
@@ -696,8 +724,8 @@ extern void pgstat_archiver_snapshot_cb(void);
 #define PGSTAT_BACKEND_FLUSH_WAL   (1 << 1) /* Flush WAL statistics */
 #define PGSTAT_BACKEND_FLUSH_ALL   (PGSTAT_BACKEND_FLUSH_IO | PGSTAT_BACKEND_FLUSH_WAL)
 
-extern bool pgstat_flush_backend(bool nowait, bits32 flags);
-extern bool pgstat_backend_flush_cb(bool nowait);
+extern bool pgstat_flush_backend(bool nowait, bits32 flags, bool anytime_only);
+extern bool pgstat_backend_flush_cb(bool nowait, bool anytime_only);
 extern void pgstat_backend_reset_timestamp_cb(PgStatShared_Common *header,
 											  TimestampTz ts);
 
@@ -729,7 +757,7 @@ extern void AtEOXact_PgStat_Database(bool isCommit, bool parallel);
 
 extern PgStat_StatDBEntry *pgstat_prep_database_pending(Oid dboid);
 extern void pgstat_reset_database_timestamp(Oid dboid, TimestampTz ts);
-extern bool pgstat_database_flush_cb(PgStat_EntryRef *entry_ref, bool nowait);
+extern bool pgstat_database_flush_cb(PgStat_EntryRef *entry_ref, bool nowait, bool anytime_only);
 extern void pgstat_database_reset_timestamp_cb(PgStatShared_Common *header, TimestampTz ts);
 
 
@@ -737,7 +765,7 @@ extern void pgstat_database_reset_timestamp_cb(PgStatShared_Common *header, Time
  * Functions in pgstat_function.c
  */
 
-extern bool pgstat_function_flush_cb(PgStat_EntryRef *entry_ref, bool nowait);
+extern bool pgstat_function_flush_cb(PgStat_EntryRef *entry_ref, bool nowait, bool anytime_only);
 extern void pgstat_function_reset_timestamp_cb(PgStatShared_Common *header, TimestampTz ts);
 
 
@@ -745,9 +773,9 @@ extern void pgstat_function_reset_timestamp_cb(PgStatShared_Common *header, Time
  * Functions in pgstat_io.c
  */
 
-extern void pgstat_flush_io(bool nowait);
+extern void pgstat_flush_io(bool nowait, bool anytime_only);
 
-extern bool pgstat_io_flush_cb(bool nowait);
+extern bool pgstat_io_flush_cb(bool nowait, bool anytime_only);
 extern void pgstat_io_init_shmem_cb(void *stats);
 extern void pgstat_io_reset_all_cb(TimestampTz ts);
 extern void pgstat_io_snapshot_cb(void);
@@ -762,7 +790,7 @@ extern void AtEOSubXact_PgStat_Relations(PgStat_SubXactStatus *xact_state, bool 
 extern void AtPrepare_PgStat_Relations(PgStat_SubXactStatus *xact_state);
 extern void PostPrepare_PgStat_Relations(PgStat_SubXactStatus *xact_state);
 
-extern bool pgstat_relation_flush_cb(PgStat_EntryRef *entry_ref, bool nowait);
+extern bool pgstat_relation_flush_cb(PgStat_EntryRef *entry_ref, bool nowait, bool anytime_only);
 extern void pgstat_relation_delete_pending_cb(PgStat_EntryRef *entry_ref);
 extern void pgstat_relation_reset_timestamp_cb(PgStatShared_Common *header, TimestampTz ts);
 
@@ -809,7 +837,7 @@ extern PgStatShared_Common *pgstat_init_entry(PgStat_Kind kind,
  * Functions in pgstat_slru.c
  */
 
-extern bool pgstat_slru_flush_cb(bool nowait);
+extern bool pgstat_slru_flush_cb(bool nowait, bool anytime_only);
 extern void pgstat_slru_init_shmem_cb(void *stats);
 extern void pgstat_slru_reset_all_cb(TimestampTz ts);
 extern void pgstat_slru_snapshot_cb(void);
@@ -820,7 +848,7 @@ extern void pgstat_slru_snapshot_cb(void);
  */
 
 extern void pgstat_wal_init_backend_cb(void);
-extern bool pgstat_wal_flush_cb(bool nowait);
+extern bool pgstat_wal_flush_cb(bool nowait, bool anytime_only);
 extern void pgstat_wal_init_shmem_cb(void *stats);
 extern void pgstat_wal_reset_all_cb(TimestampTz ts);
 extern void pgstat_wal_snapshot_cb(void);
@@ -830,7 +858,7 @@ extern void pgstat_wal_snapshot_cb(void);
  * Functions in pgstat_subscription.c
  */
 
-extern bool pgstat_subscription_flush_cb(PgStat_EntryRef *entry_ref, bool nowait);
+extern bool pgstat_subscription_flush_cb(PgStat_EntryRef *entry_ref, bool nowait, bool anytime_only);
 extern void pgstat_subscription_reset_timestamp_cb(PgStatShared_Common *header, TimestampTz ts);
 
 

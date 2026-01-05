@@ -77,7 +77,9 @@
 #include "utils/builtins.h"
 #include "utils/guc.h"
 #include "utils/pg_lsn.h"
+#include "utils/pgstat_internal.h"
 #include "utils/ps_status.h"
+#include "utils/timeout.h"
 #include "utils/timestamp.h"
 
 
@@ -252,13 +254,18 @@ WalReceiverMain(const void *startup_data, size_t startup_data_len)
 	pqsignal(SIGINT, SIG_IGN);
 	pqsignal(SIGTERM, die);		/* request shutdown */
 	/* SIGQUIT handler was already set up by InitPostmasterChild */
-	pqsignal(SIGALRM, SIG_IGN);
+	InitializeTimeouts();		/* establishes SIGALRM handler */
 	pqsignal(SIGPIPE, SIG_IGN);
 	pqsignal(SIGUSR1, procsignal_sigusr1_handler);
 	pqsignal(SIGUSR2, SIG_IGN);
 
 	/* Reset some signals that are accepted by postmaster but not here */
 	pqsignal(SIGCHLD, SIG_DFL);
+
+	/*
+	 * Register timeouts needed
+	 */
+	RegisterTimeout(ANYTIME_STATS_UPDATE_TIMEOUT, AnytimeStatsUpdateTimeoutHandler);
 
 	/* Load the libpq-specific functions */
 	load_file("libpqwalreceiver", false);

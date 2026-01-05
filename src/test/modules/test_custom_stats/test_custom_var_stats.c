@@ -84,7 +84,7 @@ static dsa_area *custom_stats_description_dsa = NULL;
 
 /* Flush callback: merge pending stats into shared memory */
 static bool test_custom_stats_var_flush_pending_cb(PgStat_EntryRef *entry_ref,
-												   bool nowait);
+												   bool nowait, bool anytime_only);
 
 /* Serialization callback: write auxiliary entry data */
 static void test_custom_stats_var_to_serialized_data(const PgStat_HashKey *key,
@@ -151,7 +151,7 @@ _PG_init(void)
  * Returns false only if nowait=true and lock acquisition fails.
  */
 static bool
-test_custom_stats_var_flush_pending_cb(PgStat_EntryRef *entry_ref, bool nowait)
+test_custom_stats_var_flush_pending_cb(PgStat_EntryRef *entry_ref, bool nowait, bool anytime_only)
 {
 	PgStat_StatCustomVarEntry *pending_entry;
 	PgStatShared_CustomVarEntry *shared_entry;

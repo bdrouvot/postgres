@@ -31,6 +31,7 @@
 #include "storage/procarray.h"
 #include "utils/memutils.h"
 #include "utils/pgstat_internal.h"
+#include "utils/timeout.h"
 
 /*
  * Backend statistics counts waiting to be flushed out. These counters may be
@@ -66,6 +67,9 @@ pgstat_count_backend_io_op_time(IOObject io_object, IOContext io_context,
 	INSTR_TIME_ADD(PendingBackendStats.pending_io.pending_times[io_object][io_context][io_op],
 				   io_time);
 
+	/* Schedule next anytime stats update timeout */
+	pgstat_schedule_anytime_update();
+
 	backend_has_iostats = true;
 	pgstat_report_fixed = true;
 }
@@ -81,6 +85,9 @@ pgstat_count_backend_io_op(IOObject io_object, IOContext io_context,
 
 	PendingBackendStats.pending_io.counts[io_object][io_context][io_op] += cnt;
 	PendingBackendStats.pending_io.bytes[io_object][io_context][io_op] += bytes;
+
+	/* Schedule next anytime stats update timeout */
+	pgstat_schedule_anytime_update();
 
 	backend_has_iostats = true;
 	pgstat_report_fixed = true;
@@ -268,7 +275,7 @@ pgstat_flush_backend_entry_wal(PgStat_EntryRef *entry_ref)
  * if some statistics could not be flushed due to lock contention.
  */
 bool
-pgstat_flush_backend(bool nowait, bits32 flags)
+pgstat_flush_backend(bool nowait, bits32 flags, bool anytime_only)
 {
 	PgStat_EntryRef *entry_ref;
 	bool		has_pending_data = false;
@@ -311,9 +318,9 @@ pgstat_flush_backend(bool nowait, bits32 flags)
  * If some stats could not be flushed due to lock contention, return true.
  */
 bool
-pgstat_backend_flush_cb(bool nowait)
+pgstat_backend_flush_cb(bool nowait, bool anytime_only)
 {
-	return pgstat_flush_backend(nowait, PGSTAT_BACKEND_FLUSH_ALL);
+	return pgstat_flush_backend(nowait, PGSTAT_BACKEND_FLUSH_ALL, anytime_only);
 }
 
 /*

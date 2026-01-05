@@ -64,6 +64,7 @@
 #include "utils/injection_point.h"
 #include "utils/memutils.h"
 #include "utils/pg_locale.h"
+#include "utils/pgstat_internal.h"
 #include "utils/portal.h"
 #include "utils/ps_status.h"
 #include "utils/snapmgr.h"
@@ -773,6 +774,8 @@ InitPostgres(const char *in_dbname, Oid dboid,
 		RegisterTimeout(CLIENT_CONNECTION_CHECK_TIMEOUT, ClientCheckTimeoutHandler);
 		RegisterTimeout(IDLE_STATS_UPDATE_TIMEOUT,
 						IdleStatsUpdateTimeoutHandler);
+		RegisterTimeout(ANYTIME_STATS_UPDATE_TIMEOUT,
+						AnytimeStatsUpdateTimeoutHandler);
 	}
 
 	/*

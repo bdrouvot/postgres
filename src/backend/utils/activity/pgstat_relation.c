@@ -267,8 +267,8 @@ pgstat_report_vacuum(Relation rel, PgStat_Counter livetuples,
 	 * is done -- which will likely vacuum many relations -- or until the
 	 * VACUUM command has processed all tables and committed.
 	 */
-	pgstat_flush_io(false);
-	(void) pgstat_flush_backend(false, PGSTAT_BACKEND_FLUSH_IO);
+	pgstat_flush_io(false, true);
+	(void) pgstat_flush_backend(false, PGSTAT_BACKEND_FLUSH_IO, true);
 }
 
 /*
@@ -362,8 +362,8 @@ pgstat_report_analyze(Relation rel,
 	pgstat_unlock_entry(entry_ref);
 
 	/* see pgstat_report_vacuum() */
-	pgstat_flush_io(false);
-	(void) pgstat_flush_backend(false, PGSTAT_BACKEND_FLUSH_IO);
+	pgstat_flush_io(false, true);
+	(void) pgstat_flush_backend(false, PGSTAT_BACKEND_FLUSH_IO, true);
 }
 
 /*
@@ -812,13 +812,15 @@ pgstat_twophase_postabort(FullTransactionId fxid, uint16 info,
  * entry when successfully flushing.
  */
 bool
-pgstat_relation_flush_cb(PgStat_EntryRef *entry_ref, bool nowait)
+pgstat_relation_flush_cb(PgStat_EntryRef *entry_ref, bool nowait, bool anytime_only)
 {
 	Oid			dboid;
 	PgStat_TableStatus *lstats; /* pending stats entry  */
 	PgStatShared_Relation *shtabstats;
 	PgStat_StatTabEntry *tabentry;	/* table entry of shared stats */
 	PgStat_StatDBEntry *dbentry;	/* pending database entry */
+
+	Assert(!anytime_only);
 
 	dboid = entry_ref->shared_entry->key.dboid;
 	lstats = (PgStat_TableStatus *) entry_ref->pending;

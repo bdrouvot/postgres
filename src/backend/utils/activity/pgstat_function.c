@@ -190,10 +190,12 @@ pgstat_end_function_usage(PgStat_FunctionCallUsage *fcu, bool finalize)
  * false without flushing the entry.  Otherwise returns true.
  */
 bool
-pgstat_function_flush_cb(PgStat_EntryRef *entry_ref, bool nowait)
+pgstat_function_flush_cb(PgStat_EntryRef *entry_ref, bool nowait, bool anytime_only)
 {
 	PgStat_FunctionCounts *localent;
 	PgStatShared_Function *shfuncent;
+
+	Assert(!anytime_only);
 
 	localent = (PgStat_FunctionCounts *) entry_ref->pending;
 	shfuncent = (PgStatShared_Function *) entry_ref->shared_stats;

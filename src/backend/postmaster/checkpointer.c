@@ -66,8 +66,9 @@
 #include "utils/acl.h"
 #include "utils/guc.h"
 #include "utils/memutils.h"
+#include "utils/pgstat_internal.h"
 #include "utils/resowner.h"
-
+#include "utils/timeout.h"
 
 /*----------
  * Shared memory area for communication between checkpointer and backends
@@ -215,7 +216,7 @@ CheckpointerMain(const void *startup_data, size_t startup_data_len)
 	pqsignal(SIGINT, ReqShutdownXLOG);
 	pqsignal(SIGTERM, SIG_IGN); /* ignore SIGTERM */
 	/* SIGQUIT handler was already set up by InitPostmasterChild */
-	pqsignal(SIGALRM, SIG_IGN);
+	InitializeTimeouts();		/* establishes SIGALRM handler */
 	pqsignal(SIGPIPE, SIG_IGN);
 	pqsignal(SIGUSR1, procsignal_sigusr1_handler);
 	pqsignal(SIGUSR2, SignalHandlerForShutdownRequest);
@@ -224,6 +225,11 @@ CheckpointerMain(const void *startup_data, size_t startup_data_len)
 	 * Reset some signals that are accepted by postmaster but not here
 	 */
 	pqsignal(SIGCHLD, SIG_DFL);
+
+	/*
+	 * Register timeouts needed
+	 */
+	RegisterTimeout(ANYTIME_STATS_UPDATE_TIMEOUT, AnytimeStatsUpdateTimeoutHandler);
 
 	/*
 	 * Initialize so that first time-driven event happens at the correct time.

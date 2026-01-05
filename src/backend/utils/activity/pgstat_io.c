@@ -19,6 +19,7 @@
 #include "executor/instrument.h"
 #include "storage/bufmgr.h"
 #include "utils/pgstat_internal.h"
+#include "utils/timeout.h"
 
 static PgStat_PendingIO PendingIOStats;
 static bool have_iostats = false;
@@ -78,6 +79,9 @@ pgstat_count_io_op(IOObject io_object, IOContext io_context, IOOp io_op,
 
 	/* Add the per-backend counts */
 	pgstat_count_backend_io_op(io_object, io_context, io_op, cnt, bytes);
+
+	/* Schedule next anytime stats update timeout */
+	pgstat_schedule_anytime_update();
 
 	have_iostats = true;
 	pgstat_report_fixed = true;
@@ -172,9 +176,9 @@ pgstat_fetch_stat_io(void)
  * Simpler wrapper of pgstat_io_flush_cb()
  */
 void
-pgstat_flush_io(bool nowait)
+pgstat_flush_io(bool nowait, bool anytime_only)
 {
-	(void) pgstat_io_flush_cb(nowait);
+	(void) pgstat_io_flush_cb(nowait, anytime_only);
 }
 
 /*
@@ -186,7 +190,7 @@ pgstat_flush_io(bool nowait)
  * acquired. Otherwise, return false.
  */
 bool
-pgstat_io_flush_cb(bool nowait)
+pgstat_io_flush_cb(bool nowait, bool anytime_only)
 {
 	LWLock	   *bktype_lock;
 	PgStat_BktypeIO *bktype_shstats;

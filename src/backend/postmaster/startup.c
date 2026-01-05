@@ -32,6 +32,7 @@
 #include "storage/standby.h"
 #include "utils/guc.h"
 #include "utils/memutils.h"
+#include "utils/pgstat_internal.h"
 #include "utils/timeout.h"
 
 
@@ -245,6 +246,7 @@ StartupProcessMain(const void *startup_data, size_t startup_data_len)
 	RegisterTimeout(STANDBY_DEADLOCK_TIMEOUT, StandbyDeadLockHandler);
 	RegisterTimeout(STANDBY_TIMEOUT, StandbyTimeoutHandler);
 	RegisterTimeout(STANDBY_LOCK_TIMEOUT, StandbyLockTimeoutHandler);
+	RegisterTimeout(ANYTIME_STATS_UPDATE_TIMEOUT, AnytimeStatsUpdateTimeoutHandler);
 
 	/*
 	 * Unblock signals (they were blocked when the postmaster forked us)

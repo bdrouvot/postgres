@@ -3564,6 +3564,18 @@ ProcessInterrupts(void)
 		pgstat_report_stat(true);
 	}
 
+	/*
+	 * Flush stats outside of transaction boundary if the timeout fired.
+	 * Unlike transactional stats, these can be flushed even inside a running
+	 * transaction.
+	 */
+	if (AnytimeStatsUpdateTimeoutPending)
+	{
+		AnytimeStatsUpdateTimeoutPending = false;
+
+		pgstat_report_anytime_stat(false);
+	}
+
 	if (ProcSignalBarrierPending)
 		ProcessProcSignalBarrier();
 

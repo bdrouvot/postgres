@@ -108,10 +108,12 @@
 #include "pgstat.h"
 #include "storage/fd.h"
 #include "storage/ipc.h"
+#include "storage/latch.h"
 #include "storage/lwlock.h"
 #include "utils/guc_hooks.h"
 #include "utils/memutils.h"
 #include "utils/pgstat_internal.h"
+#include "utils/timeout.h"
 #include "utils/timestamp.h"
 
 
@@ -122,8 +124,6 @@
  * ----------
  */
 
-/* minimum interval non-forced stats flushes.*/
-#define PGSTAT_MIN_INTERVAL			1000
 /* how long until to block flushing pending stats updates */
 #define PGSTAT_MAX_INTERVAL			60000
 /* when to call pgstat_report_stat() again, even when idle */
@@ -187,7 +187,8 @@ static void pgstat_init_snapshot_fixed(void);
 
 static void pgstat_reset_after_failure(void);
 
-static bool pgstat_flush_pending_entries(bool nowait);
+static bool pgstat_flush_pending_entries(bool nowait, bool anytime_only);
+static bool pgstat_flush_fixed_stats(bool nowait, bool anytime_only);
 
 static void pgstat_prep_snapshot(void);
 static void pgstat_build_snapshot(void);
@@ -217,6 +218,12 @@ PgStat_LocalState pgStatLocal;
  * pgstat_report_stat().
  */
 bool		pgstat_report_fixed = false;
+
+/*
+ * Track when there is pending anytime flush to avoid relying on
+ * get_timeout_active() in hot pathes.
+ */
+bool		pgstat_pending_anytime = false;
 
 /* ----------
  * Local data
@@ -288,6 +295,7 @@ static const PgStat_KindInfo pgstat_kind_builtin_infos[PGSTAT_KIND_BUILTIN_SIZE]
 
 		.fixed_amount = false,
 		.write_to_file = true,
+		.flush_mode = FLUSH_AT_TXN_BOUNDARY,
 		/* so pg_stat_database entries can be seen in all databases */
 		.accessed_across_databases = true,
 
@@ -305,6 +313,7 @@ static const PgStat_KindInfo pgstat_kind_builtin_infos[PGSTAT_KIND_BUILTIN_SIZE]
 
 		.fixed_amount = false,
 		.write_to_file = true,
+		.flush_mode = FLUSH_AT_TXN_BOUNDARY,
 
 		.shared_size = sizeof(PgStatShared_Relation),
 		.shared_data_off = offsetof(PgStatShared_Relation, stats),
@@ -321,6 +330,7 @@ static const PgStat_KindInfo pgstat_kind_builtin_infos[PGSTAT_KIND_BUILTIN_SIZE]
 
 		.fixed_amount = false,
 		.write_to_file = true,
+		.flush_mode = FLUSH_AT_TXN_BOUNDARY,
 
 		.shared_size = sizeof(PgStatShared_Function),
 		.shared_data_off = offsetof(PgStatShared_Function, stats),
@@ -336,6 +346,7 @@ static const PgStat_KindInfo pgstat_kind_builtin_infos[PGSTAT_KIND_BUILTIN_SIZE]
 
 		.fixed_amount = false,
 		.write_to_file = true,
+		.flush_mode = FLUSH_AT_TXN_BOUNDARY,
 
 		.accessed_across_databases = true,
 
@@ -353,6 +364,7 @@ static const PgStat_KindInfo pgstat_kind_builtin_infos[PGSTAT_KIND_BUILTIN_SIZE]
 
 		.fixed_amount = false,
 		.write_to_file = true,
+		.flush_mode = FLUSH_AT_TXN_BOUNDARY,
 		/* so pg_stat_subscription_stats entries can be seen in all databases */
 		.accessed_across_databases = true,
 
@@ -370,6 +382,7 @@ static const PgStat_KindInfo pgstat_kind_builtin_infos[PGSTAT_KIND_BUILTIN_SIZE]
 
 		.fixed_amount = false,
 		.write_to_file = false,
+		.flush_mode = FLUSH_ANYTIME,
 
 		.accessed_across_databases = true,
 
@@ -436,6 +449,7 @@ static const PgStat_KindInfo pgstat_kind_builtin_infos[PGSTAT_KIND_BUILTIN_SIZE]
 
 		.fixed_amount = true,
 		.write_to_file = true,
+		.flush_mode = FLUSH_ANYTIME,
 
 		.snapshot_ctl_off = offsetof(PgStat_Snapshot, io),
 		.shared_ctl_off = offsetof(PgStat_ShmemControl, io),
@@ -453,6 +467,7 @@ static const PgStat_KindInfo pgstat_kind_builtin_infos[PGSTAT_KIND_BUILTIN_SIZE]
 
 		.fixed_amount = true,
 		.write_to_file = true,
+		.flush_mode = FLUSH_ANYTIME,
 
 		.snapshot_ctl_off = offsetof(PgStat_Snapshot, slru),
 		.shared_ctl_off = offsetof(PgStat_ShmemControl, slru),
@@ -470,6 +485,7 @@ static const PgStat_KindInfo pgstat_kind_builtin_infos[PGSTAT_KIND_BUILTIN_SIZE]
 
 		.fixed_amount = true,
 		.write_to_file = true,
+		.flush_mode = FLUSH_ANYTIME,
 
 		.snapshot_ctl_off = offsetof(PgStat_Snapshot, wal),
 		.shared_ctl_off = offsetof(PgStat_ShmemControl, wal),
@@ -775,23 +791,11 @@ pgstat_report_stat(bool force)
 	partial_flush = false;
 
 	/* flush of variable-numbered stats tracked in pending entries list */
-	partial_flush |= pgstat_flush_pending_entries(nowait);
+	partial_flush |= pgstat_flush_pending_entries(nowait, false);
 
 	/* flush of other stats kinds */
 	if (pgstat_report_fixed)
-	{
-		for (PgStat_Kind kind = PGSTAT_KIND_MIN; kind <= PGSTAT_KIND_MAX; kind++)
-		{
-			const PgStat_KindInfo *kind_info = pgstat_get_kind_info(kind);
-
-			if (!kind_info)
-				continue;
-			if (!kind_info->flush_static_cb)
-				continue;
-
-			partial_flush |= kind_info->flush_static_cb(nowait);
-		}
-	}
+		partial_flush |= pgstat_flush_fixed_stats(nowait, false);
 
 	last_flush = now;
 
@@ -1293,7 +1297,8 @@ pgstat_prep_pending_entry(PgStat_Kind kind, Oid dboid, uint64 objid, bool *creat
 
 	if (entry_ref->pending == NULL)
 	{
-		size_t		entrysize = pgstat_get_kind_info(kind)->pending_size;
+		const PgStat_KindInfo *kind_info = pgstat_get_kind_info(kind);
+		size_t		entrysize = kind_info->pending_size;
 
 		Assert(entrysize != (size_t) -1);
 
@@ -1345,9 +1350,14 @@ pgstat_delete_pending_entry(PgStat_EntryRef *entry_ref)
 
 /*
  * Flush out pending variable-numbered stats.
+ *
+ * If anytime_only is true, only flushes FLUSH_ANYTIME entries.
+ * This is safe to call inside transactions.
+ *
+ * If anytime_only is false, flushes all entries.
  */
 static bool
-pgstat_flush_pending_entries(bool nowait)
+pgstat_flush_pending_entries(bool nowait, bool anytime_only)
 {
 	bool		have_pending = false;
 	dlist_node *cur = NULL;
@@ -1377,8 +1387,22 @@ pgstat_flush_pending_entries(bool nowait)
 		Assert(!kind_info->fixed_amount);
 		Assert(kind_info->flush_pending_cb != NULL);
 
+		/* Skip transactional stats if we're in anytime_only mode */
+		if (anytime_only && kind_info->flush_mode == FLUSH_AT_TXN_BOUNDARY)
+		{
+			have_pending = true;
+
+			if (dlist_has_next(&pgStatPending, cur))
+				next = dlist_next_node(&pgStatPending, cur);
+			else
+				next = NULL;
+
+			cur = next;
+			continue;
+		}
+
 		/* flush the stats, if possible */
-		did_flush = kind_info->flush_pending_cb(entry_ref, nowait);
+		did_flush = kind_info->flush_pending_cb(entry_ref, nowait, anytime_only);
 
 		Assert(did_flush || nowait);
 
@@ -1402,6 +1426,33 @@ pgstat_flush_pending_entries(bool nowait)
 	return have_pending;
 }
 
+/*
+ * Flush fixed-amount stats.
+ *
+ * If anytime_only is true, only flushes FLUSH_ANYTIME stats (safe inside transactions).
+ * If anytime_only is false, flushes all stats with flush_static_cb.
+ */
+static bool
+pgstat_flush_fixed_stats(bool nowait, bool anytime_only)
+{
+	bool		partial_flush = false;
+
+	for (PgStat_Kind kind = PGSTAT_KIND_MIN; kind <= PGSTAT_KIND_MAX; kind++)
+	{
+		const PgStat_KindInfo *kind_info = pgstat_get_kind_info(kind);
+
+		if (!kind_info || !kind_info->flush_static_cb)
+			continue;
+
+		/* Skip transactional stats if we're in anytime_only mode */
+		if (anytime_only && kind_info->flush_mode == FLUSH_AT_TXN_BOUNDARY)
+			continue;
+
+		partial_flush |= kind_info->flush_static_cb(nowait, anytime_only);
+	}
+
+	return partial_flush;
+}
 
 /* ------------------------------------------------------------
  * Helper / infrastructure functions
@@ -2118,4 +2169,34 @@ assign_stats_fetch_consistency(int newval, void *extra)
 	 */
 	if (pgstat_fetch_consistency != newval)
 		force_stats_snapshot_clear = true;
+}
+
+/*
+ * Flushes only FLUSH_ANYTIME stats using non-blocking locks. Transactional
+ * stats (FLUSH_AT_TXN_BOUNDARY) remain pending until transaction boundary.
+ * Safe to call inside transactions.
+ */
+void
+pgstat_report_anytime_stat(bool force)
+{
+	bool		nowait = !force;
+
+	pgstat_assert_is_up();
+
+	/* Flush stats outside of transaction boundary */
+	pgstat_flush_pending_entries(nowait, true);
+	pgstat_flush_fixed_stats(nowait, true);
+
+	pgstat_pending_anytime = false;
+}
+
+/*
+ * Timeout handler for flushing anytime stats.
+ */
+void
+AnytimeStatsUpdateTimeoutHandler(void)
+{
+	AnytimeStatsUpdateTimeoutPending = true;
+	InterruptPending = true;
+	SetLatch(MyLatch);
 }

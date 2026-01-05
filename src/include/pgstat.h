@@ -34,6 +34,9 @@
 /* Default directory to store temporary statistics data in */
 #define PG_STAT_TMP_DIR		"pg_stat_tmp"
 
+/* Minimum interval non-forced stats flushes */
+#define PGSTAT_MIN_INTERVAL	1000
+
 /* Values for track_functions GUC variable --- order is significant! */
 typedef enum TrackFunctionsLevel
 {
@@ -532,7 +535,23 @@ extern void pgstat_initialize(void);
 
 /* Functions called from backends */
 extern long pgstat_report_stat(bool force);
+extern void pgstat_report_anytime_stat(bool force);
 extern void pgstat_force_next_flush(void);
+
+/*
+ * Schedule the next anytime stats update timeout.
+ *
+ * This should be called whenever accumulating statistics that support
+ * FLUSH_ANYTIME flushing mode.
+ */
+#define pgstat_schedule_anytime_update()												\
+	do {																				\
+		if (IsUnderPostmaster && !pgstat_pending_anytime)								\
+		{																				\
+			enable_timeout_after(ANYTIME_STATS_UPDATE_TIMEOUT, PGSTAT_MIN_INTERVAL);	\
+			pgstat_pending_anytime = true;												\
+		}																				\
+	} while (0)
 
 extern void pgstat_reset_counters(void);
 extern void pgstat_reset(PgStat_Kind kind, Oid dboid, uint64 objid);
@@ -806,6 +825,8 @@ extern PgStat_WalStats *pgstat_fetch_stat_wal(void);
  * Variables in pgstat.c
  */
 
+extern PGDLLIMPORT bool pgstat_pending_anytime;
+
 /* GUC parameters */
 extern PGDLLIMPORT bool pgstat_track_counts;
 extern PGDLLIMPORT int pgstat_track_functions;
@@ -848,5 +869,6 @@ extern PGDLLIMPORT PgStat_Counter pgStatTransactionIdleTime;
 
 /* updated by the traffic cop and in errfinish() */
 extern PGDLLIMPORT SessionEndType pgStatSessionEndCause;
+
 
 #endif							/* PGSTAT_H */
