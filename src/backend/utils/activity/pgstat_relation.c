@@ -260,15 +260,6 @@ pgstat_report_vacuum(Relation rel, PgStat_Counter livetuples,
 	}
 
 	pgstat_unlock_entry(entry_ref);
-
-	/*
-	 * Flush IO statistics now. pgstat_report_stat() will flush IO stats,
-	 * however this will not be called until after an entire autovacuum cycle
-	 * is done -- which will likely vacuum many relations -- or until the
-	 * VACUUM command has processed all tables and committed.
-	 */
-	pgstat_flush_io(false, true);
-	(void) pgstat_flush_backend(false, PGSTAT_BACKEND_FLUSH_IO, true);
 }
 
 /*
@@ -360,10 +351,6 @@ pgstat_report_analyze(Relation rel,
 	}
 
 	pgstat_unlock_entry(entry_ref);
-
-	/* see pgstat_report_vacuum() */
-	pgstat_flush_io(false, true);
-	(void) pgstat_flush_backend(false, PGSTAT_BACKEND_FLUSH_IO, true);
 }
 
 /*

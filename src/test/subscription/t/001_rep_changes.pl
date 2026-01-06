@@ -11,6 +11,7 @@ use Test::More;
 # Initialize publisher node
 my $node_publisher = PostgreSQL::Test::Cluster->new('publisher');
 $node_publisher->init(allows_streaming => 'logical');
+$node_publisher->append_conf('postgresql.conf', "stats_flush_interval = '1s'");
 $node_publisher->start;
 
 # Create subscriber node

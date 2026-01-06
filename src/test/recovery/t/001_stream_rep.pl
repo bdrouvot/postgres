@@ -15,6 +15,7 @@ my $node_primary = PostgreSQL::Test::Cluster->new('primary');
 $node_primary->init(
 	allows_streaming => 1,
 	auth_extra => [ '--create-role' => 'repl_role' ]);
+$node_primary->append_conf('postgresql.conf', "stats_flush_interval = '1s'");
 $node_primary->start;
 my $backup_name = 'my_backup';
 
