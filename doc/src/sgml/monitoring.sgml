@@ -3767,6 +3767,19 @@ description | Waiting for a newly initialized WAL file to reach durable storage
    </tgroup>
   </table>
 
+  <note>
+   <para>
+    Some statistics are updated while a transaction is in progress (for example,
+    <structfield>blks_read</structfield>, <structfield>blks_hit</structfield>,
+    <structfield>tup_returned</structfield> and <structfield>tup_fetched</structfield>).
+    Statistics that either do not depend on transactions or require transactional
+    consistency are updated only when the transaction ends. Statistics that require
+    transactional consistency include <structfield>xact_commit</structfield>,
+    <structfield>xact_rollback</structfield>, <structfield>tup_inserted</structfield>,
+    <structfield>tup_updated</structfield> and <structfield>tup_deleted</structfield>.
+   </para>
+  </note>
+
  </sect2>
 
  <sect2 id="monitoring-pg-stat-database-conflicts-view">
@@ -3956,8 +3969,8 @@ description | Waiting for a newly initialized WAL file to reach durable storage
        <structfield>last_seq_scan</structfield> <type>timestamp with time zone</type>
       </para>
       <para>
-       The time of the last sequential scan on this table, based on the
-       most recent transaction stop time
+       The approximate time of the last sequential scan on this table, updated
+       at least every <varname>stats_flush_interval</varname>
       </para></entry>
      </row>
 
@@ -3984,8 +3997,8 @@ description | Waiting for a newly initialized WAL file to reach durable storage
        <structfield>last_idx_scan</structfield> <type>timestamp with time zone</type>
       </para>
       <para>
-       The time of the last index scan on this table, based on the
-       most recent transaction stop time
+       The approximate time of the last index scan on this table, updated
+       at least every <varname>stats_flush_interval</varname>
       </para></entry>
      </row>
 
@@ -4223,6 +4236,15 @@ description | Waiting for a newly initialized WAL file to reach durable storage
    </tgroup>
   </table>
 
+  <note>
+   <para>
+    The <structfield>seq_scan</structfield>, <structfield>last_seq_scan</structfield>,
+    <structfield>seq_tup_read</structfield>, <structfield>idx_scan</structfield>,
+    <structfield>last_idx_scan</structfield> and <structfield>idx_tup_fetch</structfield>
+    are updated while the transactions are in progress.
+   </para>
+  </note>
+
  </sect2>
 
  <sect2 id="monitoring-pg-stat-all-indexes-view">
@@ -4402,6 +4424,13 @@ description | Waiting for a newly initialized WAL file to reach durable storage
     the skip scan optimization, an index search is performed each time the
     scan is repositioned to the next index leaf page that might have matching
     tuples (see <xref linkend="indexes-multicolumn"/>).
+   </para>
+  </note>
+  <note>
+   <para>
+    The <structfield>idx_scan</structfield>, <structfield>last_idx_scan</structfield>,
+    <structfield>idx_tup_read</structfield> and <structfield>idx_tup_fetch</structfield>
+    are updated while the transactions are in progress.
    </para>
   </note>
   <tip>

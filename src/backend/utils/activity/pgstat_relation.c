@@ -47,7 +47,19 @@ static void add_tabstat_xact_level(PgStat_TableStatus *pgstat_info, int nest_lev
 static void ensure_tabstat_xact_level(PgStat_TableStatus *pgstat_info);
 static void save_truncdrop_counters(PgStat_TableXactStatus *trans, bool is_drop);
 static void restore_truncdrop_counters(PgStat_TableXactStatus *trans);
+static void flush_relation_anytime_stats(PgStat_StatTabEntry *tabentry,
+										 PgStat_TableCounts *counts, bool anytime_only);
 
+/*
+ * Update database statistics with non-transactional stats.
+ */
+#define UPDATE_DATABASE_ANYTIME_STATS(dbentry, counts)				\
+	do {															\
+		(dbentry)->tuples_returned += (counts)->tuples_returned;	\
+		(dbentry)->tuples_fetched += (counts)->tuples_fetched;		\
+		(dbentry)->blocks_fetched += (counts)->blocks_fetched;		\
+		(dbentry)->blocks_hit += (counts)->blocks_hit;				\
+	} while (0)
 
 /*
  * Copy stats between relations. This is used for things like REINDEX
@@ -790,6 +802,29 @@ pgstat_twophase_postabort(FullTransactionId fxid, uint16 info,
 }
 
 /*
+ * Helper function to flush non-transactional statistics.
+ */
+static void
+flush_relation_anytime_stats(PgStat_StatTabEntry *tabentry, PgStat_TableCounts *counts,
+							 bool anytime_only)
+{
+	TimestampTz t;
+
+	tabentry->numscans += counts->numscans;
+	if (counts->numscans)
+	{
+		t = anytime_only ? GetCurrentTimestamp() : GetCurrentTransactionStopTimestamp();
+		if (t > tabentry->lastscan)
+			tabentry->lastscan = t;
+	}
+
+	tabentry->tuples_returned += counts->tuples_returned;
+	tabentry->tuples_fetched += counts->tuples_fetched;
+	tabentry->blocks_fetched += counts->blocks_fetched;
+	tabentry->blocks_hit += counts->blocks_hit;
+}
+
+/*
  * Flush out pending stats for the entry
  *
  * If nowait is true and the lock could not be immediately acquired, returns
@@ -797,9 +832,17 @@ pgstat_twophase_postabort(FullTransactionId fxid, uint16 info,
  *
  * Some of the stats are copied to the corresponding pending database stats
  * entry when successfully flushing.
+ *
+ * If anytime_only is true, only non-transactional fields are flushed
+ * (numscans, tuples_returned, tuples_fetched, blocks_fetched, blocks_hit).
+ * Transactional fields remain pending until transaction boundary.
+ *
+ * Some of the stats are copied to the corresponding pending database stats
+ * entry when successfully flushing.
  */
 bool
-pgstat_relation_flush_cb(PgStat_EntryRef *entry_ref, bool nowait, bool anytime_only)
+pgstat_relation_flush_cb(PgStat_EntryRef *entry_ref, bool nowait,
+						 bool anytime_only, bool *is_partial)
 {
 	Oid			dboid;
 	PgStat_TableStatus *lstats; /* pending stats entry  */
@@ -807,11 +850,12 @@ pgstat_relation_flush_cb(PgStat_EntryRef *entry_ref, bool nowait, bool anytime_o
 	PgStat_StatTabEntry *tabentry;	/* table entry of shared stats */
 	PgStat_StatDBEntry *dbentry;	/* pending database entry */
 
-	Assert(!anytime_only);
-
 	dboid = entry_ref->shared_entry->key.dboid;
 	lstats = (PgStat_TableStatus *) entry_ref->pending;
 	shtabstats = (PgStatShared_Relation *) entry_ref->shared_stats;
+
+	/* this is a partial flush if in anytime only mode */
+	*is_partial = anytime_only;
 
 	/*
 	 * Ignore entries that didn't accumulate any actual counts, such as
@@ -824,19 +868,36 @@ pgstat_relation_flush_cb(PgStat_EntryRef *entry_ref, bool nowait, bool anytime_o
 	if (!pgstat_lock_entry(entry_ref, nowait))
 		return false;
 
-	/* add the values to the shared entry. */
 	tabentry = &shtabstats->stats;
 
-	tabentry->numscans += lstats->counts.numscans;
-	if (lstats->counts.numscans)
+	if (anytime_only)
 	{
-		TimestampTz t = GetCurrentTransactionStopTimestamp();
 
-		if (t > tabentry->lastscan)
-			tabentry->lastscan = t;
+		/* Flush non-transactional statistics */
+		flush_relation_anytime_stats(tabentry, &lstats->counts, true);
+
+		pgstat_unlock_entry(entry_ref);
+
+		/* Also update the corresponding fields in database stats */
+		dbentry = pgstat_prep_database_pending(dboid);
+		UPDATE_DATABASE_ANYTIME_STATS(dbentry, &lstats->counts);
+
+		/*
+		 * Clear the flushed fields from pending stats to prevent
+		 * double-counting when we flush all fields at transaction boundary.
+		 */
+		lstats->counts.numscans = 0;
+		lstats->counts.tuples_returned = 0;
+		lstats->counts.tuples_fetched = 0;
+		lstats->counts.blocks_fetched = 0;
+		lstats->counts.blocks_hit = 0;
+
+		return true;
 	}
-	tabentry->tuples_returned += lstats->counts.tuples_returned;
-	tabentry->tuples_fetched += lstats->counts.tuples_fetched;
+
+	/* Flush non-transactional statistics */
+	flush_relation_anytime_stats(tabentry, &lstats->counts, false);
+
 	tabentry->tuples_inserted += lstats->counts.tuples_inserted;
 	tabentry->tuples_updated += lstats->counts.tuples_updated;
 	tabentry->tuples_deleted += lstats->counts.tuples_deleted;
@@ -866,9 +927,6 @@ pgstat_relation_flush_cb(PgStat_EntryRef *entry_ref, bool nowait, bool anytime_o
 	 */
 	tabentry->ins_since_vacuum += lstats->counts.tuples_inserted;
 
-	tabentry->blocks_fetched += lstats->counts.blocks_fetched;
-	tabentry->blocks_hit += lstats->counts.blocks_hit;
-
 	/* Clamp live_tuples in case of negative delta_live_tuples */
 	tabentry->live_tuples = Max(tabentry->live_tuples, 0);
 	/* Likewise for dead_tuples */
@@ -878,13 +936,11 @@ pgstat_relation_flush_cb(PgStat_EntryRef *entry_ref, bool nowait, bool anytime_o
 
 	/* The entry was successfully flushed, add the same to database stats */
 	dbentry = pgstat_prep_database_pending(dboid);
-	dbentry->tuples_returned += lstats->counts.tuples_returned;
-	dbentry->tuples_fetched += lstats->counts.tuples_fetched;
+	UPDATE_DATABASE_ANYTIME_STATS(dbentry, &lstats->counts);
+
 	dbentry->tuples_inserted += lstats->counts.tuples_inserted;
 	dbentry->tuples_updated += lstats->counts.tuples_updated;
 	dbentry->tuples_deleted += lstats->counts.tuples_deleted;
-	dbentry->blocks_fetched += lstats->counts.blocks_fetched;
-	dbentry->blocks_hit += lstats->counts.blocks_hit;
 
 	return true;
 }

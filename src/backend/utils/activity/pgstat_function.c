@@ -190,7 +190,8 @@ pgstat_end_function_usage(PgStat_FunctionCallUsage *fcu, bool finalize)
  * false without flushing the entry.  Otherwise returns true.
  */
 bool
-pgstat_function_flush_cb(PgStat_EntryRef *entry_ref, bool nowait, bool anytime_only)
+pgstat_function_flush_cb(PgStat_EntryRef *entry_ref, bool nowait,
+						 bool anytime_only, bool *is_partial)
 {
 	PgStat_FunctionCounts *localent;
 	PgStatShared_Function *shfuncent;
@@ -199,6 +200,9 @@ pgstat_function_flush_cb(PgStat_EntryRef *entry_ref, bool nowait, bool anytime_o
 
 	localent = (PgStat_FunctionCounts *) entry_ref->pending;
 	shfuncent = (PgStatShared_Function *) entry_ref->shared_stats;
+
+	/* this is not a partial flush */
+	*is_partial = false;
 
 	/* localent always has non-zero content */
 

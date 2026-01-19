@@ -20,6 +20,7 @@
 #include "utils/backend_status.h"	/* for backward compatibility */	/* IWYU pragma: export */
 #include "utils/pgstat_kind.h"
 #include "utils/relcache.h"
+#include "utils/timeout.h"
 #include "utils/wait_event.h"	/* for backward compatibility */	/* IWYU pragma: export */
 
 
@@ -536,10 +537,11 @@ extern void pgstat_report_anytime_stat(bool force);
 extern void pgstat_force_next_flush(void);
 
 /*
- * Schedule the next anytime stats update timeout.
+ * Schedule the next anytime stats update timeout and mark that we have
+ * mixed anytime stats pending.
  *
  * This should be called whenever accumulating statistics that support
- * FLUSH_ANYTIME flushing mode.
+ * FLUSH_ANYTIME or FLUSH_MIXED flushing modes.
  */
 #define pgstat_schedule_anytime_update()												\
 	do {																				\
@@ -705,37 +707,58 @@ extern void pgstat_report_analyze(Relation rel,
 #define pgstat_count_heap_scan(rel)									\
 	do {															\
 		if (pgstat_should_count_relation(rel))						\
+		{															\
 			(rel)->pgstat_info->counts.numscans++;					\
+			pgstat_schedule_anytime_update();						\
+		}															\
 	} while (0)
 #define pgstat_count_heap_getnext(rel)								\
 	do {															\
 		if (pgstat_should_count_relation(rel))						\
+		{															\
 			(rel)->pgstat_info->counts.tuples_returned++;			\
+			pgstat_schedule_anytime_update();						\
+		}															\
 	} while (0)
 #define pgstat_count_heap_fetch(rel)								\
 	do {															\
 		if (pgstat_should_count_relation(rel))						\
+		{															\
 			(rel)->pgstat_info->counts.tuples_fetched++;			\
+			pgstat_schedule_anytime_update();						\
+		}															\
 	} while (0)
 #define pgstat_count_index_scan(rel)								\
 	do {															\
 		if (pgstat_should_count_relation(rel))						\
+		{															\
 			(rel)->pgstat_info->counts.numscans++;					\
+			pgstat_schedule_anytime_update();						\
+		}															\
 	} while (0)
 #define pgstat_count_index_tuples(rel, n)							\
 	do {															\
 		if (pgstat_should_count_relation(rel))						\
+		{															\
 			(rel)->pgstat_info->counts.tuples_returned += (n);		\
+			pgstat_schedule_anytime_update();						\
+		}															\
 	} while (0)
 #define pgstat_count_buffer_read(rel)								\
 	do {															\
 		if (pgstat_should_count_relation(rel))						\
+		{															\
 			(rel)->pgstat_info->counts.blocks_fetched++;			\
+			pgstat_schedule_anytime_update();						\
+		}															\
 	} while (0)
 #define pgstat_count_buffer_hit(rel)								\
 	do {															\
 		if (pgstat_should_count_relation(rel))						\
+		{															\
 			(rel)->pgstat_info->counts.blocks_hit++;				\
+			pgstat_schedule_anytime_update();						\
+		}															\
 	} while (0)
 
 extern void pgstat_count_heap_insert(Relation rel, PgStat_Counter n);

@@ -117,7 +117,8 @@ pgstat_fetch_stat_subscription(Oid subid)
  * false without flushing the entry.  Otherwise returns true.
  */
 bool
-pgstat_subscription_flush_cb(PgStat_EntryRef *entry_ref, bool nowait, bool anytime_only)
+pgstat_subscription_flush_cb(PgStat_EntryRef *entry_ref, bool nowait,
+							 bool anytime_only, bool *is_partial)
 {
 	PgStat_BackendSubEntry *localent;
 	PgStatShared_Subscription *shsubent;
@@ -126,6 +127,9 @@ pgstat_subscription_flush_cb(PgStat_EntryRef *entry_ref, bool nowait, bool anyti
 
 	localent = (PgStat_BackendSubEntry *) entry_ref->pending;
 	shsubent = (PgStatShared_Subscription *) entry_ref->shared_stats;
+
+	/* this is not a partial flush */
+	*is_partial = false;
 
 	/* localent always has non-zero content */
 

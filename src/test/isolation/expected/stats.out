@@ -2245,6 +2245,108 @@ seq_scan|seq_tup_read|n_tup_ins|n_tup_upd|n_tup_del|n_live_tup|n_dead_tup|vacuum
 (1 row)
 
 
+starting permutation: s2_begin s2_table_select s1_sleep s1_table_stats s2_track_counts_off s2_table_select s1_sleep s1_table_stats s2_track_counts_on s2_table_select s1_sleep s1_table_stats s2_table_drop s2_commit
+pg_stat_force_next_flush
+------------------------
+                        
+(1 row)
+
+step s2_begin: BEGIN;
+step s2_table_select: SELECT * FROM test_stat_tab ORDER BY key, value;
+key|value
+---+-----
+k0 |    1
+(1 row)
+
+step s1_sleep: SELECT pg_sleep(1.5);
+pg_sleep
+--------
+        
+(1 row)
+
+step s1_table_stats: 
+    SELECT
+        pg_stat_get_numscans(tso.oid) AS seq_scan,
+        pg_stat_get_tuples_returned(tso.oid) AS seq_tup_read,
+        pg_stat_get_tuples_inserted(tso.oid) AS n_tup_ins,
+        pg_stat_get_tuples_updated(tso.oid) AS n_tup_upd,
+        pg_stat_get_tuples_deleted(tso.oid) AS n_tup_del,
+        pg_stat_get_live_tuples(tso.oid) AS n_live_tup,
+        pg_stat_get_dead_tuples(tso.oid) AS n_dead_tup,
+        pg_stat_get_vacuum_count(tso.oid) AS vacuum_count
+    FROM test_stat_oid AS tso
+    WHERE tso.name = 'test_stat_tab'
+
+seq_scan|seq_tup_read|n_tup_ins|n_tup_upd|n_tup_del|n_live_tup|n_dead_tup|vacuum_count
+--------+------------+---------+---------+---------+----------+----------+------------
+       1|           1|        1|        0|        0|         1|         0|           0
+(1 row)
+
+step s2_track_counts_off: SET track_counts = off;
+step s2_table_select: SELECT * FROM test_stat_tab ORDER BY key, value;
+key|value
+---+-----
+k0 |    1
+(1 row)
+
+step s1_sleep: SELECT pg_sleep(1.5);
+pg_sleep
+--------
+        
+(1 row)
+
+step s1_table_stats: 
+    SELECT
+        pg_stat_get_numscans(tso.oid) AS seq_scan,
+        pg_stat_get_tuples_returned(tso.oid) AS seq_tup_read,
+        pg_stat_get_tuples_inserted(tso.oid) AS n_tup_ins,
+        pg_stat_get_tuples_updated(tso.oid) AS n_tup_upd,
+        pg_stat_get_tuples_deleted(tso.oid) AS n_tup_del,
+        pg_stat_get_live_tuples(tso.oid) AS n_live_tup,
+        pg_stat_get_dead_tuples(tso.oid) AS n_dead_tup,
+        pg_stat_get_vacuum_count(tso.oid) AS vacuum_count
+    FROM test_stat_oid AS tso
+    WHERE tso.name = 'test_stat_tab'
+
+seq_scan|seq_tup_read|n_tup_ins|n_tup_upd|n_tup_del|n_live_tup|n_dead_tup|vacuum_count
+--------+------------+---------+---------+---------+----------+----------+------------
+       1|           1|        1|        0|        0|         1|         0|           0
+(1 row)
+
+step s2_track_counts_on: SET track_counts = on;
+step s2_table_select: SELECT * FROM test_stat_tab ORDER BY key, value;
+key|value
+---+-----
+k0 |    1
+(1 row)
+
+step s1_sleep: SELECT pg_sleep(1.5);
+pg_sleep
+--------
+        
+(1 row)
+
+step s1_table_stats: 
+    SELECT
+        pg_stat_get_numscans(tso.oid) AS seq_scan,
+        pg_stat_get_tuples_returned(tso.oid) AS seq_tup_read,
+        pg_stat_get_tuples_inserted(tso.oid) AS n_tup_ins,
+        pg_stat_get_tuples_updated(tso.oid) AS n_tup_upd,
+        pg_stat_get_tuples_deleted(tso.oid) AS n_tup_del,
+        pg_stat_get_live_tuples(tso.oid) AS n_live_tup,
+        pg_stat_get_dead_tuples(tso.oid) AS n_dead_tup,
+        pg_stat_get_vacuum_count(tso.oid) AS vacuum_count
+    FROM test_stat_oid AS tso
+    WHERE tso.name = 'test_stat_tab'
+
+seq_scan|seq_tup_read|n_tup_ins|n_tup_upd|n_tup_del|n_live_tup|n_dead_tup|vacuum_count
+--------+------------+---------+---------+---------+----------+----------+------------
+       2|           2|        1|        0|        0|         1|         0|           0
+(1 row)
+
+step s2_table_drop: DROP TABLE test_stat_tab;
+step s2_commit: COMMIT;
+
 starting permutation: s1_track_counts_off s1_table_stats s1_track_counts_on
 pg_stat_force_next_flush
 ------------------------

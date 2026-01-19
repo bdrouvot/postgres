@@ -50,6 +50,8 @@ step s1_rollback { ROLLBACK; }
 step s1_prepare_a { PREPARE TRANSACTION 'a'; }
 step s1_commit_prepared_a { COMMIT PREPARED 'a'; }
 step s1_rollback_prepared_a { ROLLBACK PREPARED 'a'; }
+# Has to be greater than session 2 stats_flush_interval
+step s1_sleep { SELECT pg_sleep(1.5); }
 
 # Function stats steps
 step s1_ff { SELECT pg_stat_force_next_flush(); }
@@ -132,12 +134,16 @@ step s1_slru_check_stats {
 
 
 session s2
-setup { SET stats_fetch_consistency = 'none'; }
+setup {
+        SET stats_fetch_consistency = 'none';
+        SET stats_flush_interval = '1s';
+}
 step s2_begin { BEGIN; }
 step s2_commit { COMMIT; }
 step s2_commit_prepared_a { COMMIT PREPARED 'a'; }
 step s2_rollback_prepared_a { ROLLBACK PREPARED 'a'; }
 step s2_ff { SELECT pg_stat_force_next_flush(); }
+step s2_table_drop { DROP TABLE test_stat_tab; }
 
 # Function stats steps
 step s2_track_funcs_all { SET track_functions = 'all'; }
@@ -156,6 +162,8 @@ step s2_func_stats {
 }
 
 # Relation stats steps
+step s2_track_counts_on { SET track_counts = on; }
+step s2_track_counts_off { SET track_counts = off; }
 step s2_table_select { SELECT * FROM test_stat_tab ORDER BY key, value; }
 step s2_table_update_k1 { UPDATE test_stat_tab SET value = value + 1 WHERE key = 'k1';}
 
@@ -435,6 +443,23 @@ permutation
   s1_table_drop
   s1_table_stats
 
+### Check that some stats are updated (seq_scan and seq_tup_read)
+### while the transaction is still running
+permutation
+  s2_begin
+  s2_table_select
+  s1_sleep
+  s1_table_stats
+  s2_track_counts_off
+  s2_table_select
+  s1_sleep
+  s1_table_stats
+  s2_track_counts_on
+  s2_table_select
+  s1_sleep
+  s1_table_stats
+  s2_table_drop
+  s2_commit
 
 ### Check that we don't count changes with track counts off, but allow access
 ### to prior stats

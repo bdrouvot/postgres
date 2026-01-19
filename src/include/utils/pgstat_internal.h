@@ -322,8 +322,10 @@ typedef struct PgStat_KindInfo
 	 * that cannot use PgStat_EntryRef->pending.
 	 *
 	 * The anytime_only parameter indicates whether this is an anytime flush.
+	 * The is_partial parameter indicates whether this is a partial flush.
 	 */
-	bool		(*flush_pending_cb) (PgStat_EntryRef *sr, bool nowait, bool anytime_only);
+	bool		(*flush_pending_cb) (PgStat_EntryRef *sr, bool nowait,
+									 bool anytime_only, bool *is_partial);
 
 	/*
 	 * For variable-numbered stats: delete pending stats. Optional.
@@ -757,7 +759,8 @@ extern void AtEOXact_PgStat_Database(bool isCommit, bool parallel);
 
 extern PgStat_StatDBEntry *pgstat_prep_database_pending(Oid dboid);
 extern void pgstat_reset_database_timestamp(Oid dboid, TimestampTz ts);
-extern bool pgstat_database_flush_cb(PgStat_EntryRef *entry_ref, bool nowait, bool anytime_only);
+extern bool pgstat_database_flush_cb(PgStat_EntryRef *entry_ref, bool nowait,
+									 bool anytime_only, bool *is_partial);
 extern void pgstat_database_reset_timestamp_cb(PgStatShared_Common *header, TimestampTz ts);
 
 
@@ -765,7 +768,8 @@ extern void pgstat_database_reset_timestamp_cb(PgStatShared_Common *header, Time
  * Functions in pgstat_function.c
  */
 
-extern bool pgstat_function_flush_cb(PgStat_EntryRef *entry_ref, bool nowait, bool anytime_only);
+extern bool pgstat_function_flush_cb(PgStat_EntryRef *entry_ref, bool nowait,
+									 bool anytime_only, bool *is_partial);
 extern void pgstat_function_reset_timestamp_cb(PgStatShared_Common *header, TimestampTz ts);
 
 
@@ -790,7 +794,8 @@ extern void AtEOSubXact_PgStat_Relations(PgStat_SubXactStatus *xact_state, bool 
 extern void AtPrepare_PgStat_Relations(PgStat_SubXactStatus *xact_state);
 extern void PostPrepare_PgStat_Relations(PgStat_SubXactStatus *xact_state);
 
-extern bool pgstat_relation_flush_cb(PgStat_EntryRef *entry_ref, bool nowait, bool anytime_only);
+extern bool pgstat_relation_flush_cb(PgStat_EntryRef *entry_ref, bool nowait,
+									 bool anytime_only, bool *is_partial);
 extern void pgstat_relation_delete_pending_cb(PgStat_EntryRef *entry_ref);
 extern void pgstat_relation_reset_timestamp_cb(PgStatShared_Common *header, TimestampTz ts);
 
@@ -858,7 +863,8 @@ extern void pgstat_wal_snapshot_cb(void);
  * Functions in pgstat_subscription.c
  */
 
-extern bool pgstat_subscription_flush_cb(PgStat_EntryRef *entry_ref, bool nowait, bool anytime_only);
+extern bool pgstat_subscription_flush_cb(PgStat_EntryRef *entry_ref, bool nowait,
+										 bool anytime_only, bool *is_partial);
 extern void pgstat_subscription_reset_timestamp_cb(PgStatShared_Common *header, TimestampTz ts);
 
 

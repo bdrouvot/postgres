@@ -298,7 +298,7 @@ static const PgStat_KindInfo pgstat_kind_builtin_infos[PGSTAT_KIND_BUILTIN_SIZE]
 
 		.fixed_amount = false,
 		.write_to_file = true,
-		.flush_mode = FLUSH_AT_TXN_BOUNDARY,
+		.flush_mode = FLUSH_ANYTIME,
 		/* so pg_stat_database entries can be seen in all databases */
 		.accessed_across_databases = true,
 
@@ -316,7 +316,7 @@ static const PgStat_KindInfo pgstat_kind_builtin_infos[PGSTAT_KIND_BUILTIN_SIZE]
 
 		.fixed_amount = false,
 		.write_to_file = true,
-		.flush_mode = FLUSH_AT_TXN_BOUNDARY,
+		.flush_mode = FLUSH_ANYTIME,
 
 		.shared_size = sizeof(PgStatShared_Relation),
 		.shared_data_off = offsetof(PgStatShared_Relation, stats),
@@ -1354,7 +1354,8 @@ pgstat_delete_pending_entry(PgStat_EntryRef *entry_ref)
 /*
  * Flush out pending variable-numbered stats.
  *
- * If anytime_only is true, only flushes FLUSH_ANYTIME entries.
+ * If anytime_only is true, only flushes FLUSH_ANYTIME entries. For entries
+ * that support it, the callback may flush only non-transactional fields.
  * This is safe to call inside transactions.
  *
  * If anytime_only is false, flushes all entries.
@@ -1385,6 +1386,7 @@ pgstat_flush_pending_entries(bool nowait, bool anytime_only)
 		PgStat_Kind kind = key.kind;
 		const PgStat_KindInfo *kind_info = pgstat_get_kind_info(kind);
 		bool		did_flush;
+		bool		is_partial_flush = false;
 		dlist_node *next;
 
 		Assert(!kind_info->fixed_amount);
@@ -1405,7 +1407,8 @@ pgstat_flush_pending_entries(bool nowait, bool anytime_only)
 		}
 
 		/* flush the stats, if possible */
-		did_flush = kind_info->flush_pending_cb(entry_ref, nowait, anytime_only);
+		did_flush = kind_info->flush_pending_cb(entry_ref, nowait,
+												anytime_only, &is_partial_flush);
 
 		Assert(did_flush || nowait);
 
@@ -1415,8 +1418,8 @@ pgstat_flush_pending_entries(bool nowait, bool anytime_only)
 		else
 			next = NULL;
 
-		/* if successfully flushed, remove entry */
-		if (did_flush)
+		/* if successfull non-partial flush, remove entry */
+		if (did_flush && !is_partial_flush)
 			pgstat_delete_pending_entry(entry_ref);
 		else
 			have_pending = true;
