@@ -8929,6 +8929,38 @@ COPY postgres_log FROM '/full/path/to/logfile.csv' WITH csv;
       </listitem>
      </varlistentry>
 
+     <varlistentry id="guc-stats-flush-interval" xreflabel="stats_flush_interval">
+      <term><varname>stats_flush_interval</varname> (<type>integer</type>)
+      <indexterm>
+       <primary><varname>stats_flush_interval</varname> configuration parameter</primary>
+      </indexterm>
+      </term>
+      <listitem>
+       <para>
+        Sets the interval at which certain statistics, which can be updated while a
+        transaction is in progress, are made visible. These include WAL activity
+        and I/O operations.
+        Such statistics are refreshed at the specified interval and can be observed
+        during active transactions in monitoring views such as
+        <link linkend="monitoring-pg-stat-wal-view"><structname>pg_stat_wal</structname></link>
+        and
+        <link linkend="monitoring-pg-stat-io-view"><structname>pg_stat_io</structname></link>.
+        If the value is specified without a unit, milliseconds are assumed.
+        The default is 10 seconds (<literal>10s</literal>), which is generally
+        the smallest practical value for long-running transactions.
+       </para>
+       <note>
+        <para>
+         This parameter does not affect statistics that are only reported at
+         transaction end, such as the columns of <structname>pg_stat_all_tables</structname>
+         (for example, <structfield>n_tup_ins</structfield>, <structfield>n_tup_upd</structfield>,
+         and <structfield>n_tup_del</structfield>). These statistics are always
+         flushed at the end of a transaction.
+        </para>
+       </note>
+      </listitem>
+     </varlistentry>
+
      </variablelist>
     </sect2>
 

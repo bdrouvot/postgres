@@ -34,9 +34,6 @@
 /* Default directory to store temporary statistics data in */
 #define PG_STAT_TMP_DIR		"pg_stat_tmp"
 
-/* Minimum interval non-forced stats flushes */
-#define PGSTAT_MIN_INTERVAL	1000
-
 /* Values for track_functions GUC variable --- order is significant! */
 typedef enum TrackFunctionsLevel
 {
@@ -548,7 +545,7 @@ extern void pgstat_force_next_flush(void);
 	do {																				\
 		if (IsUnderPostmaster && !pgstat_pending_anytime)								\
 		{																				\
-			enable_timeout_after(ANYTIME_STATS_UPDATE_TIMEOUT, PGSTAT_MIN_INTERVAL);	\
+			enable_timeout_after(ANYTIME_STATS_UPDATE_TIMEOUT, pgstat_flush_interval);	\
 			pgstat_pending_anytime = true;												\
 		}																				\
 	} while (0)
@@ -831,6 +828,7 @@ extern PGDLLIMPORT bool pgstat_pending_anytime;
 extern PGDLLIMPORT bool pgstat_track_counts;
 extern PGDLLIMPORT int pgstat_track_functions;
 extern PGDLLIMPORT int pgstat_fetch_consistency;
+extern PGDLLIMPORT int pgstat_flush_interval;
 
 
 /*

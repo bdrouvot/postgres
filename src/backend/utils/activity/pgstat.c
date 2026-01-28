@@ -124,6 +124,8 @@
  * ----------
  */
 
+/* minimum interval non-forced stats flushes.*/
+#define PGSTAT_MIN_INTERVAL			1000
 /* how long until to block flushing pending stats updates */
 #define PGSTAT_MAX_INTERVAL			60000
 /* when to call pgstat_report_stat() again, even when idle */
@@ -204,6 +206,7 @@ static inline bool pgstat_is_kind_valid(PgStat_Kind kind);
 
 bool		pgstat_track_counts = false;
 int			pgstat_fetch_consistency = PGSTAT_FETCH_CONSISTENCY_CACHE;
+int			pgstat_flush_interval = 10000;
 
 
 /* ----------
@@ -2169,6 +2172,16 @@ assign_stats_fetch_consistency(int newval, void *extra)
 	 */
 	if (pgstat_fetch_consistency != newval)
 		force_stats_snapshot_clear = true;
+}
+
+/*
+ * GUC assign_hook for stats_flush_interval.
+ */
+void
+assign_stats_flush_interval(int newval, void *extra)
+{
+	if (get_all_timeouts_initialized())
+		enable_timeout_after(ANYTIME_STATS_UPDATE_TIMEOUT, newval);
 }
 
 /*

@@ -828,3 +828,9 @@ get_timeout_finish_time(TimeoutId id)
 {
 	return all_timeouts[id].fin_time;
 }
+
+bool
+get_all_timeouts_initialized(void)
+{
+	return all_timeouts_initialized;
+}

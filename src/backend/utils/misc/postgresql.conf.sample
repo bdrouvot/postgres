@@ -688,6 +688,7 @@
 #track_wal_io_timing = off
 #track_functions = none                 # none, pl, all
 #stats_fetch_consistency = cache        # cache, none, snapshot
+#stats_flush_interval = 10s             # in milliseconds
 
 
 # - Monitoring -
