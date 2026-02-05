@@ -156,5 +156,48 @@ $result = $node->safe_psql('postgres',
 );
 is($result, "0", "report of fixed-sized after manual reset");
 
+# Test FLUSH_ANYTIME mechanism with custom fixed stats
+# This verifies that custom stats can be flushed during a transaction
+
+# Reset stats first
+$node->safe_psql('postgres', q(select test_custom_stats_fixed_reset()));
+$node->safe_psql('postgres', q(select pg_stat_force_next_flush()));
+
+my $anytime_test = q[
+    BEGIN;
+    SET LOCAL stats_fetch_consistency = none;
+    -- Accumulate stats
+    select test_custom_stats_fixed_anytime_update() from generate_series(1, 2);
+    -- Wait (has to be greater than PGSTAT_MIN_INTERVAL)
+    select pg_sleep(1.5);
+    -- Check
+    select 'fixed_anytime:'||numcalls from test_custom_stats_fixed_report();
+];
+
+$result = $node->safe_psql('postgres', $anytime_test);
+like($result, qr/^fixed_anytime:2/m,
+	"anytime fixed stats flushed during transaction");
+
+# Test FLUSH_ANYTIME mechanism with custom variable stats
+# This verifies that custom stats can be flushed during a transaction
+
+$node->safe_psql('postgres', q(select pg_stat_force_next_flush()));
+
+$anytime_test = q[
+    BEGIN;
+    SET LOCAL stats_fetch_consistency = none;
+    -- Accumulate stats
+    select test_custom_stats_var_anytime_update('entry2');
+    select test_custom_stats_var_anytime_update('entry2');
+    -- Wait (has to be greater than PGSTAT_MIN_INTERVAL)
+    select pg_sleep(1.5);
+    -- Check
+    select 'var_anytime:'||calls from test_custom_stats_var_report('entry2');
+];
+
+$result = $node->safe_psql('postgres', $anytime_test);
+like($result, qr/^var_anytime:2/m,
+	"anytime var stats flushed during transaction");
+
 # Test completed successfully
 done_testing();

@@ -18,3 +18,8 @@ CREATE FUNCTION test_custom_stats_fixed_reset()
 RETURNS void
 AS 'MODULE_PATHNAME', 'test_custom_stats_fixed_reset'
 LANGUAGE C STRICT PARALLEL UNSAFE;
+
+CREATE FUNCTION test_custom_stats_fixed_anytime_update()
+RETURNS void
+AS 'MODULE_PATHNAME'
+LANGUAGE C STRICT PARALLEL UNSAFE;

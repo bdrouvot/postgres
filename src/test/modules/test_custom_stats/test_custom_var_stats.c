@@ -18,6 +18,7 @@
 #include "storage/dsm_registry.h"
 #include "utils/builtins.h"
 #include "utils/pgstat_internal.h"
+#include "utils/timeout.h"
 
 PG_MODULE_MAGIC_EXT(
 					.name = "test_custom_var_stats",
@@ -108,6 +109,7 @@ static const PgStat_KindInfo custom_stats = {
 	.name = "test_custom_var_stats",
 	.fixed_amount = false,		/* variable number of entries */
 	.write_to_file = true,		/* persist across restarts */
+	.flush_mode = FLUSH_ANYTIME,	/* can be flushed anytime */
 	.track_entry_count = true,	/* count active entries */
 	.accessed_across_databases = true,	/* global statistics */
 	.shared_size = sizeof(PgStatShared_CustomVarEntry),
@@ -689,4 +691,29 @@ test_custom_stats_var_report(PG_FUNCTION_ARGS)
 	}
 
 	SRF_RETURN_DONE(funcctx);
+}
+
+/*
+ * test_custom_stats_var_anytime_update
+ *		Increment custom statistic counter and schedule anytime flush
+ */
+PG_FUNCTION_INFO_V1(test_custom_stats_var_anytime_update);
+Datum
+test_custom_stats_var_anytime_update(PG_FUNCTION_ARGS)
+{
+	char	   *stat_name = text_to_cstring(PG_GETARG_TEXT_PP(0));
+	PgStat_EntryRef *entry_ref;
+	PgStat_StatCustomVarEntry *pending_entry;
+
+	/* Get pending entry in local memory */
+	entry_ref = pgstat_prep_pending_entry(PGSTAT_KIND_TEST_CUSTOM_VAR_STATS, InvalidOid,
+										  PGSTAT_CUSTOM_VAR_STATS_IDX(stat_name), NULL);
+
+	pending_entry = (PgStat_StatCustomVarEntry *) entry_ref->pending;
+	pending_entry->numcalls++;
+
+	/* Schedule anytime stats update */
+	pgstat_schedule_anytime_update();
+
+	PG_RETURN_VOID();
 }

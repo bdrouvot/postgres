@@ -18,6 +18,7 @@
 #include "pgstat.h"
 #include "utils/builtins.h"
 #include "utils/pgstat_internal.h"
+#include "utils/timeout.h"
 #include "utils/timestamp.h"
 
 PG_MODULE_MAGIC_EXT(
@@ -44,11 +45,13 @@ typedef struct PgStatShared_CustomFixedEntry
 static void test_custom_stats_fixed_init_shmem_cb(void *stats);
 static void test_custom_stats_fixed_reset_all_cb(TimestampTz ts);
 static void test_custom_stats_fixed_snapshot_cb(void);
+static bool test_custom_stats_fixed_flush_cb(bool nowait, bool anytime_only);
 
 static const PgStat_KindInfo custom_stats = {
 	.name = "test_custom_fixed_stats",
 	.fixed_amount = true,		/* exactly one entry */
 	.write_to_file = true,		/* persist to stats file */
+	.flush_mode = FLUSH_ANYTIME,	/* can be flushed anytime */
 
 	.shared_size = sizeof(PgStat_StatCustomFixedEntry),
 	.shared_data_off = offsetof(PgStatShared_CustomFixedEntry, stats),
@@ -57,7 +60,11 @@ static const PgStat_KindInfo custom_stats = {
 	.init_shmem_cb = test_custom_stats_fixed_init_shmem_cb,
 	.reset_all_cb = test_custom_stats_fixed_reset_all_cb,
 	.snapshot_cb = test_custom_stats_fixed_snapshot_cb,
+	.flush_static_cb = test_custom_stats_fixed_flush_cb,
 };
+
+/* Pending statistics */
+static PgStat_StatCustomFixedEntry PendingCustomStats = {0};
 
 /*
  * Kind ID for test_custom_fixed_stats.
@@ -142,6 +149,38 @@ test_custom_stats_fixed_snapshot_cb(void)
 #undef FIXED_COMP
 }
 
+/*
+ * test_custom_stats_fixed_flush_cb
+ *		Flush pending stats to shared memory
+ */
+static bool
+test_custom_stats_fixed_flush_cb(bool nowait, bool anytime_only)
+{
+	PgStatShared_CustomFixedEntry *stats_shmem;
+
+	/* Nothing to flush if no calls were made */
+	if (PendingCustomStats.numcalls == 0)
+		return false;
+
+	stats_shmem = pgstat_get_custom_shmem_data(PGSTAT_KIND_TEST_CUSTOM_FIXED_STATS);
+
+	if (!nowait)
+		LWLockAcquire(&stats_shmem->lock, LW_EXCLUSIVE);
+	else if (!LWLockConditionalAcquire(&stats_shmem->lock, LW_EXCLUSIVE))
+		return true;
+
+	pgstat_begin_changecount_write(&stats_shmem->changecount);
+	stats_shmem->stats.numcalls += PendingCustomStats.numcalls;
+	pgstat_end_changecount_write(&stats_shmem->changecount);
+
+	LWLockRelease(&stats_shmem->lock);
+
+	/* Reset pending stats */
+	PendingCustomStats.numcalls = 0;
+
+	return false;				/* successfully flushed */
+}
+
 /*--------------------------------------------------------------------------
  * SQL-callable functions
  *--------------------------------------------------------------------------
@@ -222,4 +261,22 @@ test_custom_stats_fixed_report(PG_FUNCTION_ARGS)
 
 	/* Return as tuple */
 	PG_RETURN_DATUM(HeapTupleGetDatum(heap_form_tuple(tupdesc, values, nulls)));
+}
+
+/*
+ * test_custom_stats_fixed_anytime_update
+ *		Increment call counter and schedule anytime flush
+ */
+PG_FUNCTION_INFO_V1(test_custom_stats_fixed_anytime_update);
+Datum
+test_custom_stats_fixed_anytime_update(PG_FUNCTION_ARGS)
+{
+	/* Accumulate in pending stats */
+	PendingCustomStats.numcalls++;
+
+	/* Schedule anytime stats update */
+	pgstat_schedule_anytime_update();
+	pgstat_report_fixed = true;
+
+	PG_RETURN_VOID();
 }
