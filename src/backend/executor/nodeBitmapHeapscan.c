@@ -499,7 +499,7 @@ ExecBitmapHeapInitializeDSM(BitmapHeapScanState *node,
 	if (node->ss.ps.instrument && pcxt->nworkers > 0)
 		sinstrument = (SharedBitmapHeapInstrumentation *) ptr;
 
-	pstate->tbmiterator = 0;
+	pstate->tbmiterator = InvalidDsaPointer;
 
 	/* Initialize the mutex */
 	SpinLockInit(&pstate->mutex);
