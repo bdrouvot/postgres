@@ -1597,7 +1597,7 @@ ForgetDatabaseSyncRequests(Oid dbid)
 
 	rlocator.dbOid = dbid;
 	rlocator.spcOid = 0;
-	rlocator.relNumber = 0;
+	rlocator.relNumber = InvalidRelFileNumber;
 
 	INIT_MD_FILETAG(tag, rlocator, InvalidForkNumber, InvalidBlockNumber);
 
