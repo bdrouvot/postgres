@@ -77,15 +77,15 @@ const IoMethodOps pgaio_uring_ops = {
 	.wait_one = pgaio_uring_wait_one,
 };
 
-/*
- * Per-backend state when using io_method=io_uring
- *
- * Align the whole struct to a cacheline boundary, to prevent false sharing
- * between completion_lock and prior backend's io_uring_ring.
- */
-typedef struct pg_attribute_aligned (PG_CACHE_LINE_SIZE)
-PgAioUringContext
+/* Per-backend state when using io_method=io_uring */
+typedef struct PgAioUringContext
 {
+	/*
+	 * Align the whole struct to a cacheline boundary, to prevent false
+	 * sharing between completion_lock and prior backend's io_uring_ring.
+	 */
+	alignas(PG_CACHE_LINE_SIZE)
+
 	/*
 	 * Multiple backends can process completions for this backend's io_uring
 	 * instance (e.g. when the backend issuing IO is busy doing something
