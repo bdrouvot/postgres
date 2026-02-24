@@ -35,14 +35,17 @@
  */
 typedef struct ItemPointerData
 {
+/* If compiler understands packed pragma, use alignas with it */
+#if defined(pg_attribute_packed)
+	alignas(2)
+#endif
 	BlockIdData ip_blkid;
 	OffsetNumber ip_posid;
 }
 
-/* If compiler understands packed and aligned pragmas, use those */
-#if defined(pg_attribute_packed) && defined(pg_attribute_aligned)
+/* If compiler understands packed pragma, use it with alignas */
+#if defined(pg_attribute_packed)
 			pg_attribute_packed()
-			pg_attribute_aligned(2)
 #endif
 ItemPointerData;
 
