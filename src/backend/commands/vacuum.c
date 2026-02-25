@@ -1665,9 +1665,11 @@ vac_update_datfrozenxid(void)
 
 	while ((classTup = systable_getnext(scan)) != NULL)
 	{
-		volatile FormData_pg_class *classForm = (Form_pg_class) GETSTRUCT(classTup);
-		TransactionId relfrozenxid = classForm->relfrozenxid;
-		TransactionId relminmxid = classForm->relminmxid;
+		Form_pg_class classForm = (Form_pg_class) GETSTRUCT(classTup);
+		volatile TransactionId *relfrozenxid_p = &classForm->relfrozenxid;
+		volatile TransactionId *relminmxid_p = &classForm->relminmxid;
+		TransactionId relfrozenxid = *relfrozenxid_p;
+		TransactionId relminmxid = *relminmxid_p;
 
 		/*
 		 * Only consider relations able to hold unfrozen XIDs (anything else
