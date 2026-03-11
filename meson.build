@@ -2144,6 +2144,13 @@ elif cc.links('''
   cdata.set('HAVE__CPUIDEX', 1)
 endif
 
+# Defend against -ffast-math
+if not cc.compiles('''
+#ifdef __FAST_MATH__
+choke me
+#endif''', name: 'ffast-math check', args: test_c_args)
+  error('do not put -ffast-math in CFLAGS')
+endif
 
 # Defend against clang being used on x86-32 without SSE2 enabled.  As current
 # versions of clang do not understand -fexcess-precision=standard, the use of
