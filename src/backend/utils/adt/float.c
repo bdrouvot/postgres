@@ -28,6 +28,15 @@
 #include "utils/fmgrprotos.h"
 #include "utils/sortsupport.h"
 
+/*
+ * -ffast-math switch breaks isnan() and isinf() tests and near-overflow
+ * handling.
+ * This test is not done in the header file because we still want third-party
+ * extensions to be able to use -ffast-math if they need to.
+ */
+#ifdef __FAST_MATH__
+#error -ffast-math is known to break this code
+#endif
 
 /*
  * Configurable GUC parameter
