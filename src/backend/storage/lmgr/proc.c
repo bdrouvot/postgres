@@ -52,6 +52,7 @@
 #include "storage/procsignal.h"
 #include "storage/spin.h"
 #include "storage/standby.h"
+#include "utils/injection_point.h"
 #include "utils/timeout.h"
 #include "utils/timestamp.h"
 #include "utils/wait_event.h"
@@ -1560,6 +1561,7 @@ ProcSleep(LOCALLOCK *locallock)
 			int			usecs;
 			long		msecs;
 
+			INJECTION_POINT("deadlock-timeout-fired", NULL);
 			TimestampDifference(get_timeout_start_time(DEADLOCK_TIMEOUT),
 								GetCurrentTimestamp(),
 								&secs, &usecs);
