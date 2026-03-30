@@ -467,10 +467,10 @@ typedef struct PgStatShared_IO
 typedef struct PgStatShared_Lock
 {
 	/*
-	 * locks[i] protects stats.stats[i]. locks[0] also protects
-	 * stats.stat_reset_timestamp.
+	 * single lock protecting all entries as well as
+	 * stats->stat_reset_timestamp.
 	 */
-	LWLock		locks[LOCKTAG_LAST_TYPE + 1];
+	LWLock		lock;
 	PgStat_Lock stats;
 } PgStatShared_Lock;
 
