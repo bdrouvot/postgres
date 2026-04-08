@@ -796,8 +796,7 @@ task:
   only_if: $CI_WINDOWS_ENABLED
 
   setup_additional_packages_script: |
-    REM choco install -y --no-progress ...
-
+    choco install -y --no-progress winflexbison3
   setup_hosts_file_script: |
     echo 127.0.0.1 pg-loadbalancetest >> c:\Windows\System32\Drivers\etc\hosts
     echo 127.0.0.2 pg-loadbalancetest >> c:\Windows\System32\Drivers\etc\hosts
@@ -806,7 +805,7 @@ task:
 
   configure_script: |
     vcvarsall x64
-    meson setup --backend ninja %MESON_COMMON_PG_CONFIG_ARGS% --buildtype debug -Db_pch=true -Dextra_lib_dirs=c:\openssl\1.1\lib -Dextra_include_dirs=c:\openssl\1.1\include -DTAR=%TAR% %MESON_FEATURES% build
+    meson setup --backend ninja %MESON_COMMON_PG_CONFIG_ARGS% --buildtype debug -Db_pch=true -Dextra_lib_dirs=c:\openssl\1.1\lib -Dextra_include_dirs=c:\openssl\1.1\include -DTAR=%TAR% -DFLEX=win_flex -DBISON=win_bison %MESON_FEATURES% build
 
   build_script: |
     vcvarsall x64
