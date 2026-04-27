@@ -18,6 +18,7 @@
 #include "access/htup_details.h"
 #include "access/table.h"
 #include "catalog/catalog.h"
+#include "catalog/aclcheck_track.h"
 #include "catalog/dependency.h"
 #include "catalog/indexing.h"
 #include "catalog/pg_constraint.h"
@@ -27,6 +28,8 @@
 #include "catalog/partition.h"
 #include "commands/extension.h"
 #include "miscadmin.h"
+#include "storage/lmgr.h"
+#include "storage/lock.h"
 #include "utils/fmgroids.h"
 #include "utils/lsyscache.h"
 #include "utils/rel.h"
@@ -106,6 +109,31 @@ recordMultipleDependencies(const ObjectAddress *depender,
 		 */
 		if (isObjectPinned(referenced))
 			continue;
+
+#ifdef USE_ASSERT_CHECKING
+		/*
+		 * If this referenced object had a permission check earlier in this
+		 * statement, assert that a lock is already held on it.  This ensures
+		 * callers acquired the lock before calling object_aclcheck(), not
+		 * after. The latter would widen the TOCTOU window between the
+		 * permission check and the dependency recording.
+		 */
+		if (aclcheck_track_was_checked(referenced->classId, referenced->objectId))
+		{
+			if (referenced->classId == RelationRelationId)
+				Assert(CheckRelationOidLockedByMe(referenced->objectId,
+												  AccessShareLock, true));
+			else
+			{
+				LOCKTAG		tag;
+
+				SET_LOCKTAG_OBJECT(tag, MyDatabaseId,
+								   referenced->classId,
+								   referenced->objectId, 0);
+				Assert(LockHeldByMe(&tag, AccessShareLock, true));
+			}
+		}
+#endif
 
 		/*
 		 * Acquire a lock and check object still exists while recording the
@@ -511,6 +539,30 @@ changeDependencyFor(Oid classId, Oid objectId,
 		return 1;
 	}
 
+#ifdef USE_ASSERT_CHECKING
+	/*
+	 * If this referenced object had a permission check earlier in this
+	 * statement, assert that a lock is already held on it.  This ensures
+	 * callers acquired the lock before calling object_aclcheck(), not after.
+	 * The latter would widen the TOCTOU window between the permission check and
+	 * the dependency recording.
+	 */
+	if (aclcheck_track_was_checked(objAddr.classId, objAddr.objectId))
+	{
+		if (objAddr.classId == RelationRelationId)
+			Assert(CheckRelationOidLockedByMe(objAddr.objectId,
+											  AccessShareLock, true));
+		else
+		{
+			LOCKTAG		tag;
+
+			SET_LOCKTAG_OBJECT(tag, MyDatabaseId,
+							   objAddr.classId,
+							   objAddr.objectId, 0);
+			Assert(LockHeldByMe(&tag, AccessShareLock, true));
+		}
+	}
+#endif
 	/*
 	 * Acquire a lock and check object still exists while changing the
 	 * dependency.

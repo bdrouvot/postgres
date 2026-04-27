@@ -76,6 +76,7 @@
 #include "parser/parse_type.h"
 #include "storage/lmgr.h"
 #include "utils/acl.h"
+#include "catalog/aclcheck_track.h"
 #include "utils/aclchk_internal.h"
 #include "utils/builtins.h"
 #include "utils/fmgroids.h"
@@ -3890,6 +3891,8 @@ object_aclcheck_ext(Oid classid, Oid objectid,
 					Oid roleid, AclMode mode,
 					bool *is_missing)
 {
+	aclcheck_track_record(classid, objectid, mode);
+
 	if (object_aclmask_ext(classid, objectid, roleid, mode, ACLMASK_ANY,
 						   is_missing) != 0)
 		return ACLCHECK_OK;
@@ -4092,6 +4095,8 @@ AclResult
 pg_class_aclcheck_ext(Oid table_oid, Oid roleid,
 					  AclMode mode, bool *is_missing)
 {
+	aclcheck_track_record(RelationRelationId, table_oid, mode);
+
 	if (pg_class_aclmask_ext(table_oid, roleid, mode,
 							 ACLMASK_ANY, is_missing) != 0)
 		return ACLCHECK_OK;
@@ -5035,3 +5040,30 @@ RemoveRoleFromInitPriv(Oid roleid, Oid classid, Oid objid, int32 objsubid)
 
 	table_close(rel, RowExclusiveLock);
 }
+
+/*
+ * Instrumentation to detect permission check before lock regressions.
+ * Only used in assert-enabled builds.
+ */
+#ifdef USE_ASSERT_CHECKING
+AclCheckEntry aclcheck_tracked[ACLCHECK_TRACK_MAX];
+int			aclcheck_tracked_count = 0;
+
+void
+aclcheck_track_reset(void)
+{
+	aclcheck_tracked_count = 0;
+}
+
+bool
+aclcheck_track_was_checked(Oid classId, Oid objectId)
+{
+	for (int i = 0; i < aclcheck_tracked_count; i++)
+	{
+		if (aclcheck_tracked[i].classId == classId &&
+			aclcheck_tracked[i].objectId == objectId)
+			return true;
+	}
+	return false;
+}
+#endif							/* USE_ASSERT_CHECKING */

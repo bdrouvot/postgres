@@ -21,6 +21,7 @@
 #include "access/xact.h"
 #include "access/xlog.h"
 #include "catalog/namespace.h"
+#include "catalog/aclcheck_track.h"
 #include "catalog/pg_authid.h"
 #include "catalog/pg_inherits.h"
 #include "catalog/toasting.h"
@@ -514,6 +515,8 @@ ProcessUtility(PlannedStmt *pstmt,
 	Assert(pstmt->commandType == CMD_UTILITY);
 	Assert(queryString != NULL);	/* required as of 8.4 */
 	Assert(qc == NULL || qc->commandTag == CMDTAG_UNKNOWN);
+
+	aclcheck_track_reset();
 
 	/*
 	 * We provide a function hook variable that lets loadable plugins get
