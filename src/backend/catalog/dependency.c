@@ -87,6 +87,7 @@
 #include "parser/parsetree.h"
 #include "rewrite/rewriteRemove.h"
 #include "storage/lmgr.h"
+#include "storage/lock.h"
 #include "utils/fmgroids.h"
 #include "utils/lsyscache.h"
 #include "utils/syscache.h"
@@ -1604,6 +1605,77 @@ ReleaseDeletionLock(const ObjectAddress *object)
 		/* assume we should lock the whole object not a sub-object */
 		UnlockDatabaseObject(object->classId, object->objectId, 0,
 							 AccessExclusiveLock);
+}
+
+/*
+ * LockNotPinnedObject
+ *
+ * Lock the object that we are about to record a dependency on.
+ * After it's locked, verify that it hasn't been dropped while we
+ * weren't looking.  If the object has been dropped, this function
+ * does not return!
+ *
+ * If the caller already holds a lock that conflicts with DROP
+ * (AccessShareLock or stronger), skip the lock acquisition entirely.
+ */
+void
+LockNotPinnedObject(const ObjectAddress *object)
+{
+	if (isObjectPinned(object))
+		return;
+
+	if (object->classId == RelationRelationId)
+	{
+		/* skip shared relations as they are pinned */
+		if (IsSharedRelation(object->objectId))
+			return;
+
+		/*
+		 * We must be in one of the two following cases that would already
+		 * prevent the relation to be dropped: 1. The relation is already
+		 * locked (could be an existing relation or a relation that we are
+		 * creating). 2. The relation is protected indirectly (i.e an index
+		 * protected by a lock on its table, a table protected by a lock on a
+		 * function that depends of the table...). To avoid any risks, acquire
+		 * a lock if there is none. That may add unnecessary lock for 2. but
+		 * that's worth it.
+		 */
+		if (!CheckRelationOidLockedByMe(object->objectId, AccessShareLock, true))
+			LockRelationOid(object->objectId, AccessShareLock);
+		return;
+	}
+	else
+	{
+		LOCKTAG		tag;
+
+		SET_LOCKTAG_OBJECT(tag,
+						   MyDatabaseId,
+						   object->classId,
+						   object->objectId,
+						   0);
+
+		if (LockHeldByMe(&tag, AccessShareLock, true))
+			return;
+
+		/* assume we should lock the whole object not a sub-object */
+		LockDatabaseObject(object->classId, object->objectId, 0, AccessShareLock);
+	}
+
+	/* check if object still exists */
+	if (!ObjectByIdExist(object, false))
+	{
+		/*
+		 * It might be possible that we are creating it (for example creating
+		 * a composite type while creating a relation), so bypass the syscache
+		 * lookup and use a SnapshotSelf scan instead to cover this scenario.
+		 */
+		if (!ObjectByIdExist(object, true))
+			ereport(ERROR,
+					(errcode(ERRCODE_DEPENDENT_OBJECTS_DOES_NOT_EXIST),
+					 errmsg("dependent object does not exist"),
+					 errdetail("Class OID is %u and object OID is %u",
+							   object->classId, object->objectId)));
+	}
 }
 
 /*

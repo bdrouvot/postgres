@@ -33,8 +33,6 @@
 #include "utils/syscache.h"
 
 
-static bool isObjectPinned(const ObjectAddress *object);
-
 
 /*
  * Record a dependency between 2 objects via their respective ObjectAddress.
@@ -108,6 +106,12 @@ recordMultipleDependencies(const ObjectAddress *depender,
 		 */
 		if (isObjectPinned(referenced))
 			continue;
+
+		/*
+		 * Acquire a lock and check object still exists while recording the
+		 * dependency.
+		 */
+		LockNotPinnedObject(referenced);
 
 		if (slot_init_count < max_slots)
 		{
@@ -507,6 +511,12 @@ changeDependencyFor(Oid classId, Oid objectId,
 		return 1;
 	}
 
+	/*
+	 * Acquire a lock and check object still exists while changing the
+	 * dependency.
+	 */
+	LockNotPinnedObject(&objAddr);
+
 	depRel = table_open(DependRelationId, RowExclusiveLock);
 
 	/* There should be existing dependency record(s), so search. */
@@ -707,7 +717,7 @@ changeDependenciesOn(Oid refClassId, Oid oldRefObjectId,
  * The passed subId, if any, is ignored; we assume that only whole objects
  * are pinned (and that this implies pinning their components).
  */
-static bool
+bool
 isObjectPinned(const ObjectAddress *object)
 {
 	return IsPinnedObject(object->classId, object->objectId);

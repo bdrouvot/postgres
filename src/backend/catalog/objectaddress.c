@@ -90,6 +90,7 @@
 #include "utils/lsyscache.h"
 #include "utils/memutils.h"
 #include "utils/regproc.h"
+#include "utils/snapmgr.h"
 #include "utils/syscache.h"
 
 /*
@@ -2694,6 +2695,70 @@ get_object_namespace(const ObjectAddress *address)
 	ReleaseSysCache(tuple);
 
 	return oid;
+}
+
+/*
+ * ObjectByIdExist
+ *
+ * Return whether the given object exists.
+ *
+ * If use_snapshot_self is false, uses the syscache (which sees committed data).
+ * If use_snapshot_self is true, does a direct catalog scan with SnapshotSelf
+ * to also see objects created in the current transaction.
+ */
+bool
+ObjectByIdExist(const ObjectAddress *address, bool use_snapshot_self)
+{
+	HeapTuple	tuple;
+	SysCacheIdentifier cache = SYSCACHEID_INVALID;
+
+	if (!use_snapshot_self)
+	{
+		const ObjectPropertyType *property;
+
+		property = get_object_property_data(address->classId);
+		cache = property->oid_catcache_id;
+	}
+
+	if (cache != SYSCACHEID_INVALID)
+	{
+		tuple = SearchSysCache1(cache, ObjectIdGetDatum(address->objectId));
+
+		if (!HeapTupleIsValid(tuple))
+			return false;
+
+		ReleaseSysCache(tuple);
+		return true;
+	}
+	else
+	{
+		Relation	rel;
+		ScanKeyData skey[1];
+		SysScanDesc scan;
+		Snapshot	snapshot;
+
+		if (use_snapshot_self)
+			snapshot = SnapshotSelf;
+		else
+			snapshot = NULL;
+
+		rel = table_open(address->classId, AccessShareLock);
+
+		ScanKeyInit(&skey[0],
+					get_object_attnum_oid(address->classId),
+					BTEqualStrategyNumber, F_OIDEQ,
+					ObjectIdGetDatum(address->objectId));
+
+		scan = systable_beginscan(rel, get_object_oid_index(address->classId),
+								  true, snapshot, 1, skey);
+
+		tuple = systable_getnext(scan);
+
+		systable_endscan(scan);
+		table_close(rel, AccessShareLock);
+
+		return HeapTupleIsValid(tuple);
+	}
 }
 
 /*

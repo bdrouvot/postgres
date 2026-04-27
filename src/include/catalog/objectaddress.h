@@ -54,6 +54,7 @@ extern void check_object_ownership(Oid roleid,
 								   Node *object, Relation relation);
 
 extern Oid	get_object_namespace(const ObjectAddress *address);
+extern bool ObjectByIdExist(const ObjectAddress *address, bool use_snapshot_self);
 
 extern bool is_objectclass_supported(Oid class_id);
 extern const char *get_object_class_descr(Oid class_id);
