@@ -377,6 +377,7 @@ AlterForeignServerOwner_internal(Relation rel, HeapTuple tup, Oid newOwnerId)
 			check_can_set_role(GetUserId(), newOwnerId);
 
 			/* New owner must have USAGE privilege on foreign-data wrapper */
+			LockNotPinnedObjectById(ForeignDataWrapperRelationId, form->srvfdw);
 			aclresult = object_aclcheck(ForeignDataWrapperRelationId, form->srvfdw, newOwnerId, ACL_USAGE);
 			if (aclresult != ACLCHECK_OK)
 			{
@@ -997,6 +998,7 @@ CreateForeignServer(CreateForeignServerStmt *stmt)
 	 */
 	fdw = GetForeignDataWrapperByName(stmt->fdwname, false);
 
+	LockNotPinnedObjectById(ForeignDataWrapperRelationId, fdw->fdwid);
 	aclresult = object_aclcheck(ForeignDataWrapperRelationId, fdw->fdwid, ownerId, ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FDW, fdw->fdwname);
@@ -1188,6 +1190,7 @@ user_mapping_ddl_aclcheck(Oid umuserid, Oid serverid, const char *servername)
 		{
 			AclResult	aclresult;
 
+			LockNotPinnedObjectById(ForeignServerRelationId, serverid);
 			aclresult = object_aclcheck(ForeignServerRelationId, serverid, curuserid, ACL_USAGE);
 			if (aclresult != ACLCHECK_OK)
 				aclcheck_error(aclresult, OBJECT_FOREIGN_SERVER, servername);
@@ -1539,6 +1542,7 @@ CreateForeignTable(CreateForeignTableStmt *stmt, Oid relid)
 	 * get the actual FDW for option validation etc.
 	 */
 	server = GetForeignServerByName(stmt->servername, false);
+	LockNotPinnedObjectById(ForeignServerRelationId, server->serverid);
 	aclresult = object_aclcheck(ForeignServerRelationId, server->serverid, ownerId, ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FOREIGN_SERVER, server->servername);
@@ -1598,6 +1602,7 @@ ImportForeignSchema(ImportForeignSchemaStmt *stmt)
 
 	/* Check that the foreign server exists and that we have USAGE on it */
 	server = GetForeignServerByName(stmt->server_name, false);
+	LockNotPinnedObjectById(ForeignServerRelationId, server->serverid);
 	aclresult = object_aclcheck(ForeignServerRelationId, server->serverid, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FOREIGN_SERVER, server->servername);

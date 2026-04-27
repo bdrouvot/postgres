@@ -586,22 +586,26 @@ AggregateCreate(const char *aggName,
 	 */
 	for (i = 0; i < numArgs; i++)
 	{
+		LockNotPinnedObjectById(TypeRelationId, aggArgTypes[i]);
 		aclresult = object_aclcheck(TypeRelationId, aggArgTypes[i], GetUserId(), ACL_USAGE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error_type(aclresult, aggArgTypes[i]);
 	}
 
+	LockNotPinnedObjectById(TypeRelationId, aggTransType);
 	aclresult = object_aclcheck(TypeRelationId, aggTransType, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error_type(aclresult, aggTransType);
 
 	if (OidIsValid(aggmTransType))
 	{
+		LockNotPinnedObjectById(TypeRelationId, aggmTransType);
 		aclresult = object_aclcheck(TypeRelationId, aggmTransType, GetUserId(), ACL_USAGE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error_type(aclresult, aggmTransType);
 	}
 
+	LockNotPinnedObjectById(TypeRelationId, finaltype);
 	aclresult = object_aclcheck(TypeRelationId, finaltype, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error_type(aclresult, finaltype);
@@ -909,6 +913,7 @@ lookup_agg_function(List *fnName,
 	}
 
 	/* Check aggregate creator has permission to call the function */
+	LockNotPinnedObjectById(ProcedureRelationId, fnOid);
 	aclresult = object_aclcheck(ProcedureRelationId, fnOid, GetUserId(), ACL_EXECUTE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FUNCTION, get_func_name(fnOid));

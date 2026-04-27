@@ -350,6 +350,7 @@ CreateTriggerFiringOn(const CreateTrigStmt *stmt, const char *queryString,
 
 		if (OidIsValid(constrrelid))
 		{
+			LockNotPinnedObjectById(RelationRelationId, constrrelid);
 			aclresult = pg_class_aclcheck(constrrelid, GetUserId(),
 										  ACL_TRIGGER);
 			if (aclresult != ACLCHECK_OK)
@@ -695,6 +696,7 @@ CreateTriggerFiringOn(const CreateTrigStmt *stmt, const char *queryString,
 		funcoid = LookupFuncName(stmt->funcname, 0, NULL, false);
 	if (!isInternal)
 	{
+		LockNotPinnedObjectById(ProcedureRelationId, funcoid);
 		aclresult = object_aclcheck(ProcedureRelationId, funcoid, GetUserId(), ACL_EXECUTE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_FUNCTION,

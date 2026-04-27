@@ -146,6 +146,7 @@ compute_return_type(TypeName *returnType, Oid languageOid,
 				 errdetail("Creating a shell type definition.")));
 		namespaceId = QualifiedNameGetCreationNamespace(returnType->names,
 														&typname);
+		LockNotPinnedObjectById(NamespaceRelationId, namespaceId);
 		aclresult = object_aclcheck(NamespaceRelationId, namespaceId, GetUserId(),
 									ACL_CREATE);
 		if (aclresult != ACLCHECK_OK)
@@ -158,6 +159,7 @@ compute_return_type(TypeName *returnType, Oid languageOid,
 		CommandCounterIncrement();
 	}
 
+	LockNotPinnedObjectById(TypeRelationId, rettype);
 	aclresult = object_aclcheck(TypeRelationId, rettype, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error_type(aclresult, rettype);
@@ -274,6 +276,7 @@ interpret_function_parameter_list(ParseState *pstate,
 			toid = InvalidOid;	/* keep compiler quiet */
 		}
 
+		LockNotPinnedObjectById(TypeRelationId, toid);
 		aclresult = object_aclcheck(TypeRelationId, toid, GetUserId(), ACL_USAGE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error_type(aclresult, toid);
@@ -1071,6 +1074,7 @@ CreateFunction(ParseState *pstate, CreateFunctionStmt *stmt)
 													&funcname);
 
 	/* Check we have creation rights in target namespace */
+	LockNotPinnedObjectById(NamespaceRelationId, namespaceId);
 	aclresult = object_aclcheck(NamespaceRelationId, namespaceId, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,
@@ -1125,6 +1129,7 @@ CreateFunction(ParseState *pstate, CreateFunctionStmt *stmt)
 	if (languageStruct->lanpltrusted)
 	{
 		/* if trusted language, need USAGE privilege */
+		LockNotPinnedObjectById(LanguageRelationId, languageOid);
 		aclresult = object_aclcheck(LanguageRelationId, languageOid, GetUserId(), ACL_USAGE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_LANGUAGE,
@@ -1582,10 +1587,12 @@ CreateCast(CreateCastStmt *stmt)
 						format_type_be(sourcetypeid),
 						format_type_be(targettypeid))));
 
+	LockNotPinnedObjectById(TypeRelationId, sourcetypeid);
 	aclresult = object_aclcheck(TypeRelationId, sourcetypeid, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error_type(aclresult, sourcetypeid);
 
+	LockNotPinnedObjectById(TypeRelationId, targettypeid);
 	aclresult = object_aclcheck(TypeRelationId, targettypeid, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error_type(aclresult, targettypeid);
@@ -1874,6 +1881,7 @@ CreateTransform(CreateTransformStmt *stmt)
 	if (!object_ownercheck(TypeRelationId, typeid, GetUserId()))
 		aclcheck_error_type(ACLCHECK_NOT_OWNER, typeid);
 
+	LockNotPinnedObjectById(TypeRelationId, typeid);
 	aclresult = object_aclcheck(TypeRelationId, typeid, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error_type(aclresult, typeid);
@@ -1883,6 +1891,7 @@ CreateTransform(CreateTransformStmt *stmt)
 	 */
 	langid = get_language_oid(stmt->lang, false);
 
+	LockNotPinnedObjectById(LanguageRelationId, langid);
 	aclresult = object_aclcheck(LanguageRelationId, langid, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_LANGUAGE, stmt->lang);
@@ -1897,6 +1906,7 @@ CreateTransform(CreateTransformStmt *stmt)
 		if (!object_ownercheck(ProcedureRelationId, fromsqlfuncid, GetUserId()))
 			aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_FUNCTION, NameListToString(stmt->fromsql->objname));
 
+		LockNotPinnedObjectById(ProcedureRelationId, fromsqlfuncid);
 		aclresult = object_aclcheck(ProcedureRelationId, fromsqlfuncid, GetUserId(), ACL_EXECUTE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_FUNCTION, NameListToString(stmt->fromsql->objname));
@@ -1923,6 +1933,7 @@ CreateTransform(CreateTransformStmt *stmt)
 		if (!object_ownercheck(ProcedureRelationId, tosqlfuncid, GetUserId()))
 			aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_FUNCTION, NameListToString(stmt->tosql->objname));
 
+		LockNotPinnedObjectById(ProcedureRelationId, tosqlfuncid);
 		aclresult = object_aclcheck(ProcedureRelationId, tosqlfuncid, GetUserId(), ACL_EXECUTE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_FUNCTION, NameListToString(stmt->tosql->objname));

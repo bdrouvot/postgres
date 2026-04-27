@@ -21,6 +21,7 @@
 #include "access/htup_details.h"
 #include "access/table.h"
 #include "access/xact.h"
+#include "catalog/dependency.h"
 #include "catalog/indexing.h"
 #include "catalog/namespace.h"
 #include "catalog/objectaccess.h"
@@ -82,6 +83,7 @@ DefineCollation(ParseState *pstate, List *names, List *parameters, bool if_not_e
 
 	collNamespace = QualifiedNameGetCreationNamespace(names, &collName);
 
+	LockNotPinnedObjectById(NamespaceRelationId, collNamespace);
 	aclresult = object_aclcheck(NamespaceRelationId, collNamespace, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,

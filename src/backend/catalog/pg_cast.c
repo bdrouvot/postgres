@@ -105,6 +105,7 @@ CastCreate(Oid sourcetypeid, Oid targettypeid,
 	/* dependency on function */
 	if (OidIsValid(funcid))
 	{
+		LockNotPinnedObjectById(ProcedureRelationId, funcid);
 		ObjectAddressSet(referenced, ProcedureRelationId, funcid);
 		add_exact_object_address(&referenced, addrs);
 	}

@@ -39,6 +39,7 @@
 #include "access/xact.h"
 #include "catalog/binary_upgrade.h"
 #include "catalog/catalog.h"
+#include "catalog/dependency.h"
 #include "catalog/heap.h"
 #include "catalog/objectaccess.h"
 #include "catalog/pg_am.h"
@@ -739,6 +740,7 @@ DefineDomain(ParseState *pstate, CreateDomainStmt *stmt)
 														&domainName);
 
 	/* Check we have creation rights in target namespace */
+	LockNotPinnedObjectById(NamespaceRelationId, domainNamespace);
 	aclresult = object_aclcheck(NamespaceRelationId, domainNamespace, GetUserId(),
 								ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
@@ -788,6 +790,7 @@ DefineDomain(ParseState *pstate, CreateDomainStmt *stmt)
 						TypeNameToString(stmt->typeName)),
 				 parser_errposition(pstate, stmt->typeName->location)));
 
+	LockNotPinnedObjectById(TypeRelationId, basetypeoid);
 	aclresult = object_aclcheck(TypeRelationId, basetypeoid, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error_type(aclresult, basetypeoid);
@@ -1195,6 +1198,7 @@ DefineEnum(CreateEnumStmt *stmt)
 													  &enumName);
 
 	/* Check we have creation rights in target namespace */
+	LockNotPinnedObjectById(NamespaceRelationId, enumNamespace);
 	aclresult = object_aclcheck(NamespaceRelationId, enumNamespace, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,
@@ -1420,6 +1424,7 @@ DefineRange(ParseState *pstate, CreateRangeStmt *stmt)
 													  &typeName);
 
 	/* Check we have creation rights in target namespace */
+	LockNotPinnedObjectById(NamespaceRelationId, typeNamespace);
 	aclresult = object_aclcheck(NamespaceRelationId, typeNamespace, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,
@@ -2414,6 +2419,7 @@ findRangeCanonicalFunction(List *procname, Oid typeOid)
 						func_signature_string(procname, 1, NIL, argList))));
 
 	/* Also, range type's creator must have permission to call function */
+	LockNotPinnedObjectById(ProcedureRelationId, procOid);
 	aclresult = object_aclcheck(ProcedureRelationId, procOid, GetUserId(), ACL_EXECUTE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FUNCTION, get_func_name(procOid));
@@ -2457,6 +2463,7 @@ findRangeSubtypeDiffFunction(List *procname, Oid subtype)
 						func_signature_string(procname, 2, NIL, argList))));
 
 	/* Also, range type's creator must have permission to call function */
+	LockNotPinnedObjectById(ProcedureRelationId, procOid);
 	aclresult = object_aclcheck(ProcedureRelationId, procOid, GetUserId(), ACL_EXECUTE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FUNCTION, get_func_name(procOid));
@@ -3956,6 +3963,7 @@ AlterTypeOwner(List *names, Oid newOwnerId, ObjectType objecttype)
 			check_can_set_role(GetUserId(), newOwnerId);
 
 			/* New owner must have CREATE privilege on namespace */
+			LockNotPinnedObjectById(NamespaceRelationId, typTup->typnamespace);
 			aclresult = object_aclcheck(NamespaceRelationId, typTup->typnamespace,
 										newOwnerId,
 										ACL_CREATE);

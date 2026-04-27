@@ -654,6 +654,7 @@ get_other_operator(List *otherOp, Oid otherLeftTypeId, Oid otherRightTypeId,
 
 	/* not in catalogs, different from operator, so make shell */
 
+	LockNotPinnedObjectById(NamespaceRelationId, otherNamespace);
 	aclresult = object_aclcheck(NamespaceRelationId, otherNamespace, GetUserId(),
 								ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
@@ -876,6 +877,7 @@ makeOperatorDependencies(HeapTuple tuple,
 	/* Dependency on namespace */
 	if (OidIsValid(oper->oprnamespace))
 	{
+		LockNotPinnedObjectById(NamespaceRelationId, oper->oprnamespace);
 		ObjectAddressSet(referenced, NamespaceRelationId, oper->oprnamespace);
 		add_exact_object_address(&referenced, addrs);
 	}

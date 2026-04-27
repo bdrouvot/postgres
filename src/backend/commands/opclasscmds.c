@@ -363,6 +363,7 @@ DefineOpClass(CreateOpClassStmt *stmt)
 													 &opcname);
 
 	/* Check we have creation rights in target namespace */
+	LockNotPinnedObjectById(NamespaceRelationId, namespaceoid);
 	aclresult = object_aclcheck(NamespaceRelationId, namespaceoid, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,
@@ -801,6 +802,7 @@ DefineOpFamily(CreateOpFamilyStmt *stmt)
 													 &opfname);
 
 	/* Check we have creation rights in target namespace */
+	LockNotPinnedObjectById(NamespaceRelationId, namespaceoid);
 	aclresult = object_aclcheck(NamespaceRelationId, namespaceoid, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,

@@ -22,6 +22,7 @@
  */
 #include "postgres.h"
 
+#include "catalog/dependency.h"
 #include "catalog/namespace.h"
 #include "catalog/pg_aggregate.h"
 #include "catalog/pg_namespace.h"
@@ -101,6 +102,7 @@ DefineAggregate(ParseState *pstate,
 	aggNamespace = QualifiedNameGetCreationNamespace(name, &aggName);
 
 	/* Check we have creation rights in target namespace */
+	LockNotPinnedObjectById(NamespaceRelationId, aggNamespace);
 	aclresult = object_aclcheck(NamespaceRelationId, aggNamespace, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,

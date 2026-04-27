@@ -1679,6 +1679,24 @@ LockNotPinnedObject(const ObjectAddress *object)
 }
 
 /*
+ * LockNotPinnedObjectById
+ *
+ * Lock the object if it is not pinned.  This is a convenience wrapper
+ * for callers that need to lock a referenced object before a permission
+ * check, converting permission check before lock to lock before permission
+ * check.
+ */
+void
+LockNotPinnedObjectById(Oid classid, Oid objid)
+{
+	ObjectAddress object;
+
+	ObjectAddressSet(object, classid, objid);
+
+	LockNotPinnedObject(&object);
+}
+
+/*
  * recordDependencyOnExpr - find expression dependencies
  *
  * This is used to find the dependencies of rules, constraint expressions,
@@ -1960,8 +1978,11 @@ find_expr_references_walker(Node *node,
 					objoid = DatumGetObjectId(con->constvalue);
 					if (SearchSysCacheExists1(PROCOID,
 											  ObjectIdGetDatum(objoid)))
+					{
+						LockNotPinnedObjectById(ProcedureRelationId, objoid);
 						add_object_address(ProcedureRelationId, objoid, 0,
 										   context->addrs);
+					}
 					break;
 				case REGOPEROID:
 				case REGOPERATOROID:
@@ -2057,6 +2078,7 @@ find_expr_references_walker(Node *node,
 	{
 		FuncExpr   *funcexpr = (FuncExpr *) node;
 
+		LockNotPinnedObjectById(ProcedureRelationId, funcexpr->funcid);
 		add_object_address(ProcedureRelationId, funcexpr->funcid, 0,
 						   context->addrs);
 		/* fall through to examine arguments */

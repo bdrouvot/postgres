@@ -102,6 +102,7 @@ typedef struct ObjectAddresses ObjectAddresses;
 
 extern void AcquireDeletionLock(const ObjectAddress *object, int flags);
 extern void LockNotPinnedObject(const ObjectAddress *object);
+extern void LockNotPinnedObjectById(Oid classid, Oid objid);
 extern bool isObjectPinned(const ObjectAddress *object);
 
 extern void ReleaseDeletionLock(const ObjectAddress *object);

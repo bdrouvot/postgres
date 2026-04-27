@@ -30,6 +30,7 @@
 #include "access/xlog.h"
 #include "access/xloginsert.h"
 #include "catalog/catalog.h"
+#include "catalog/dependency.h"
 #include "catalog/heap.h"
 #include "catalog/index.h"
 #include "catalog/namespace.h"
@@ -997,6 +998,7 @@ DefineRelation(CreateStmt *stmt, char relkind, Oid ownerId,
 
 		ofTypeId = typenameTypeId(NULL, stmt->ofTypename);
 
+		LockNotPinnedObjectById(TypeRelationId, ofTypeId);
 		aclresult = object_aclcheck(TypeRelationId, ofTypeId, GetUserId(), ACL_USAGE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error_type(aclresult, ofTypeId);
@@ -1462,6 +1464,7 @@ BuildDescForRelation(const List *columns)
 		attname = entry->colname;
 		typenameTypeIdAndMod(NULL, entry->typeName, &atttypid, &atttypmod);
 
+		LockNotPinnedObjectById(TypeRelationId, atttypid);
 		aclresult = object_aclcheck(TypeRelationId, atttypid, GetUserId(), ACL_USAGE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error_type(aclresult, atttypid);
@@ -13941,6 +13944,7 @@ checkFkeyPermissions(Relation rel, int16 *attnums, int natts)
 	int			i;
 
 	/* Okay if we have relation-level REFERENCES permission */
+	LockNotPinnedObjectById(RelationRelationId, RelationGetRelid(rel));
 	aclresult = pg_class_aclcheck(RelationGetRelid(rel), roleid,
 								  ACL_REFERENCES);
 	if (aclresult == ACLCHECK_OK)
@@ -14724,6 +14728,7 @@ ATPrepAlterColumnType(List **wqueue,
 	/* Look up the target type */
 	typenameTypeIdAndMod(pstate, typeName, &targettype, &targettypmod);
 
+	LockNotPinnedObjectById(TypeRelationId, targettype);
 	aclresult = object_aclcheck(TypeRelationId, targettype, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error_type(aclresult, targettype);
@@ -16476,6 +16481,7 @@ ATExecChangeOwner(Oid relationOid, Oid newOwnerId, bool recursing, LOCKMODE lock
 				check_can_set_role(GetUserId(), newOwnerId);
 
 				/* New owner must have CREATE privilege on namespace */
+				LockNotPinnedObjectById(NamespaceRelationId, namespaceOid);
 				aclresult = object_aclcheck(NamespaceRelationId, namespaceOid, newOwnerId,
 											ACL_CREATE);
 				if (aclresult != ACLCHECK_OK)
@@ -19882,6 +19888,7 @@ RangeVarCallbackForAlterRelation(const RangeVar *rv, Oid relid, Oid oldrelid,
 	 */
 	if (IsA(stmt, RenameStmt))
 	{
+		LockNotPinnedObjectById(NamespaceRelationId, classform->relnamespace);
 		aclresult = object_aclcheck(NamespaceRelationId, classform->relnamespace,
 									GetUserId(), ACL_CREATE);
 		if (aclresult != ACLCHECK_OK)

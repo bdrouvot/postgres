@@ -25,6 +25,7 @@
 #include "access/tableam.h"
 #include "access/xact.h"
 #include "catalog/catalog.h"
+#include "catalog/dependency.h"
 #include "catalog/index.h"
 #include "catalog/indexing.h"
 #include "catalog/namespace.h"
@@ -770,6 +771,7 @@ DefineIndex(ParseState *pstate,
 	{
 		AclResult	aclresult;
 
+		LockNotPinnedObjectById(NamespaceRelationId, namespaceId);
 		aclresult = object_aclcheck(NamespaceRelationId, namespaceId, root_save_userid,
 									ACL_CREATE);
 		if (aclresult != ACLCHECK_OK)

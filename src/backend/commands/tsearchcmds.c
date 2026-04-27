@@ -414,6 +414,7 @@ DefineTSDictionary(List *names, List *parameters)
 	namespaceoid = QualifiedNameGetCreationNamespace(names, &dictname);
 
 	/* Check we have creation rights in target namespace */
+	LockNotPinnedObjectById(NamespaceRelationId, namespaceoid);
 	aclresult = object_aclcheck(NamespaceRelationId, namespaceoid, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,
@@ -917,6 +918,7 @@ DefineTSConfiguration(List *names, List *parameters, ObjectAddress *copied)
 	namespaceoid = QualifiedNameGetCreationNamespace(names, &cfgname);
 
 	/* Check we have creation rights in target namespace */
+	LockNotPinnedObjectById(NamespaceRelationId, namespaceoid);
 	aclresult = object_aclcheck(NamespaceRelationId, namespaceoid, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,

@@ -185,6 +185,7 @@ CreateStatistics(CreateStatsStmt *stmt, bool check_rights)
 	{
 		AclResult	aclresult;
 
+		LockNotPinnedObjectById(NamespaceRelationId, namespaceId);
 		aclresult = object_aclcheck(NamespaceRelationId, namespaceId,
 									GetUserId(), ACL_CREATE);
 		if (aclresult != ACLCHECK_OK)

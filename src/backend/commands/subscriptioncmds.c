@@ -745,6 +745,7 @@ CreateSubscription(ParseState *pstate, CreateSubscriptionStmt *stmt,
 		conninfo = NULL;
 
 		server = GetForeignServerByName(stmt->servername, false);
+		LockNotPinnedObjectById(ForeignServerRelationId, server->serverid);
 		aclresult = object_aclcheck(ForeignServerRelationId, server->serverid, owner, ACL_USAGE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_FOREIGN_SERVER, server->servername);
@@ -1833,6 +1834,7 @@ AlterSubscription(ParseState *pstate, AlterSubscriptionStmt *stmt,
 				 * the server.
 				 */
 				new_server = GetForeignServerByName(stmt->servername, false);
+				LockNotPinnedObjectById(ForeignServerRelationId, new_server->serverid);
 				aclresult = object_aclcheck(ForeignServerRelationId,
 											new_server->serverid,
 											form->subowner, ACL_USAGE);
@@ -2253,6 +2255,7 @@ DropSubscription(DropSubscriptionStmt *stmt, bool isTopLevel)
 		ForeignServer *server;
 
 		server = GetForeignServer(form->subserver);
+		LockNotPinnedObjectById(ForeignServerRelationId, form->subserver);
 		aclresult = object_aclcheck(ForeignServerRelationId, form->subserver,
 									form->subowner, ACL_USAGE);
 		if (aclresult != ACLCHECK_OK)
@@ -2597,6 +2600,7 @@ AlterSubscriptionOwner_internal(Relation rel, HeapTuple tup, Oid newOwnerId)
 	{
 		ForeignServer *server = GetForeignServer(form->subserver);
 
+		LockNotPinnedObjectById(ForeignServerRelationId, server->serverid);
 		aclresult = object_aclcheck(ForeignServerRelationId, server->serverid, newOwnerId, ACL_USAGE);
 		if (aclresult != ACLCHECK_OK)
 			ereport(ERROR,

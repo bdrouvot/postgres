@@ -14,6 +14,7 @@
  */
 #include "postgres.h"
 
+#include "catalog/dependency.h"
 #include "catalog/pg_conversion.h"
 #include "catalog/pg_namespace.h"
 #include "catalog/pg_proc.h"
@@ -50,6 +51,7 @@ CreateConversionCommand(CreateConversionStmt *stmt)
 													&conversion_name);
 
 	/* Check we have creation rights in target namespace */
+	LockNotPinnedObjectById(NamespaceRelationId, namespaceId);
 	aclresult = object_aclcheck(NamespaceRelationId, namespaceId, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,
@@ -97,6 +99,7 @@ CreateConversionCommand(CreateConversionStmt *stmt)
 						NameListToString(func_name), "integer")));
 
 	/* Check we have EXECUTE rights for the function */
+	LockNotPinnedObjectById(ProcedureRelationId, funcoid);
 	aclresult = object_aclcheck(ProcedureRelationId, funcoid, GetUserId(), ACL_EXECUTE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FUNCTION,

@@ -3512,6 +3512,7 @@ LookupCreationNamespace(const char *nspname)
 
 	namespaceId = get_namespace_oid(nspname, false);
 
+	LockNotPinnedObjectById(NamespaceRelationId, namespaceId);
 	aclresult = object_aclcheck(NamespaceRelationId, namespaceId, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,

@@ -3283,6 +3283,7 @@ AlterExtensionNamespace(const char *extensionName, const char *newschema, Oid *o
 					   extensionName);
 
 	/* Permission check: must have creation rights in target namespace */
+	LockNotPinnedObjectById(NamespaceRelationId, nspOid);
 	aclresult = object_aclcheck(NamespaceRelationId, nspOid, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA, newschema);

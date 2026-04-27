@@ -221,6 +221,7 @@ AlterObjectRename_internal(Relation rel, Oid objectId, const char *new_name)
 		/* User must have CREATE privilege on the namespace */
 		if (OidIsValid(namespaceId))
 		{
+			LockNotPinnedObjectById(NamespaceRelationId, namespaceId);
 			aclresult = object_aclcheck(NamespaceRelationId, namespaceId, GetUserId(),
 										ACL_CREATE);
 			if (aclresult != ACLCHECK_OK)
@@ -752,6 +753,7 @@ AlterObjectNamespace_internal(Relation rel, Oid objid, Oid nspOid)
 						   NameStr(*(DatumGetName(name))));
 
 		/* User must have CREATE privilege on new namespace */
+		LockNotPinnedObjectById(NamespaceRelationId, nspOid);
 		aclresult = object_aclcheck(NamespaceRelationId, nspOid, GetUserId(), ACL_CREATE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_SCHEMA,
@@ -1014,6 +1016,7 @@ AlterObjectOwner_internal(Oid classId, Oid objectId, Oid new_ownerId)
 			{
 				AclResult	aclresult;
 
+				LockNotPinnedObjectById(NamespaceRelationId, namespaceId);
 				aclresult = object_aclcheck(NamespaceRelationId, namespaceId, new_ownerId,
 											ACL_CREATE);
 				if (aclresult != ACLCHECK_OK)

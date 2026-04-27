@@ -33,6 +33,7 @@
 
 #include "access/htup_details.h"
 #include "access/table.h"
+#include "catalog/dependency.h"
 #include "catalog/indexing.h"
 #include "catalog/objectaccess.h"
 #include "catalog/pg_namespace.h"
@@ -92,6 +93,7 @@ DefineOperator(List *names, List *parameters)
 	oprNamespace = QualifiedNameGetCreationNamespace(names, &oprName);
 
 	/* Check we have creation rights in target namespace */
+	LockNotPinnedObjectById(NamespaceRelationId, oprNamespace);
 	aclresult = object_aclcheck(NamespaceRelationId, oprNamespace, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,
@@ -189,6 +191,7 @@ DefineOperator(List *names, List *parameters)
 
 	if (typeName1)
 	{
+		LockNotPinnedObjectById(TypeRelationId, typeId1);
 		aclresult = object_aclcheck(TypeRelationId, typeId1, GetUserId(), ACL_USAGE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error_type(aclresult, typeId1);
@@ -196,6 +199,7 @@ DefineOperator(List *names, List *parameters)
 
 	if (typeName2)
 	{
+		LockNotPinnedObjectById(TypeRelationId, typeId2);
 		aclresult = object_aclcheck(TypeRelationId, typeId2, GetUserId(), ACL_USAGE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error_type(aclresult, typeId2);
@@ -227,12 +231,14 @@ DefineOperator(List *names, List *parameters)
 	 * necessary, since EXECUTE will be checked at any attempted use of the
 	 * operator, but it seems like a good idea anyway.
 	 */
+	LockNotPinnedObjectById(ProcedureRelationId, functionOid);
 	aclresult = object_aclcheck(ProcedureRelationId, functionOid, GetUserId(), ACL_EXECUTE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FUNCTION,
 					   NameListToString(functionName));
 
 	rettype = get_func_rettype(functionOid);
+	LockNotPinnedObjectById(TypeRelationId, rettype);
 	aclresult = object_aclcheck(TypeRelationId, rettype, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error_type(aclresult, rettype);
@@ -312,6 +318,7 @@ ValidateRestrictionEstimator(List *restrictionName)
 	{
 		AclResult	aclresult;
 
+		LockNotPinnedObjectById(ProcedureRelationId, restrictionOid);
 		aclresult = object_aclcheck(ProcedureRelationId, restrictionOid,
 									GetUserId(), ACL_EXECUTE);
 		if (aclresult != ACLCHECK_OK)
@@ -382,6 +389,7 @@ ValidateJoinEstimator(List *joinName)
 	{
 		AclResult	aclresult;
 
+		LockNotPinnedObjectById(ProcedureRelationId, joinOid);
 		aclresult = object_aclcheck(ProcedureRelationId, joinOid,
 									GetUserId(), ACL_EXECUTE);
 		if (aclresult != ACLCHECK_OK)
